@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X5BT5RP5WF"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag("js", new Date());
+    gtag("config", "G-X5BT5RP5WF");
+  </script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Competencia Grupal · Nanopartículas Teranósticas · Biomedicina UANL</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg:#0f172a; --surface:#1e293b; --surface2:#263147;
+  --accent:#3b82f6; --accent2:#06b6d4; --accent3:#fbbf24;
+  --green:#22c55e; --red:#ef4444; --purple:#a855f7;
+  --text:#f1f5f9; --muted:#94a3b8; --border:#334155;
+}
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{ background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sans-serif; min-height:100vh; }
+
+/* ── PANTALLAS ── */
+.screen { display:none; }
+.screen.active { display:flex; }
+
+/* ── REGISTRO ── */
+#s-register {
+  min-height:100vh; align-items:center; justify-content:center; padding:2rem; flex-direction:column;
+}
+.reg-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:20px;
+  padding:2.5rem; max-width:500px; width:100%; text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+}
+.logo-txt { font-family:'Orbitron',sans-serif; font-size:1.4rem; color:var(--accent); margin-bottom:.2rem; }
+.inst-txt  { font-size:.78rem; color:var(--muted); margin-bottom:.3rem; line-height:1.5; }
+.course-txt { font-size:.8rem; color:var(--accent3); font-weight:700; margin-bottom:1.8rem; }
+.field { text-align:left; margin-bottom:1.1rem; }
+.field label { display:block; font-size:.8rem; color:var(--muted); margin-bottom:.35rem; font-weight:600; letter-spacing:.03em; }
+.field input, .field select {
+  width:100%; background:var(--surface2); border:1px solid var(--border);
+  border-radius:10px; padding:.7rem 1rem; color:var(--text); font-size:.93rem;
+  font-family:inherit; transition:border-color .2s;
+}
+.field input:focus, .field select:focus { outline:none; border-color:var(--accent); }
+.pills { display:flex; gap:.5rem; flex-wrap:wrap; justify-content:center; margin-bottom:1.5rem; }
+.pill { background:var(--surface2); border:1px solid var(--border); border-radius:20px; padding:.3rem .8rem; font-size:.72rem; color:var(--muted); }
+.btn-primary {
+  width:100%; background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff; border:none; border-radius:12px; padding:.9rem; font-size:1rem;
+  font-weight:700; cursor:pointer; transition:opacity .2s; font-family:inherit;
+  letter-spacing:.03em; margin-top:.4rem;
+}
+.btn-primary:hover{ opacity:.88; }
+.btn-primary:disabled{ opacity:.35; cursor:default; }
+
+/* ── FLASHCARDS ── */
+#s-flash {
+  flex-direction:column; min-height:100vh;
+}
+.flash-header {
+  background:linear-gradient(135deg,#0f2849,#1e293b);
+  padding:1rem 1.5rem; border-bottom:2px solid var(--accent);
+  display:flex; align-items:center; gap:1rem; flex-wrap:wrap; position:sticky; top:0; z-index:100;
+}
+.flash-header h1 { font-family:'Orbitron',sans-serif; font-size:.9rem; color:var(--accent2); flex:1; min-width:160px; }
+.flash-progress-wrap { width:100%; }
+.flash-progress-bar { height:5px; background:var(--border); border-radius:3px; margin-top:.4rem; }
+.flash-progress-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:3px; transition:width .4s; }
+.flash-counter { font-size:.8rem; color:var(--muted); }
+.flash-lock-msg {
+  text-align:center; padding:.6rem 1rem;
+  background:rgba(251,191,36,.08); border-bottom:1px solid rgba(251,191,36,.2);
+  font-size:.8rem; color:var(--accent3); font-weight:600;
+}
+.flash-grid {
+  max-width:1100px; margin:16px auto 20px; padding:0 16px;
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:18px;
+}
+.btn-go-quiz {
+  display:block; margin:0 auto 40px; padding:.85rem 2.5rem;
+  background:linear-gradient(135deg,var(--green),#16a34a);
+  color:#fff; border:none; border-radius:12px; font-size:1rem;
+  font-weight:700; cursor:pointer; font-family:inherit; transition:opacity .2s;
+  opacity:.35;
+}
+.btn-go-quiz.unlocked{ opacity:1; }
+.btn-go-quiz.unlocked:hover{ opacity:.88; }
+
+/* Flip card */
+.card-wrap { perspective:1000px; height:210px; cursor:pointer; }
+.card-inner {
+  position:relative; width:100%; height:100%;
+  transform-style:preserve-3d; transition:transform .55s cubic-bezier(.4,0,.2,1);
+  border-radius:14px; box-shadow:0 4px 14px rgba(0,0,0,.15);
+}
+.card-wrap.flipped .card-inner{ transform:rotateY(180deg); }
+.card-face {
+  position:absolute; width:100%; height:100%;
+  backface-visibility:hidden; -webkit-backface-visibility:hidden;
+  border-radius:14px; padding:18px; display:flex; flex-direction:column; overflow:hidden;
+}
+.card-front { color:#fff; }
+.card-back  { transform:rotateY(180deg); background:#fff; color:#111; border:1.5px solid var(--border); }
+
+.card-wrap[data-t="quimica"]   .card-front { background:linear-gradient(135deg,#0b2545,#2a5298); }
+.card-wrap[data-t="her2"]      .card-front { background:linear-gradient(135deg,#4a0a0a,#8b1a1a); }
+.card-wrap[data-t="myc"]       .card-front { background:linear-gradient(135deg,#1a3a00,#2e6b00); }
+.card-wrap[data-t="acidos"]    .card-front { background:linear-gradient(135deg,#0a2a4a,#1a5a8a); }
+.card-wrap[data-t="teranóstico"] .card-front { background:linear-gradient(135deg,#3a1a5a,#6a2a9a); }
+.card-wrap[data-t="brecha"]    .card-front { background:linear-gradient(135deg,#4a3000,#8a6000); }
+
+.c-tag { font-size:.7rem; font-weight:800; letter-spacing:1px; text-transform:uppercase; opacity:.65; margin-bottom:6px; }
+.c-icon { font-size:22px; margin-bottom:6px; }
+.c-num { position:absolute; top:10px; right:12px; font-size:.7rem; font-weight:700; opacity:.4; }
+.c-q { font-size:.88rem; line-height:1.4; flex:1; display:flex; align-items:center; }
+.c-hint { font-size:.68rem; opacity:.5; margin-top:8px; text-align:right; }
+.back-label { font-size:.68rem; font-weight:800; color:#2a6f97; letter-spacing:.5px; text-transform:uppercase; margin-bottom:6px; }
+.back-body { font-size:.78rem; line-height:1.55; flex:1; overflow-y:auto; color:#222; }
+.back-body b { color:#0b2545; }
+.back-body em { color:#1a7a4a; font-style:normal; font-weight:700; }
+.back-ref { font-size:.65rem; color:#888; margin-top:6px; border-top:1px solid #ddd; padding-top:4px; }
+
+.seen-badge {
+  position:absolute; top:7px; left:9px; z-index:5;
+  background:#22c55e; color:#fff; border-radius:999px;
+  width:18px; height:18px; font-size:.6rem; font-weight:900;
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; transition:opacity .3s;
+}
+.card-wrap.seen .seen-badge { opacity:1; }
+
+/* ── QUIZ ── */
+#s-quiz { flex-direction:column; min-height:100vh; }
+.quiz-header {
+  background:linear-gradient(135deg,#0f2849,#1e293b);
+  padding:1rem 1.5rem; border-bottom:2px solid var(--accent);
+  display:flex; align-items:center; gap:1rem; flex-wrap:wrap;
+  position:sticky; top:0; z-index:100;
+}
+.quiz-header h1 { font-family:'Orbitron',sans-serif; font-size:.85rem; color:var(--accent2); flex:1; }
+.quiz-meta { font-size:.78rem; color:var(--muted); }
+.attempt-badge {
+  background:var(--surface2); border:1px solid var(--accent3);
+  color:var(--accent3); font-size:.75rem; font-weight:700; padding:.2rem .6rem; border-radius:6px;
+}
+.q-prog-bar { height:4px; background:var(--border); border-radius:2px; margin-top:.4rem; width:100%; }
+.q-prog-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:2px; transition:width .4s; }
+
+.quiz-main { max-width:760px; margin:0 auto; padding:1.5rem 1rem 4rem; }
+
+.q-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:14px;
+  padding:1.4rem 1.5rem; margin-bottom:1.2rem; transition:border-color .2s;
+}
+.q-card.answered{ border-color:var(--accent2); }
+.q-head { display:flex; gap:.7rem; align-items:flex-start; margin-bottom:1rem; }
+.q-badge {
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff; font-weight:700; font-size:.72rem; padding:.2rem .55rem;
+  border-radius:6px; white-space:nowrap; flex-shrink:0; margin-top:2px;
+}
+.q-text { font-size:.95rem; line-height:1.6; }
+.opts { display:flex; flex-direction:column; gap:.45rem; }
+.opt {
+  background:var(--surface2); border:1.5px solid var(--border);
+  border-radius:10px; padding:.6rem .95rem; cursor:pointer;
+  font-size:.88rem; transition:all .15s; display:flex; align-items:center; gap:.6rem;
+}
+.opt:hover:not(.locked){ border-color:var(--accent); background:#1e3a5f; }
+.opt.selected{ border-color:var(--accent); background:#1e3a5f; }
+.opt.correct{ border-color:var(--green)!important; background:rgba(34,197,94,.12)!important; }
+.opt.wrong  { border-color:var(--red)!important;   background:rgba(239,68,68,.12)!important; }
+.opt.locked { cursor:default; }
+.opt-letter {
+  width:22px; height:22px; border-radius:50%;
+  background:var(--border); color:var(--text);
+  font-size:.72rem; font-weight:800; display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.opt.selected .opt-letter { background:var(--accent); }
+.opt.correct .opt-letter  { background:var(--green); }
+.opt.wrong   .opt-letter  { background:var(--red); }
+.opt-feedback { font-size:.75rem; color:var(--muted); margin-top:.35rem; margin-left:2rem; display:none; }
+.opt-feedback.show{ display:block; }
+
+.submit-wrap { text-align:center; margin-top:1.5rem; }
+.btn-submit {
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff; border:none; border-radius:12px; padding:.85rem 2.5rem;
+  font-size:1rem; font-weight:700; cursor:pointer; font-family:inherit;
+  transition:opacity .2s;
+}
+.btn-submit:disabled{ opacity:.35; cursor:default; }
+.btn-submit:not(:disabled):hover{ opacity:.88; }
+
+/* ── RESULTADO (entre intentos) ── */
+#s-result { flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:2rem; }
+.result-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:20px;
+  padding:2.5rem; max-width:520px; width:100%; text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+}
+.score-circle {
+  width:120px; height:120px; border-radius:50%; margin:0 auto 1.2rem;
+  display:flex; align-items:center; justify-content:center; flex-direction:column;
+  border:5px solid var(--accent);
+}
+.score-circle.pass { border-color:var(--green); }
+.score-circle.fail { border-color:var(--red); }
+.score-num { font-family:'Orbitron',sans-serif; font-size:1.8rem; font-weight:900; }
+.score-lbl { font-size:.7rem; color:var(--muted); }
+.result-title { font-size:1.2rem; font-weight:700; margin-bottom:.4rem; }
+.result-sub   { font-size:.85rem; color:var(--muted); margin-bottom:1.5rem; line-height:1.5; }
+.retry-info   { font-size:.78rem; color:var(--accent3); margin-bottom:1.2rem; }
+.breakdown { text-align:left; margin-bottom:1.4rem; }
+.breakdown h4 { font-size:.78rem; color:var(--muted); letter-spacing:.05em; text-transform:uppercase; margin-bottom:.6rem; }
+.bk-item { display:flex; justify-content:space-between; align-items:center; font-size:.83rem; padding:.35rem 0; border-bottom:1px solid var(--border); }
+.bk-badge { padding:.15rem .5rem; border-radius:6px; font-size:.7rem; font-weight:700; }
+.bk-ok   { background:rgba(34,197,94,.15); color:var(--green); }
+.bk-fail { background:rgba(239,68,68,.15); color:var(--red); }
+.btn-retry {
+  width:100%; background:linear-gradient(135deg,var(--accent3),#d97706);
+  color:#111; border:none; border-radius:12px; padding:.85rem;
+  font-size:.95rem; font-weight:700; cursor:pointer; font-family:inherit;
+  transition:opacity .2s; margin-bottom:.6rem;
+}
+.btn-retry:hover{ opacity:.88; }
+.btn-cert {
+  width:100%; background:linear-gradient(135deg,var(--green),#16a34a);
+  color:#fff; border:none; border-radius:12px; padding:.85rem;
+  font-size:.95rem; font-weight:700; cursor:pointer; font-family:inherit;
+  transition:opacity .2s;
+}
+.btn-cert:hover{ opacity:.88; }
+
+/* ── COMPROBANTE FINAL ── */
+#s-cert { flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:2rem; }
+.cert-card {
+  background:var(--surface); border:1px solid var(--border); border-radius:20px;
+  padding:2.5rem; max-width:520px; width:100%; text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+}
+.cert-card h2 { font-family:'Orbitron',sans-serif; color:var(--accent3); font-size:1.1rem; margin-bottom:.4rem; }
+.cert-card p  { font-size:.82rem; color:var(--muted); margin-bottom:1.4rem; }
+canvas#certCanvas { display:none; }
+.btn-dl {
+  width:100%; background:linear-gradient(135deg,var(--accent3),#d97706);
+  color:#111; border:none; border-radius:12px; padding:.9rem;
+  font-size:1rem; font-weight:700; cursor:pointer; font-family:inherit;
+  transition:opacity .2s; margin-bottom:.7rem;
+}
+.btn-dl:hover{ opacity:.88; }
+.cert-preview {
+  width:100%; border-radius:10px; border:2px solid var(--border);
+  margin-bottom:1rem; max-height:260px; object-fit:contain;
+}
+.btn-new {
+  width:100%; background:var(--surface2); border:1px solid var(--border);
+  color:var(--muted); border-radius:12px; padding:.75rem;
+  font-size:.88rem; font-weight:700; cursor:pointer; font-family:inherit;
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     PANTALLA 1: REGISTRO
+═══════════════════════════════════════════════ -->
+<div id="s-register" class="screen active">
+  <div class="reg-card">
+    <div class="logo-txt">Gallardo-Lab</div>
+    <div class="inst-txt">Departamento de Bioquímica · Facultad de Medicina, UANL<br>Materia: Biomedicina</div>
+    <div class="course-txt">🏆 Competencia Grupal · Nanopartículas Teranósticas en Biomedicina</div>
+    <div class="pills">
+      <span class="pill">📚 Flashcards obligatorias</span>
+      <span class="pill">📝 10 preguntas</span>
+      <span class="pill">🔁 3 intentos</span>
+      <span class="pill">🎓 Comprobante descargable</span>
+    </div>
+    <div class="field">
+      <label>Nombre completo</label>
+      <input type="text" id="inp-name" placeholder="Apellido Apellido, Nombre(s)" autocomplete="off"/>
+    </div>
+    <div class="field">
+      <label>Matrícula</label>
+      <input type="text" id="inp-mat" placeholder="Ej: 2150123" autocomplete="off"/>
+    </div>
+    <div class="field">
+      <label>Grupo</label>
+      <input type="text" id="inp-grupo" placeholder="Ej: BM-01A" autocomplete="off"/>
+    </div>
+    <button class="btn-primary" id="btn-start-flash" disabled>Comenzar — Ver Flashcards →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PANTALLA 2: FLASHCARDS (obligatorias)
+═══════════════════════════════════════════════ -->
+<div id="s-flash" class="screen">
+  <div class="flash-header">
+    <h1>Paso 1 · Flashcards — Nanopartículas Teranósticas</h1>
+    <span class="flash-counter" id="flashCounter">0 / 30 vistas</span>
+    <div class="flash-progress-wrap">
+      <div class="flash-progress-bar">
+        <div class="flash-progress-fill" id="flashFill" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+  <div class="flash-lock-msg" id="flashLockMsg">
+    ⚠️ Debes voltear <strong>todas las tarjetas</strong> para desbloquear el examen.
+  </div>
+  <div class="flash-grid" id="flashGrid"></div>
+  <button class="btn-go-quiz" id="btnGoQuiz" disabled>✅ Tarjetas completadas — Ir al Examen →</button>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PANTALLA 3: QUIZ
+═══════════════════════════════════════════════ -->
+<div id="s-quiz" class="screen">
+  <div class="quiz-header">
+    <h1>Paso 2 · Examen — Nanopartículas Teranósticas</h1>
+    <span class="attempt-badge" id="attemptBadge">Intento 1 / 3</span>
+    <span class="quiz-meta" id="quizMeta">0 / 10 respondidas</span>
+    <div class="q-prog-bar"><div class="q-prog-fill" id="qProgFill" style="width:0%"></div></div>
+  </div>
+  <div class="quiz-main" id="quizMain"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PANTALLA 4: RESULTADO (entre intentos)
+═══════════════════════════════════════════════ -->
+<div id="s-result" class="screen">
+  <div class="result-card">
+    <div class="score-circle" id="scoreCircle">
+      <span class="score-num" id="scoreNum">--</span>
+      <span class="score-lbl">/ 100</span>
+    </div>
+    <div class="result-title" id="resultTitle">Resultado</div>
+    <div class="result-sub"   id="resultSub"></div>
+    <div class="retry-info"   id="retryInfo"></div>
+    <div class="breakdown">
+      <h4>Detalle por tema</h4>
+      <div id="breakdownList"></div>
+    </div>
+    <button class="btn-retry" id="btnRetry" style="display:none;">🔁 Reintentar examen</button>
+    <button class="btn-cert"  id="btnToCert">🎓 Descargar Comprobante</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PANTALLA 5: COMPROBANTE
+═══════════════════════════════════════════════ -->
+<div id="s-cert" class="screen">
+  <div class="cert-card">
+    <h2>🎓 Comprobante de Participación</h2>
+    <p>Descarga tu comprobante como evidencia de la actividad.</p>
+    <canvas id="certCanvas"></canvas>
+    <img id="certPreview" class="cert-preview" alt="Comprobante"/>
+    <button class="btn-dl" id="btnDl">⬇️ Descargar Comprobante (PNG)</button>
+    <button class="btn-new" onclick="location.reload()">↺ Nueva sesión</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════
+// DATOS DE FLASHCARDS (30)
+// ════════════════════════════════════════════
+const FLASH = [
+  {id:1,t:"quimica",icon:"⚗️",q:"¿Por qué el enlace Au–S es el estándar para funcionalizar AuNPs?",a:"Energía ≈40 kcal/mol. Covalente, orientado, estable. Los aptámeros se modifican con <b>5'-tiol + C6</b>; la pasivación con <em>tiol-PEG 2–5 kDa</em> reduce adsorción inespecífica.",r:"Sec. 2.1"},
+  {id:2,t:"quimica",icon:"🔗",q:"EDC/NHS vs. click chemistry para aptámeros en polímeros: ¿cuándo usar cada uno?",a:"<b>EDC/NHS</b>: amidas, acuoso, rápido, pero hidrólisis de NHS a pH alto. <b>Click chemistry</b>: triazol bio-ortogonal, alta eficiencia, requiere modificación con azida. Usa EDC/NHS para prototipos rápidos; click para control estequiométrico.",r:"Tabla 1 — Sec. 2.3"},
+  {id:3,t:"quimica",icon:"✂️",q:"¿Cómo funciona el enlazador SPDP-disulfuro para liberación citoplasmática?",a:"Crea un puente <b>S–S</b> entre NP y carga. El <em>GSH intracelular (≈5 mM)</em>, 100–1000× mayor que en plasma, escinde el disulfuro → liberación selectiva en citoplasma.",r:"Yoo et al. 2014"},
+  {id:4,t:"quimica",icon:"🧪",q:"Ventaja de estreptavidina-biotina para prototipado y su limitación in vivo.",a:"K<sub>d</sub> ≈ 10<sup>−15</sup> M → modularidad máxima. Limitación: <b>estreptavidina es inmunogénica</b> en humanos; genera anticuerpos en administración repetida. Solo para validación in vitro.",r:"Tabla 1 — Sec. 2.3"},
+  {id:5,t:"quimica",icon:"💧",q:"¿Por qué el pKa ~6.0–6.8 de los lípidos ionizables es crítico para entrega de ARNm?",a:"Neutros a pH 7.4 (baja toxicidad en circulación). Se protonan en el <b>endosoma (pH 5.0–5.5)</b> → carga positiva desestabiliza membrana → <em>liberación citoplasmática del ARNm</em>.",r:"Sec. 2.2 y 3.4.1"},
+  {id:6,t:"her2",icon:"🎯",q:"¿Por qué los aptámeros de ADN anti-HER2 tienen mayor capacidad de carga que los anticuerpos?",a:"Tamaño: <b>aptámero ≈ 8–15 kDa</b> vs. <b>anticuerpo ≈ 150 kDa</b>. Una AuNP de 20 nm carga 60–150 aptámeros pero solo 5–15 anticuerpos. Sin variabilidad de lote ni inmunogenicidad Fc.",r:"Ma et al. 2022"},
+  {id:7,t:"her2",icon:"🔴",q:"Modificaciones del esqueleto que necesitan los aptámeros de ARN anti-HER2 para sobrevivir en plasma.",a:"<b>2'-fluoro</b> en pirimidinas (bloquea RNasa A), <b>2'-O-metil</b> (protección adicional) y <b>fosforotioato (PS*)</b> en extremos (resistencia a exonucleasas). Mantienen estructura terciaria sin perder K<sub>d</sub>.",r:"Sec. 3.1"},
+  {id:8,t:"her2",icon:"🏗️",q:"¿Cómo funciona el tetraedro de ADN + AuNP con aptámero HA1 para targeting HER2?",a:"El <b>tetraedro de ADN</b> presenta HA1 en orientación óptima. Resultado (Ma et al. 2022, SKBR3): <em>>90% internalización</em>, <em>5× selectividad</em> vs. MCF7. Carga: maytansina en el vértice opuesto.",r:"Ma et al. 2022"},
+  {id:9,t:"her2",icon:"💊",q:"¿Qué demostró Khorshid et al. (2023) con AuNPs porosas + aptámero + dasatinib?",a:"IC<sub>50</sub> dasatinib libre: <em>6.95 µM</em> → AuNP-dasatinib: <em>2.57 µM</em> (reducción 2.7×) en BT-474 HER2++. Efecto adicional de <b>radiosensibilización</b> (las AuNPs generan electrones secundarios bajo RT).",r:"Khorshid et al. 2023"},
+  {id:10,t:"her2",icon:"🌡️",q:"¿Cómo funciona el gating con aptámero HER2 sobre MSN para liberación a pH ácido?",a:"β-CD sella los poros con DOX. Al endosomarse, el <b>pH 5.5</b> protoniza β-CD → abre el tapón → libera el fármaco. <em>≤5% liberación a pH 7.4</em>, <em>>80% a pH 5.5</em> (Shen et al. 2019).",r:"Shen et al. 2019"},
+  {id:11,t:"her2",icon:"🍊",q:"¿Por qué los nanovectores de toronja (GNV) de Tang et al. (2020) son relevantes?",a:"Vesículas de origen natural → <b>biocompatibilidad superior</b> a LNP sintéticos, sin respuesta inmune innata. Con aptámero HA1: <em>3.2× mayor acumulación tumoral</em> in vivo. Limitación: variabilidad de lote.",r:"Tang et al. 2020"},
+  {id:12,t:"her2",icon:"⚠️",q:"¿Cuál es la brecha crítica de los nanoteranósticos HER2 en líneas resistentes a trastuzumab?",a:"Todos los constructos validados en SKBR3/BT-474 (sensibles). <b>HCC1954</b> (HER2++ pero resistente por PIK3CA + MYC) no ha sido evaluada con aptámeros-AuNP. Oportunidad directa para el laboratorio.",r:"Sec. 5.1"},
+  {id:13,t:"myc",icon:"🧬",q:"¿Por qué la inhibición PPI c-Myc/Max es difícil y cómo la resuelven las NPs?",a:"Interfaz PPI extensa (~3000 Å²), sin surco profundo → baja afinidad de moléculas pequeñas. Las NPs aumentan captación intracelular <em>5–20×</em> y protegen los péptidos bHLH-LZ de la degradación proteolítica.",r:"Sec. 3.3.1"},
+  {id:14,t:"myc",icon:"📐",q:"¿Por qué el espaciador PEG es indispensable en péptidos bHLH-LZ conjugados a AuNPs?",a:"Sin PEG, el péptido queda adosado a la superficie con el dominio de unión a Max ocluido → <em>reducción 50–80% en capacidad inhibitoria</em>. Con <b>PEG 1–2 kDa</b>: accesibilidad conformacional restaurada.",r:"Sec. 3.3.2"},
+  {id:15,t:"myc",icon:"🏭",q:"¿Cómo activa la catepsina B la liberación del péptido H1 en el sistema HPMA-GFLG?",a:"La <b>catepsina B</b> (lisosomal, pH 4–6) escinde el spacer <b>GFLG</b> en el enlace Leu-Gly. H1 se libera <em>solo en lisosoma</em> → evita inhibición sistémica de Myc. Guan et al. (2016): <em>60–70% reducción</em> del complejo c-Myc/Max.",r:"Guan et al. 2016"},
+  {id:16,t:"myc",icon:"🧠",q:"¿Qué logró Ljubimov et al. (2025) con HPMA-antisentido c-Myc + Angiopep-2 en GBM?",a:"<b>Angiopep-2</b> (ligando LRP1) permite cruce de BHE por transcitosis. + antisentido c-Myc + anti-PD-1 → reducción de volumen GBM y supervivencia extendida. Demostración de HPMA <em>modular para múltiples señales</em>.",r:"Ljubimov et al. 2025"},
+  {id:17,t:"myc",icon:"🔮",q:"¿Por qué no existe aún una AuNP-péptido bHLH-LZ que demuestre imagen LSPR + disrupción Myc/Max?",a:"1) Los péptidos hidrofóbicos bHLH-LZ tienden a agregar las AuNPs sin PEG optimizado. 2) Demostrar inhibición PPI intracelular requiere co-IP o FRET nuclear complejos. 3) LSPR intracelular cuantitativo no está estandarizado.",r:"Sec. 5.2"},
+  {id:18,t:"myc",icon:"🎯",q:"¿Por qué la co-amplificación MYC+HER2 (40–50% de mama HER2+) justifica una estrategia convergente?",a:"Myc es el <b>principal mecanismo de resistencia</b> a terapias anti-HER2. Una AuNP con <em>aptámero HER2 como ligando</em> + carga anti-Myc atacaría ambas dianas e impediría la vía de escape más común.",r:"Sec. 5.4"},
+  {id:19,t:"acidos",icon:"💉",q:"¿Cuál es el único chasis validado clínicamente para entrega de ARNm y cómo se adapta a oncología?",a:"<b>LNPs</b> (BNT162b2, mRNA-1273). Para cáncer: inserción post-formación de <em>DSPE-PEG2000-aptámero</em> en membrana LNP ya formada → encapsulación ARNm >85% preservada. Zhao et al. (2024): lípido azido-acetal → liberación endosomal <em>10×</em> más rápida.",r:"Sec. 3.4.1"},
+  {id:20,t:"acidos",icon:"🔇",q:"¿Qué diferencia mecanística hay entre un miRNA mimic y un antimiR en NPs?",a:"<b>miRNA mimic</b>: ARN bicatenario, gain-of-function (carga RISC → silencia diana oncogénica). <b>antimiR</b>: cadena sencilla, loss-of-function (secuestra miRNA oncogénico, impide que cargue RISC). Los antimiR-LNA son más cortos → mejor encapsulación.",r:"Sec. 3.4.2–3.4.3"},
+  {id:21,t:"acidos",icon:"🔒",q:"¿Cómo aumentan las modificaciones LNA la estabilidad de antimiRs?",a:"El <b>LNA</b> fija el ribosa en conformación 3'-endo → <em>+4–6°C de Tm por sustitución</em> → mayor afinidad y resistencia a nucleasas. AntimiRs de 8–12 nt LNA igualan potencia de 22 nt ARN. Con SPDP-disulfuro: liberación GSH-dependiente (Yoo et al. 2014).",r:"Sec. 3.4.3"},
+  {id:22,t:"acidos",icon:"⚫",q:"¿Qué ventaja ofrecen los carbon dots (Cdots) para entrega de antimiR-LNA?",a:"Diámetro 2–5 nm → penetración nuclear sin NLS adicional. Fluorescencia intrínseca (imagen integrada sin marcadores). Alta biocompatibilidad (sin metales pesados). Carga antimiR-LNA por interacción electrostática.",r:"Ju et al. 2020"},
+  {id:23,t:"acidos",icon:"🛡️",q:"¿Cómo activan los polímeros STING (Zhang et al. 2024) la inmunidad antitumoral junto con ARNm?",a:"<b>Polímero PD</b> activa STING en células dendríticas → IFN-β → amplificación innata. Simultáneamente el <b>ARNm</b> codifica antígeno tumoral → MHC-I → CD8+ T cells. Sinergia: eficacia vacunal superior a LNP-ARNm solas.",r:"Zhang et al. 2024"},
+  {id:24,t:"acidos",icon:"🧩",q:"¿Cómo se insertan aptámeros de direccionamiento en LNPs ya formadas?",a:"<b>Conjugado DSPE-PEG2000-aptámero</b>: el segmento DSPE se intercala espontáneamente en la bicapa lipídica a 37°C, 30 min. El aptámero queda en superficie. Eficiencia de inserción >80% con relación molar LNP:DSPE-PEG-apt = 1:10.",r:"Sec. 3.4.1"},
+  {id:25,t:"teranóstico",icon:"🔭",q:"¿Qué modalidades de imagen proporciona una AuNP funcionalizada?",a:"<b>LSPR/DFM</b>: cambio de λ al unirse al receptor (label-free). <b>PAT</b>: absorción NIR → onda ultrasónica. <b>CT</b>: densidad electrónica del oro. <b>PTT</b>: AuNRs convierten NIR (808 nm) en calor con >80% eficiencia → hipertermia >43°C.",r:"Sec. 4.1"},
+  {id:26,t:"teranóstico",icon:"🧲",q:"¿Cómo integran los SPIONs funcionalidad de imagen MRI a plataformas poliméricas?",a:"Los <b>SPIONs</b> co-encapsulados crean inhomogeneidades magnéticas → acortan <em>T2/T2*</em> de protones adyacentes → hipointensidad en MRI (contraste negativo T2*). En SPION-SPDP-antimiR: misma NP para diagnóstico + terapia.",r:"Sec. 4.1"},
+  {id:27,t:"teranóstico",icon:"💡",q:"¿Cuáles son los 3 tipos de liberación por estímulo y qué plataforma representa cada uno?",a:"<b>pH</b>: MSN-β-CD-aptHER2 (pH 5.5), LNP-acetal (Zhao 2024). <b>Redox/GSH</b>: SPION-SPDP-antimiR, AuNP-disulfuro-pMyc. <b>NIR (808 nm)</b>: AuNRs-PTT → hipertermia >43°C libera fármaco + destruye célula.",r:"Sec. 4.2"},
+  {id:28,t:"teranóstico",icon:"📊",q:"¿Cuáles son los 6 parámetros de caracterización mínimos de una NP teranóstica?",a:"1) Tamaño hidrodinámico DLS (50–200 nm). 2) PDI <0.2. 3) Potencial Z |ζ|>20 mV. 4) Eficiencia de encapsulación >70%. 5) Densidad de ligando (UV-Vis/BCA). 6) Funcionalidad del ligando post-conjugación (SPR/flow cytometry).",r:"Sec. 4.3"},
+  {id:29,t:"brecha",icon:"🚫",q:"¿Por qué los xenoinjertos son insuficientes y qué alternativas existen?",a:"Sin sistema inmune funcional: no hay NK cells, T/B cells ni opsonización real. Alternativas: <b>modelos singénicos</b> (4T1 en BALB/c), <b>PDX en ratones humanizados</b>, <b>organoides de paciente</b>. Además: ausencia de modelado PK-PD para aptámero-NP.",r:"Sec. 5.4"},
+  {id:30,t:"brecha",icon:"🔬",q:"¿Cuál es el vacío teranóstico en ARNm/miRNA-LNP y cómo se resolvería?",a:"Los ensayos clínicos de ARNm (NCT04480853) <b>no tienen imagen en tiempo real</b>. Solución: <em>co-encapsular SPIONs en LNP-mRNA</em> para verificar biodistribución por MRI + <em>ARNm reportero (luciferasa)</em> para confirmar expresión tumoral.",r:"Sec. 5.3"}
+];
+
+// ════════════════════════════════════════════
+// PREGUNTAS DEL EXAMEN (10)
+// ════════════════════════════════════════════
+const QUESTIONS = [
+  {
+    id:1, topic:"Química de conjugación",
+    q:"¿Cuál es la principal ventaja del enlace tiol-oro (Au–S) para funcionalizar aptámeros en AuNPs frente a la conjugación EDC/NHS?",
+    opts:["Forma un enlace no covalente reversible que permite intercambiar aptámeros fácilmente",
+          "Es un enlace covalente orientado con energía ≈40 kcal/mol, estable bajo condiciones fisiológicas y sin reticulantes",
+          "Requiere modificación con azida y forma un triazol bio-ortogonal de alta eficiencia",
+          "Solo es aplicable a polímeros PLGA y no funciona con nanopartículas metálicas"],
+    correct:1,
+    fb:["Incorrecto. El enlace Au–S es covalente, no reversible en condiciones fisiológicas normales.",
+        "Correcto. El enlace Au–S (~40 kcal/mol) es covalente, orientado por la modificación 5'-tiol del aptámero, y no requiere reticulantes adicionales.",
+        "Incorrecto. Esa descripción corresponde a click chemistry (triazol), no a la conjugación tiol-oro.",
+        "Incorrecto. La conjugación Au–S es precisamente el método estándar para AuNPs metálicas."]
+  },
+  {
+    id:2, topic:"Ácidos nucleicos — LNP",
+    q:"¿Por qué los lípidos ionizables en las LNPs tienen un pKa diseñado en el rango de 6.0–6.8 en lugar de ser constitutivamente catiónicos?",
+    opts:["Para aumentar la carga de ARNm mediante interacciones electrostáticas en todo el organismo",
+          "Porque los lípidos catiónicos tienen mayor eficiencia de producción y menor costo",
+          "Para ser neutros en circulación (minimizando toxicidad y opsonización) y protonarse selectivamente en el endosoma ácido, facilitando la liberación citoplasmática",
+          "Porque el ARNm requiere un ambiente ácido para mantener su estructura secundaria activa"],
+    correct:2,
+    fb:["Incorrecto. La carga constitutiva generaría toxicidad sistémica y opsonización excesiva.",
+        "Incorrecto. La justificación del pKa es biológica, no de producción.",
+        "Correcto. Neutros a pH 7.4 (bajo perfil tóxico), se protonan en el endosoma (pH 5.0–5.5) → carga positiva desestabiliza la membrana → liberación citoplasmática del ARNm.",
+        "Incorrecto. El ARNm requiere condiciones neutras; el pH ácido endosomal degrada el ARNm si no se libera rápidamente."]
+  },
+  {
+    id:3, topic:"Targeting HER2",
+    q:"Ma et al. (2022) demostraron que los tetraedros de ADN funcionalizados con aptámero HA1 en AuNPs lograron en células SKBR3 (HER2++):",
+    opts:[">90% de internalización y 5× selectividad sobre MCF7 (HER2-bajo)",
+          "~30% de internalización similar al aptámero libre y sin selectividad diferencial",
+          "IC50 reducido de 6.95 a 2.57 µM mediante radiosensibilización",
+          "Cruce de barrera hematoencefálica mediado por el receptor LRP1"],
+    correct:0,
+    fb:["Correcto. Los tetraedros de ADN presentan el aptámero HA1 en orientación óptima, logrando >90% internalización en 4h y 5× selectividad vs. MCF7.",
+        "Incorrecto. Esos resultados (~30%) corresponden al aptámero libre; el tetraedro aumenta significativamente la internalización.",
+        "Incorrecto. Esos datos (IC50 6.95→2.57 µM y radiosensibilización) son de Khorshid et al. 2023, con AuNPs porosas.",
+        "Incorrecto. El cruce de BHE por LRP1 es la estrategia de Ljubimov et al. (2025) con HPMA-Angiopep-2."]
+  },
+  {
+    id:4, topic:"Eje c-Myc/Max",
+    q:"En el sistema HPMA-GFLG-péptido H1 (Guan et al., 2016), la catepsina B activa la liberación del péptido inhibidor de Myc/Max. ¿Cuál es la ventaja terapéutica de este diseño?",
+    opts:["El péptido H1 se libera en plasma por cambios de temperatura, evitando la endocitosis",
+          "El péptido H1 se libera únicamente en el compartimento lisosomal ácido (catepsina B activa), evitando la inhibición sistémica de Myc en tejidos normales",
+          "La catepsina B escinde el spacer GFLG en el citoplasma neutro, permitiendo distribución nuclear inmediata",
+          "El espaciador GFLG previene la unión del péptido al receptor LRP1 en la membrana celular"],
+    correct:1,
+    fb:["Incorrecto. La liberación por temperatura no está involucrada en este sistema.",
+        "Correcto. La catepsina B es activa a pH 4–6 (lisosoma), escinde el enlace Leu-Gly del spacer GFLG → H1 liberado solo intracelularmente → 60–70% reducción del complejo c-Myc/Max sin toxicidad sistémica.",
+        "Incorrecto. La catepsina B opera en el lisosoma ácido, no en el citoplasma neutro.",
+        "Incorrecto. El espaciador GFLG no tiene función en la unión a receptores de membrana; su función es proveer sitio de escisión enzimática."]
+  },
+  {
+    id:5, topic:"Resistencia terapéutica",
+    q:"¿Por qué la co-amplificación de MYC y HER2 (presente en 40–50% de los cánceres de mama HER2+) justifica una estrategia convergente de una sola nanopartícula?",
+    opts:["Porque ambos oncogenes comparten el mismo promotor y se pueden silenciar con un único ARNm antisentido",
+          "Porque MYC amplificado es el principal mecanismo de resistencia adquirida a terapias anti-HER2, y una NP-aptámero HER2 que libere carga anti-Myc atacaría la diana de entrada y el mecanismo de escape simultáneamente",
+          "Porque HER2 y Myc forman un heterodímero directo en la membrana que solo puede bloquearse con nanopartículas duales",
+          "Porque el aptámero HA1 tiene afinidad cruzada natural por el dominio bHLH-LZ de c-Myc, eliminando la necesidad de una carga adicional"],
+    correct:1,
+    fb:["Incorrecto. MYC y HER2 están en cromosomas distintos (8q24 y 17q12) y no comparten promotor.",
+        "Correcto. MYC amplificado activa vías alternativas de proliferación que hacen resistentes a pertuzumab/lapatinib. Una AuNP-aptHER2 con carga anti-Myc bloquea la entrada por HER2 Y el mecanismo de resistencia principal.",
+        "Incorrecto. HER2 es un receptor de membrana tipo tirosina cinasa; c-Myc es un factor de transcripción nuclear. No forman heterodímero directo.",
+        "Incorrecto. El aptámero HA1 tiene afinidad específica por el ECD de HER2; no tiene actividad anti-Myc intrínseca."]
+  },
+  {
+    id:6, topic:"Ácidos nucleicos — miRNA/antimiR",
+    q:"Las modificaciones de Ácido Nucleico Bloqueado (LNA) en antimiRs aumentan la Tm en +4–6°C por sustitución. ¿Cuál es la consecuencia directa más relevante para el diseño de nanodrogas?",
+    opts:["Permiten que los antimiRs crucen la barrera hematoencefálica sin necesidad de nanopartículas",
+          "Aumentan la toxicidad hepática al incrementar la retención del oligonucleótido en el hígado",
+          "Permiten usar antimiRs más cortos (8–12 nt) con igual o mayor potencia de silenciamiento y mayor resistencia a nucleasas",
+          "Convierten el antimiR en un ARN bicatenario que activa la vía de interferencia por ARN (siRNA)"],
+    correct:2,
+    fb:["Incorrecto. El cruce de BHE requiere estrategias adicionales (Angiopep-2, receptor-mediated transcytosis).",
+        "Incorrecto. Las modificaciones LNA en general reducen la toxicidad por mejorar la especificidad; la hepatotoxicidad es un riesgo de PS no de LNA per se.",
+        "Correcto. La alta Tm permite antimiRs de 8–12 nt LNA que igualan la potencia de oligómeros de 22 nt ARN estándar, son mejores sustratos para la encapsulación en NPs y tienen mayor resistencia a RNasas.",
+        "Incorrecto. Los antimiRs son de cadena sencilla (antisense); el LNA no los convierte en dúplex ni activa la vía de siRNA."]
+  },
+  {
+    id:7, topic:"Diseño teranóstico",
+    q:"Para que una nanopartícula sea clasificada como 'verdaderamente teranóstica', ¿qué debe integrar además de la función terapéutica?",
+    opts:["Un anticuerpo monoclonal aprobado por FDA en su superficie para garantizar la validación clínica",
+          "Una modalidad de imagen detectable (LSPR, MRI, PAT, fluorescencia) que permita monitorear biodistribución y confirmar la entrega, sin comprometer la accesibilidad del ligando ni la liberación de la carga",
+          "Al menos dos fármacos quimioterápicos distintos encapsulados para efecto sinérgico",
+          "Una señal de localización nuclear (NLS) para garantizar que los péptidos inhibidores lleguen al núcleo"],
+    correct:1,
+    fb:["Incorrecto. Un anticuerpo FDA-aprobado es un ligando de targeting, no una modalidad de imagen.",
+        "Correcto. La función teranóstica requiere integrar diagnóstico por imagen Y terapia en una sola plataforma. Los 6 benchmarks de caracterización incluyen funcionalidad del ligando post-conjugación, que garantiza que la imagen no comprometa la terapia.",
+        "Incorrecto. Dos fármacos es una plataforma de combinación terapéutica, no teranóstica.",
+        "Incorrecto. Una NLS facilita entrega nuclear de cargas (péptidos Myc) pero no es un requisito de definición teranóstica."]
+  },
+  {
+    id:8, topic:"Química de conjugación — PEG",
+    q:"¿Qué efecto tiene la omisión del espaciador PEG (1–2 kDa) en la conjugación de péptidos bHLH-LZ a AuNPs, según la evidencia experimental disponible?",
+    opts:["Aumenta la densidad de péptidos en la superficie, mejorando la inhibición del complejo Myc/Max entre un 20 y 30%",
+          "Facilita la entrada nuclear del péptido al eliminar la carga estérica del polietilen glicol",
+          "Reduce la capacidad inhibitoria del péptido entre un 50 y 80% por oclusión del dominio de unión a Max contra la superficie de la AuNP",
+          "No tiene efecto significativo si la temperatura de conjugación se mantiene por debajo de 4°C"],
+    correct:2,
+    fb:["Incorrecto. Sin PEG, el péptido queda adosado a la superficie con su dominio de unión ocluido.",
+        "Incorrecto. El PEG espaciador no ocluye la entrada nuclear; al contrario, es necesario para que el dominio activo quede accesible.",
+        "Correcto. Sin PEG, el dominio bHLH-LZ queda adosado a la superficie de AuNP, impidiendo su interacción con Max. La reducción de actividad documentada es del 50–80%.",
+        "Incorrecto. La temperatura de conjugación no compensa el efecto estérico de la ausencia de espaciador."]
+  },
+  {
+    id:9, topic:"Brechas traslacionales",
+    q:"¿Cuál es la limitación traslacional más crítica identificada en la literatura actual sobre nanoteranósticos dirigidos a HER2 o Myc?",
+    opts:["La falta de aptámeros de ADN con K_d < 1 nM para HER2, que impide una unión suficientemente específica",
+          "La ausencia de síntesis química reproducible para nanopartículas de oro de tamaño uniforme",
+          "La dependencia casi universal en modelos de xenoinjerto (sin sistema inmune syngénico) y la ausencia de modelado farmacocinético-farmacodinámico (PK-PD) para constructos aptámero-NP",
+          "La inexistencia de técnicas de caracterización por DLS y potencial Z para nanopartículas poliméricas"],
+    correct:2,
+    fb:["Incorrecto. Los aptámeros actuales (HA1, K_d ~50–100 nM) tienen selectividad biológica suficiente para experimentos in vitro e in vivo.",
+        "Incorrecto. La síntesis de AuNPs por reducción de citrato es reproducible y está estandarizada.",
+        "Correcto. Los xenoinjertos carecen de sistema inmune funcional (NK, T/B cells), no reproducen la opsonización real, y la ausencia de modelos PK-PD impide predecir la dosis terapéutica en humanos.",
+        "Incorrecto. DLS y potencial Z son técnicas estándar aplicables a cualquier nanopartícula; no son una limitación traslacional."]
+  },
+  {
+    id:10, topic:"Plataformas LNP — imagen",
+    q:"¿Qué estrategia convertiría a las LNP-ARNm oncológicas actuales en plataformas verdaderamente teranósticas, según las brechas identificadas en la revisión?",
+    opts:["Sustituir el ARNm por ADN bicatenario, que es más estable y puede encapsularse sin lípidos ionizables",
+          "Co-encapsular SPIONs en las LNP-ARNm para verificar biodistribución por MRI, complementado con ARNm reportero (luciferasa) para confirmar expresión tumoral in vivo",
+          "Añadir trastuzumab en la superficie de la LNP para incrementar la selectividad tumoral sin necesidad de imagen",
+          "Aumentar el tamaño de la LNP a >500 nm para mejorar el efecto de permeabilidad y retención (EPR) en tumores sólidos"],
+    correct:1,
+    fb:["Incorrecto. El ADN bicatenario no se traduce directamente en proteína; la terapia basada en ARNm requiere ARNm mensajero.",
+        "Correcto. Los SPIONs integrarían imagen MRI para biodistribución y el ARNm reportero confirmaría la expresión en tumor. Esto cubriría el vacío de que los ensayos clínicos ARNm actuales no verifican si el ARNm llega y se expresa en el tumor.",
+        "Incorrecto. Trastuzumab añade targeting pero no modalidad de imagen; la plataforma seguiría siendo terapéutica, no teranóstica.",
+        "Incorrecto. LNPs >500 nm son captadas eficientemente por el sistema fagocítico mononuclear y eliminadas antes de alcanzar el tumor; el rango óptimo para EPR es 50–200 nm."]
+  }
+];
+
+// ════════════════════════════════════════════
+// ESTADO GLOBAL
+// ════════════════════════════════════════════
+let student = { name:'', mat:'', grupo:'' };
+let seenCards = new Set();
+let attempt = 1;
+let answers = {};   // qId → optIdx
+let bestScore = 0;
+let bestAttemptData = null;
+
+const TOTAL_FLASH = FLASH.length;
+const PASS_SCORE  = 70;
+const MAX_ATTEMPTS = 3;
+
+// ════════════════════════════════════════════
+// UTILIDADES
+// ════════════════════════════════════════════
+function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function topicLabel(t){ return {quimica:'Química de Conjugación',her2:'Targeting HER2',myc:'Eje c-Myc/Max',acidos:'Ácidos Nucleicos',teranóstico:'Diseño Teranóstico',brecha:'Brechas de Investigación'}[t]||t; }
+
+// ════════════════════════════════════════════
+// REGISTRO
+// ════════════════════════════════════════════
+const inpName  = document.getElementById('inp-name');
+const inpMat   = document.getElementById('inp-mat');
+const inpGrupo = document.getElementById('inp-grupo');
+const btnStart = document.getElementById('btn-start-flash');
+
+function checkReg(){
+  btnStart.disabled = !(inpName.value.trim() && inpMat.value.trim() && inpGrupo.value.trim());
+}
+inpName.addEventListener('input',checkReg);
+inpMat.addEventListener('input',checkReg);
+inpGrupo.addEventListener('input',checkReg);
+
+btnStart.addEventListener('click',()=>{
+  student = { name:inpName.value.trim(), mat:inpMat.value.trim(), grupo:inpGrupo.value.trim() };
+  buildFlashGrid();
+  show('s-flash');
+});
+
+// ════════════════════════════════════════════
+// FLASHCARDS
+// ════════════════════════════════════════════
+function buildFlashGrid(){
+  const grid = document.getElementById('flashGrid');
+  grid.innerHTML = '';
+  FLASH.forEach(card=>{
+    const wrap = document.createElement('div');
+    wrap.className = 'card-wrap' + (seenCards.has(card.id)?' seen':'');
+    wrap.dataset.t = card.t;
+    wrap.dataset.id = card.id;
+    wrap.setAttribute('tabindex','0');
+    wrap.innerHTML=`
+      <div class="seen-badge">✓</div>
+      <div class="card-inner">
+        <div class="card-face card-front">
+          <span class="c-icon">${card.icon}</span>
+          <span class="c-num">#${card.id}</span>
+          <div class="c-tag">${topicLabel(card.t)}</div>
+          <div class="c-q">${card.q}</div>
+          <div class="c-hint">clic para respuesta →</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="back-label">${topicLabel(card.t)}</div>
+          <div class="back-body">${card.a}</div>
+          <div class="back-ref">📄 ${card.r}</div>
+        </div>
+      </div>`;
+    wrap.addEventListener('click',()=>flipCard(wrap,card.id));
+    wrap.addEventListener('keydown',e=>{ if(e.key===' '||e.key==='Enter'){e.preventDefault();flipCard(wrap,card.id);} });
+    grid.appendChild(wrap);
+  });
+  updateFlashProgress();
+}
+
+function flipCard(wrap, id){
+  wrap.classList.toggle('flipped');
+  if(!seenCards.has(id)){
+    seenCards.add(id);
+    wrap.classList.add('seen');
+    updateFlashProgress();
+  }
+}
+
+function updateFlashProgress(){
+  const n = seenCards.size;
+  document.getElementById('flashCounter').textContent = `${n} / ${TOTAL_FLASH} vistas`;
+  document.getElementById('flashFill').style.width = `${(n/TOTAL_FLASH)*100}%`;
+  const allSeen = n >= TOTAL_FLASH;
+  const btnQ = document.getElementById('btnGoQuiz');
+  btnQ.disabled = !allSeen;
+  btnQ.classList.toggle('unlocked', allSeen);
+  const lockMsg = document.getElementById('flashLockMsg');
+  if(allSeen){ lockMsg.textContent = '✅ ¡Todas las tarjetas vistas! Puedes continuar al examen.'; lockMsg.style.color='var(--green)'; }
+}
+
+document.getElementById('btnGoQuiz').addEventListener('click',()=>{
+  buildQuiz();
+  show('s-quiz');
+});
+
+// ════════════════════════════════════════════
+// QUIZ
+// ════════════════════════════════════════════
+function buildQuiz(){
+  answers = {};
+  document.getElementById('attemptBadge').textContent = `Intento ${attempt} / ${MAX_ATTEMPTS}`;
+  document.getElementById('quizMeta').textContent = `0 / ${QUESTIONS.length} respondidas`;
+  document.getElementById('qProgFill').style.width = '0%';
+
+  const main = document.getElementById('quizMain');
+  main.innerHTML = '';
+
+  QUESTIONS.forEach((q,qi)=>{
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.dataset.qid = q.id;
+    card.innerHTML = `
+      <div class="q-head">
+        <span class="q-badge">P${qi+1} · ${q.topic}</span>
+        <div class="q-text">${q.q}</div>
+      </div>
+      <div class="opts">
+        ${q.opts.map((o,oi)=>`
+          <div class="opt" data-qid="${q.id}" data-oi="${oi}" tabindex="0">
+            <span class="opt-letter">${String.fromCharCode(65+oi)}</span>
+            <span>${o}</span>
+          </div>
+        `).join('')}
+      </div>`;
+    main.appendChild(card);
+  });
+
+  // Botón submit
+  const sw = document.createElement('div');
+  sw.className = 'submit-wrap';
+  sw.innerHTML = `<button class="btn-submit" id="btnSubmit" disabled>Enviar respuestas →</button>`;
+  main.appendChild(sw);
+
+  // Eventos opts
+  main.querySelectorAll('.opt').forEach(opt=>{
+    opt.addEventListener('click',()=>selectOpt(opt));
+    opt.addEventListener('keydown',e=>{ if(e.key===' '||e.key==='Enter'){e.preventDefault();selectOpt(opt);} });
+  });
+
+  document.getElementById('btnSubmit').addEventListener('click', submitQuiz);
+}
+
+function selectOpt(opt){
+  const qid = parseInt(opt.dataset.qid);
+  const oi  = parseInt(opt.dataset.oi);
+  // Deselect others in same question
+  document.querySelectorAll(`.opt[data-qid="${qid}"]`).forEach(o=>o.classList.remove('selected'));
+  opt.classList.add('selected');
+  answers[qid] = oi;
+  document.getElementById(`[data-qid="${qid}"]`)?.classList.add('answered');
+  // Mark card answered
+  document.querySelector(`.q-card[data-qid="${qid}"]`)?.classList.add('answered');
+
+  const answered = Object.keys(answers).length;
+  document.getElementById('quizMeta').textContent = `${answered} / ${QUESTIONS.length} respondidas`;
+  document.getElementById('qProgFill').style.width = `${(answered/QUESTIONS.length)*100}%`;
+  const btnS = document.getElementById('btnSubmit');
+  if(btnS) btnS.disabled = answered < QUESTIONS.length;
+}
+
+function submitQuiz(){
+  // Lock opts
+  document.querySelectorAll('.opt').forEach(o=>o.classList.add('locked'));
+
+  // Score
+  let correct = 0;
+  QUESTIONS.forEach(q=>{
+    const selected = answers[q.id];
+    const opts = document.querySelectorAll(`.opt[data-qid="${q.id}"]`);
+    opts.forEach((o,oi)=>{
+      if(oi === q.correct) o.classList.add('correct');
+      else if(oi === selected && oi !== q.correct) o.classList.add('wrong');
+    });
+    // Show feedback under selected
+    if(selected !== undefined){
+      const selOpt = document.querySelector(`.opt[data-qid="${q.id}"][data-oi="${selected}"]`);
+      const fb = document.createElement('div');
+      fb.className = 'opt-feedback show';
+      fb.textContent = q.fb[selected];
+      selOpt?.after(fb);
+    }
+    if(selected === q.correct) correct++;
+  });
+
+  const score = Math.round((correct/QUESTIONS.length)*100);
+  if(score > bestScore){ bestScore = score; bestAttemptData = { ...answers }; }
+
+  // Scroll to top of quiz
+  document.getElementById('s-quiz').scrollTo(0,0);
+
+  // After 1.5s show result
+  setTimeout(()=>showResult(score, correct), 1500);
+}
+
+function showResult(score, correct){
+  const circle = document.getElementById('scoreCircle');
+  document.getElementById('scoreNum').textContent = score;
+  circle.className = 'score-circle ' + (score >= PASS_SCORE ? 'pass' : 'fail');
+
+  const pass = score >= PASS_SCORE;
+  document.getElementById('resultTitle').textContent = pass ? '✅ ¡Aprobado!' : '❌ No aprobado';
+  document.getElementById('resultSub').textContent = `Respondiste correctamente ${correct} de ${QUESTIONS.length} preguntas. ` +
+    (pass ? 'Has superado el umbral de 70 puntos.' : 'El umbral de aprobación es 70 puntos.');
+
+  // Breakdown por tema
+  const byTopic = {};
+  QUESTIONS.forEach(q=>{
+    if(!byTopic[q.topic]) byTopic[q.topic]={total:0,correct:0};
+    byTopic[q.topic].total++;
+    if(answers[q.id]===q.correct) byTopic[q.topic].correct++;
+  });
+  const bkList = document.getElementById('breakdownList');
+  bkList.innerHTML = Object.entries(byTopic).map(([t,v])=>{
+    const ok = v.correct===v.total;
+    return `<div class="bk-item"><span>${t}</span><span class="bk-badge ${ok?'bk-ok':'bk-fail'}">${v.correct}/${v.total}</span></div>`;
+  }).join('');
+
+  // Retry / cert
+  const btnRetry = document.getElementById('btnRetry');
+  const btnToCert = document.getElementById('btnToCert');
+  const retryInfo = document.getElementById('retryInfo');
+
+  const attemptsLeft = MAX_ATTEMPTS - attempt;
+  if(attemptsLeft > 0 && !pass){
+    retryInfo.textContent = `Te quedan ${attemptsLeft} intento${attemptsLeft>1?'s':''} más.`;
+    btnRetry.style.display = 'block';
+    btnRetry.textContent = `🔁 Reintentar (intento ${attempt+1} / ${MAX_ATTEMPTS})`;
+  } else {
+    retryInfo.textContent = attempt >= MAX_ATTEMPTS ? 'Has utilizado todos tus intentos.' : '';
+    btnRetry.style.display = 'none';
+  }
+  btnToCert.textContent = pass ? '🎓 Descargar Comprobante' : '📄 Obtener Comprobante de Participación';
+
+  show('s-result');
+}
+
+document.getElementById('btnRetry').addEventListener('click',()=>{
+  attempt++;
+  buildQuiz();
+  show('s-quiz');
+});
+
+document.getElementById('btnToCert').addEventListener('click', generateCert);
+
+// ════════════════════════════════════════════
+// COMPROBANTE (Canvas)
+// ════════════════════════════════════════════
+function generateCert(){
+  show('s-cert');
+  const canvas = document.getElementById('certCanvas');
+  const W = 900, H = 600;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // Fondo oscuro degradado
+  const bg = ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,'#0f172a'); bg.addColorStop(1,'#1e3a5f');
+  ctx.fillStyle = bg; ctx.fillRect(0,0,W,H);
+
+  // Marco dorado
+  ctx.strokeStyle='#b8860b'; ctx.lineWidth=4;
+  ctx.strokeRect(18,18,W-36,H-36);
+  ctx.strokeStyle='rgba(184,134,11,0.3)'; ctx.lineWidth=1;
+  ctx.strokeRect(26,26,W-52,H-52);
+
+  // Encabezado
+  ctx.fillStyle='#3b82f6'; ctx.font='bold 13px Arial';
+  ctx.textAlign='center';
+  ctx.fillText('DEPARTAMENTO DE BIOQUÍMICA · FACULTAD DE MEDICINA · UANL', W/2, 65);
+  ctx.fillStyle='rgba(59,130,246,0.2)'; ctx.fillRect(30,74,W-60,2);
+
+  // Logo texto
+  ctx.fillStyle='#fbbf24'; ctx.font='bold 34px Arial';
+  ctx.fillText('Gallardo-Lab', W/2, 118);
+
+  // Título comprobante
+  ctx.fillStyle='#ffffff'; ctx.font='bold 20px Arial';
+  ctx.fillText('COMPROBANTE DE PARTICIPACIÓN', W/2, 158);
+  ctx.fillStyle='rgba(255,255,255,0.15)'; ctx.fillRect(180,166,W-360,2);
+
+  // Subtítulo actividad
+  ctx.fillStyle='#06b6d4'; ctx.font='bold 15px Arial';
+  ctx.fillText('Competencia Grupal — Nanopartículas Teranósticas en Biomedicina', W/2, 195);
+  ctx.fillStyle='#94a3b8'; ctx.font='13px Arial';
+  ctx.fillText('Materia: Biomedicina · Departamento de Bioquímica · Facultad de Medicina, UANL', W/2, 216);
+
+  // Certifica a
+  ctx.fillStyle='rgba(255,255,255,0.12)';
+  ctx.beginPath(); ctx.roundRect(W/2-310,238,620,90,12); ctx.fill();
+  ctx.fillStyle='#94a3b8'; ctx.font='12px Arial';
+  ctx.fillText('CERTIFICA QUE', W/2, 263);
+  ctx.fillStyle='#ffffff'; ctx.font='bold 24px Arial';
+  ctx.fillText(student.name, W/2, 296);
+  ctx.fillStyle='#94a3b8'; ctx.font='13px Arial';
+  ctx.fillText(`Matrícula: ${student.mat}   |   Grupo: ${student.grupo}`, W/2, 318);
+
+  // Descripción
+  ctx.fillStyle='#f1f5f9'; ctx.font='13px Arial';
+  const desc = 'completó las flashcards de fundamentos y el examen de la actividad mencionada,';
+  ctx.fillText(desc, W/2, 352);
+  ctx.fillText('demostrando conocimiento sobre estrategias de funcionalización de plataformas nanoteranósticas.', W/2, 371);
+
+  // Score
+  const pass = bestScore >= PASS_SCORE;
+  ctx.fillStyle = pass ? '#22c55e' : '#fbbf24';
+  ctx.font = 'bold 18px Arial';
+  ctx.fillText(`Calificación obtenida: ${bestScore} / 100 pts ${pass?'— APROBADO':'— PARTICIPACIÓN'}`, W/2, 408);
+  ctx.fillStyle='#94a3b8'; ctx.font='12px Arial';
+  ctx.fillText(`Intentos utilizados: ${attempt} / ${MAX_ATTEMPTS}   |   Tarjetas revisadas: ${seenCards.size} / ${TOTAL_FLASH}`, W/2, 428);
+
+  // Líneas de firma
+  ctx.strokeStyle='rgba(255,255,255,0.25)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(130,496); ctx.lineTo(370,496); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(530,496); ctx.lineTo(770,496); ctx.stroke();
+  ctx.fillStyle='#94a3b8'; ctx.font='11px Arial';
+  ctx.fillText('Hugo L. Gallardo-Blanco', 250,515);
+  ctx.fillText('Posgrado en Ciencias Básicas, UANL', 250,530);
+
+  // Fecha
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'});
+  ctx.fillText(dateStr, 650, 515);
+  ctx.fillText('Fecha de emisión', 650, 530);
+
+  // Footer
+  ctx.fillStyle='rgba(59,130,246,0.2)'; ctx.fillRect(30,544,W-60,1);
+  ctx.fillStyle='#475569'; ctx.font='10px Arial';
+  ctx.fillText('Gallardo BioTools · gallardo-lab.github.io/gallardo-biotools · MIT License', W/2, 562);
+
+  // Mostrar preview
+  const dataURL = canvas.toDataURL('image/png');
+  document.getElementById('certPreview').src = dataURL;
+  document.getElementById('btnDl').onclick = ()=>{
+    const a = document.createElement('a');
+    a.href = dataURL;
+    a.download = `Comprobante_${student.mat}_NanoTeranosticos.png`;
+    a.click();
+  };
+}
+</script>
+</body>
+</html>

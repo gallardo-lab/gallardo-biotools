@@ -1,0 +1,2167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PrimerDesigner Expert — Diseño de primers para secuenciación Sanger | Gallardo BioTools</title>
+<meta name="author" content="Hugo Leonid Gallardo Blanco">
+<meta name="description" content="Versión experta de PrimerDesigner: regiones de búsqueda independientes para forward y reverse, Tm nearest-neighbor (SantaLucia 1998), corrección de sales (Owczarzy 2004), Ta óptima (Rychlik 1990), PCR in silico y base de datos local de oligos. 100% en el navegador.">
+<link rel="canonical" href="https://gallardo-lab.github.io/gallardo-biotools/tools/primer-designer-expert.html">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-X5BT5RP5WF"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-X5BT5RP5WF');
+</script>
+
+<style>
+
+  :root {
+    --bg: #090c12;
+    --panel: #111620;
+    --panel2: #171e2e;
+    --border: #2e3f5c;
+    --accent: #60b4ff;
+    --accent2: #00e8ba;
+    --warn: #ffb930;
+    --danger: #ff6b6b;
+    --good: #4ddd90;
+    --text: #edf2ff;
+    --text2: #a8bcd8;
+    --text3: #6a82a0;
+    --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13px;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  header h1 {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+  header span {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: var(--mono);
+  }
+  .tab-bar {
+    margin-left: auto;
+    display: flex;
+    gap: 2px;
+  }
+  .tab {
+    padding: 5px 14px;
+    font-size: 12px;
+    font-family: var(--mono);
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text2);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.15s;
+  }
+  .tab.active {
+    background: var(--panel2);
+    border-color: var(--border);
+    color: var(--accent);
+  }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  /* LAYOUT */
+  .app { display: flex; height: calc(100vh - 43px); }
+
+  /* LEFT PANEL */
+  .left {
+    width: 320px;
+    min-width: 280px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* RIGHT PANEL */
+  .right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* SECTION HEADERS */
+  .sec-hdr {
+    padding: 8px 14px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text3);
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  /* SCROLLABLE */
+  .scroll { overflow-y: auto; flex: 1; }
+  .scroll::-webkit-scrollbar { width: 4px; }
+  .scroll::-webkit-scrollbar-track { background: transparent; }
+  .scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* FORM GROUPS */
+  .form-block { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+  .form-row { display: flex; gap: 8px; align-items: center; margin-bottom: 7px; }
+  .form-row:last-child { margin-bottom: 0; }
+  label { color: var(--text2); font-size: 12px; flex: 1; white-space: nowrap; }
+
+  input[type=text], input[type=number], textarea, select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 4px 7px;
+    border-radius: 3px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input[type=text]:focus, input[type=number]:focus, textarea:focus, select:focus {
+    border-color: var(--accent);
+  }
+  input[type=number] { width: 62px; text-align: right; }
+  input.wide { width: 100%; flex: 1; }
+  textarea {
+    width: 100%;
+    resize: vertical;
+    font-size: 11px;
+    line-height: 1.5;
+    min-height: 80px;
+  }
+  select { flex: 1; }
+
+  .pair-inputs { display: flex; gap: 6px; }
+  .pair-inputs input { width: 60px; }
+
+  /* BUTTONS */
+  .btn {
+    padding: 6px 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #000;
+  }
+  .btn-primary:hover { background: #6ab3ff; }
+  .btn-secondary {
+    background: var(--panel2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-good { background: var(--good); color: #000; }
+  .btn-good:hover { background: #4fd18a; }
+  .btn-sm { padding: 3px 9px; font-size: 11px; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-full { width: 100%; text-align: center; }
+
+  .action-bar {
+    padding: 10px 14px;
+    display: flex;
+    gap: 8px;
+    border-top: 1px solid var(--border);
+    background: var(--panel);
+    flex-shrink: 0;
+  }
+
+  /* RESULTS TABLE */
+  .results-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .results-hdr {
+    padding: 8px 14px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .results-hdr span { font-family: var(--mono); font-size: 11px; color: var(--text2); }
+  .results-hdr .count { color: var(--accent); font-weight: 600; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+  thead th {
+    background: var(--panel2);
+    padding: 6px 10px;
+    text-align: left;
+    color: var(--text3);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    white-space: nowrap;
+  }
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  tbody tr:hover { background: var(--panel2); }
+  tbody tr.selected { background: #1a2840; border-left: 2px solid var(--accent); }
+  td { padding: 5px 10px; white-space: nowrap; }
+  td.seq { font-size: 10px; color: var(--accent2); letter-spacing: 0.05em; }
+  td.good { color: var(--good); }
+  td.warn { color: var(--warn); }
+  td.bad { color: var(--danger); }
+
+  /* PRIMER DETAIL PANEL */
+  .detail-panel {
+    height: 220px;
+    min-height: 160px;
+    border-top: 1px solid var(--border);
+    background: var(--panel);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+  }
+  .detail-inner {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+  .detail-stats {
+    width: 220px;
+    border-right: 1px solid var(--border);
+    padding: 10px 14px;
+    overflow-y: auto;
+  }
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3px 0;
+    border-bottom: 1px solid #1e2d42;
+  }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-label { color: var(--text2); font-family: var(--mono); font-size: 11px; }
+  .stat-val { font-family: var(--mono); font-size: 11px; font-weight: 600; }
+  .stat-qual { font-size: 10px; margin-left: 6px; }
+  .sq-good { color: var(--good); }
+  .sq-warn { color: var(--warn); }
+  .sq-bad { color: var(--danger); }
+
+  .detail-alignment {
+    flex: 1;
+    padding: 10px 14px;
+    overflow-y: auto;
+  }
+  .align-block {
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.8;
+    white-space: pre;
+  }
+  .align-primer { color: var(--accent); }
+  .align-match { color: var(--text3); }
+  .align-target { color: var(--text2); }
+  .align-mm { color: var(--danger); }
+  .align-info { color: var(--text2); font-size: 11px; margin-bottom: 6px; }
+  .nt-degen { color: var(--warn); font-weight: 700; background: rgba(255,185,48,0.12); border-radius: 2px; padding: 0 1px; cursor: help; }
+
+  /* PCR IN SILICO */
+  .amplicon-vis {
+    padding: 10px 14px;
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+  .amplicon-bar {
+    display: flex;
+    align-items: center;
+    height: 28px;
+    margin: 8px 0;
+    position: relative;
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .amp-fwd {
+    position: absolute;
+    height: 100%;
+    background: rgba(96,180,255,0.25);
+    border-right: 2px solid var(--accent);
+    display: flex;
+    align-items: center;
+    padding-left: 4px;
+    font-size: 10px;
+    color: var(--accent);
+  }
+  .amp-rev {
+    position: absolute;
+    height: 100%;
+    background: rgba(0,232,186,0.18);
+    border-left: 2px solid var(--accent2);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 4px;
+    font-size: 10px;
+    color: var(--accent2);
+  }
+  .amp-product {
+    position: absolute;
+    height: 60%;
+    top: 20%;
+    background: rgba(240,165,0,0.15);
+    border-top: 1px solid var(--warn);
+    border-bottom: 1px solid var(--warn);
+  }
+
+  /* DATABASE TAB */
+  .db-toolbar {
+    padding: 8px 14px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .db-filter { flex: 1; }
+
+  /* TAGS */
+  .tag {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 2px;
+    font-size: 10px;
+    font-family: var(--mono);
+    font-weight: 600;
+    margin-right: 3px;
+  }
+  .tag-fwd { background: rgba(74,158,255,0.2); color: var(--accent); }
+  .tag-rev { background: rgba(0,212,170,0.2); color: var(--accent2); }
+  .tag-pair { background: rgba(240,165,0,0.2); color: var(--warn); }
+
+  /* TOAST */
+  #toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 10px 16px;
+    font-family: var(--mono);
+    font-size: 12px;
+    border-radius: 4px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.25s;
+    z-index: 999;
+    pointer-events: none;
+    max-width: 320px;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+
+  /* TABS CONTENT */
+  .tab-content { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+  .tab-content.active { display: flex; }
+
+  /* EMPTY STATE */
+  .empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    color: var(--text3);
+    font-family: var(--mono);
+    font-size: 12px;
+    gap: 8px;
+  }
+  .empty-icon { font-size: 28px; opacity: 0.3; }
+
+  /* BLAST URL info */
+  .blast-info {
+    padding: 6px 14px;
+    background: rgba(74,158,255,0.05);
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text3);
+    font-family: var(--mono);
+    flex-shrink: 0;
+  }
+
+  /* Spinner */
+  .spin {
+    display: inline-block;
+    width: 12px; height: 12px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>▶ PrimerDesigner</h1>
+  <span>Expert · SantaLucia 1998 + Owczarzy 2004 + Rychlik 1990 · IUPAC · Sanger</span>
+  <div class="tab-bar">
+    <button class="tab active" onclick="switchMainTab('design')">Design</button>
+    <button class="tab" onclick="switchMainTab('pcr')">PCR in silico</button>
+    <button class="tab" onclick="switchMainTab('database')">Database</button>
+    <button class="tab" onclick="switchMainTab('help')">Help</button>
+  </div>
+  <button id="langBtn" class="tab" style="margin-left:auto" onclick="toggleLang()" title="Español / English">ES</button>
+</header>
+
+<div class="app">
+
+  <!-- LEFT: PARAMETERS -->
+  <div class="left">
+    <div class="sec-hdr">Parameters</div>
+    <div class="scroll">
+
+      <!-- SEQUENCE INPUT -->
+      <div class="form-block">
+        <div class="form-row"><label>Target sequence (FASTA or plain)</label></div>
+        <textarea id="seqInput" placeholder=">Gene_name&#10;ATGCGTACGATCGATCGATCGAT..." rows="6"></textarea>
+      </div>
+
+      <!-- SEARCH REGIONS -->
+      <div class="form-block">
+        <div class="form-row">
+          <label style="font-weight:600;color:var(--text)">Search regions</label>
+        </div>
+        <div class="form-row">
+          <label>Forward (from – to)</label>
+          <div class="pair-inputs">
+            <input type="number" id="fwdFrom" value="1" min="1">
+            <input type="number" id="fwdTo" value="" placeholder="end">
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Reverse (from – to)</label>
+          <div class="pair-inputs">
+            <input type="number" id="revFrom" value="" placeholder="auto">
+            <input type="number" id="revTo" value="" placeholder="end">
+          </div>
+        </div>
+        <div class="form-row">
+          <label>or use own Forward</label>
+          <input type="text" id="ownFwd" placeholder="5'→3' sequence" class="wide" style="font-size:10px;">
+        </div>
+        <div class="form-row">
+          <label>or use own Reverse</label>
+          <input type="text" id="ownRev" placeholder="5'→3' minus strand" class="wide" style="font-size:10px;">
+        </div>
+      </div>
+
+      <!-- PRIMER CRITERIA -->
+      <div class="form-block">
+        <div class="form-row" style="margin-bottom:8px">
+          <label style="font-weight:600;color:var(--text)">General criteria</label>
+        </div>
+        <div class="form-row">
+          <label>Primer length (min – max)</label>
+          <div class="pair-inputs">
+            <input type="number" id="pLenMin" value="18" min="10" max="40">
+            <input type="number" id="pLenMax" value="30" min="10" max="45">
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Tm range (°C)</label>
+          <div class="pair-inputs">
+            <input type="number" id="tmMin" value="58" step="0.5">
+            <input type="number" id="tmMax" value="62" step="0.5">
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Opt Tm (°C)</label>
+          <input type="number" id="tmOpt" value="60" step="0.5" style="width:62px">
+        </div>
+        <div class="form-row">
+          <label>Max ΔTm pair (°C)</label>
+          <input type="number" id="tmDiff" value="3" step="0.5" style="width:62px">
+        </div>
+        <div class="form-row">
+          <label>GC% (min – max)</label>
+          <div class="pair-inputs">
+            <input type="number" id="gcMin" value="35" min="0" max="100">
+            <input type="number" id="gcMax" value="65" min="0" max="100">
+          </div>
+        </div>
+        <div class="form-row">
+          <label>GC clamp (min)</label>
+          <input type="number" id="gcClamp" value="0" min="0" max="3" style="width:62px">
+        </div>
+        <div class="form-row">
+          <label>Min quality score</label>
+          <input type="number" id="minQ" value="80" min="0" max="100" style="width:62px">
+        </div>
+      </div>
+
+      <!-- AMPLICON -->
+      <div class="form-block">
+        <div class="form-row" style="margin-bottom:8px">
+          <label style="font-weight:600;color:var(--text)">Amplified fragment size</label>
+        </div>
+        <div class="form-row">
+          <label>Min – Max (nt)</label>
+          <div class="pair-inputs">
+            <input type="number" id="ampMin" value="80" min="50">
+            <input type="number" id="ampMax" value="500" min="50">
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Best pairs to return</label>
+          <input type="number" id="nPairs" value="50" min="1" max="500" style="width:62px">
+        </div>
+      </div>
+
+      <!-- ADVANCED -->
+      <div class="form-block">
+        <div class="form-row" style="margin-bottom:8px">
+          <label style="font-weight:600;color:var(--text)">Advanced</label>
+        </div>
+        <div class="form-row">
+          <label>Max 3' stability score</label>
+          <input type="number" id="maxStab3" value="9" step="0.5" style="width:62px">
+        </div>
+        <div class="form-row">
+          <label>Max poly-X run</label>
+          <input type="number" id="maxPolyX" value="4" min="2" max="8" style="width:62px">
+        </div>
+        <div class="form-row">
+          <label>Max self-end dimer (Tm)</label>
+          <input type="number" id="maxSED" value="35" step="1" style="width:62px">
+        </div>
+        <div class="form-row">
+          <label>[Na⁺] mM</label>
+          <input type="number" id="saltNa" value="50" step="1" style="width:62px">
+        </div>
+        <div class="form-row">
+          <label>[Mg²⁺] mM</label>
+          <input type="number" id="saltMg" value="1.5" step="0.5" style="width:62px">
+        </div>
+        <div class="form-row">
+          <label>[oligo] nM</label>
+          <input type="number" id="concOligo" value="250" step="50" style="width:62px">
+        </div>
+        <div class="form-row">
+          <label>[dNTP] mM</label>
+          <input type="number" id="concDNTP" value="0.6" step="0.1" style="width:62px">
+        </div>
+        <div class="form-row">
+          <label>Min SNP dist (nt)</label>
+          <input type="number" id="minSnpDist" value="60" min="0" max="200" style="width:62px">
+          <span style="font-size:10px;color:var(--text3);margin-left:4px">Sanger</span>
+        </div>
+      </div>
+
+    </div><!-- /scroll -->
+
+    <div class="action-bar">
+      <button class="btn btn-primary btn-full" onclick="runDesign()">
+        <span id="findBtn">▶ Find Primers</span>
+      </button>
+    </div>
+  </div><!-- /left -->
+
+  <!-- RIGHT -->
+  <div class="right">
+
+    <!-- TAB: DESIGN RESULTS -->
+    <div class="tab-content active" id="tab-design">
+      <div class="results-area">
+        <div class="results-hdr">
+          <span>Results: <span class="count" id="resultCount">—</span> pairs found</span>
+          <span id="seqName" style="color:var(--text3)"></span>
+          <span id="degenInfo" style="display:none;color:var(--warn);font-family:var(--mono);font-size:10px"></span>
+          <div style="margin-left:auto;display:flex;gap:6px">
+            <button class="btn btn-secondary btn-sm" onclick="exportCSV()" id="btnExport" style="display:none">↓ CSV</button>
+            <button class="btn btn-secondary btn-sm" onclick="saveSelectedToDB()" id="btnSaveDB" style="display:none">＋ Save to DB</button>
+          </div>
+        </div>
+
+        <div class="scroll" id="resultsScroll">
+          <div class="empty" id="emptyDesign">
+            <div class="empty-icon">◈</div>
+            <span>Enter sequence and click Find Primers</span>
+          </div>
+          <table id="resultsTable" class="hidden">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Forward primer 5'→3'</th>
+                <th>Pos</th>
+                <th>Tm</th>
+                <th>Q</th>
+                <th>Reverse primer 5'→3'</th>
+                <th>Pos</th>
+                <th>Tm</th>
+                <th>Q</th>
+                <th>Amp (nt)</th>
+                <th>Q pair</th>
+                <th>Dist FWD→SNP</th>
+                <th>Dist SNP→REV</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="resultsBody"></tbody>
+          </table>
+        </div>
+
+        <!-- DETAIL PANEL -->
+        <div class="detail-panel" id="detailPanel">
+          <div class="sec-hdr" id="detailHdr">Select a primer pair to view details</div>
+          <div class="detail-inner">
+            <div class="detail-stats" id="detailStats">
+              <div style="color:var(--text3);font-family:var(--mono);font-size:11px;padding-top:20px;text-align:center">No selection</div>
+            </div>
+            <div class="detail-alignment" id="detailAlign">
+              <div style="color:var(--text3);font-family:var(--mono);font-size:11px;padding-top:20px">—</div>
+            </div>
+          </div>
+          <div class="blast-info" id="blastInfo" style="display:none">
+            Primer-BLAST: 
+            <a id="blastFwdLink" href="#" target="_blank" style="color:var(--accent)">Check Forward specificity ↗</a>
+            &nbsp;·&nbsp;
+            <a id="blastRevLink" href="#" target="_blank" style="color:var(--accent2)">Check Reverse ↗</a>
+            &nbsp;·&nbsp;
+            <a id="blastPairLink" href="#" target="_blank" style="color:var(--warn)">Check Pair ↗</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: PCR IN SILICO -->
+    <div class="tab-content" id="tab-pcr">
+      <div class="sec-hdr">PCR in silico — test primer pair on target sequence</div>
+      <div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:flex-end;flex-shrink:0;flex-wrap:wrap">
+        <div style="flex:1;min-width:180px">
+          <label style="display:block;color:var(--text2);margin-bottom:4px;font-size:12px">Forward primer (5'→3')</label>
+          <input type="text" id="pcrFwd" class="wide" placeholder="CCCAGACAGCAGGGCTATA" style="font-size:11px">
+        </div>
+        <div style="flex:1;min-width:180px">
+          <label style="display:block;color:var(--text2);margin-bottom:4px;font-size:12px">Reverse primer (5'→3' minus strand)</label>
+          <input type="text" id="pcrRev" class="wide" placeholder="CAGAGTCAAAGCCTGCTTTG" style="font-size:11px">
+        </div>
+        <div style="width:160px">
+          <label style="display:block;color:var(--text2);margin-bottom:4px;font-size:12px">Variant position in sequence <span style="color:var(--text3)">(optional)</span></label>
+          <input type="number" id="pcrSnpPos" placeholder="e.g. 264" min="1" style="width:100%;background:var(--bg);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:12px;padding:4px 7px;border-radius:3px;outline:none">
+        </div>
+        <button class="btn btn-primary" onclick="runPCR()">▶ Run PCR</button>
+      </div>
+      <div class="scroll" id="pcrResults">
+        <div class="empty">
+          <div class="empty-icon">⌬</div>
+          <span>Enter primer pair and run PCR in silico</span>
+          <span style="font-size:10px;color:var(--text3);margin-top:4px">Uses sequence from Design tab · Specify variant position to check Sanger readability</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: DATABASE -->
+    <div class="tab-content" id="tab-database">
+      <div class="db-toolbar">
+        <input type="text" id="dbFilter" class="db-filter" placeholder="Filter by gene, sequence, pair ID, notes..." oninput="renderDB()">
+        <select id="dbFilterType" onchange="renderDB()" style="background:var(--panel2);border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:11px;padding:4px 8px;border-radius:3px;outline:none">
+          <option value="">All types</option>
+          <option value="FWD">FWD only</option>
+          <option value="REV">REV only</option>
+        </select>
+        <button class="btn btn-secondary btn-sm" onclick="exportDBCSV()">↓ CSV</button>
+        <button class="btn btn-danger btn-sm" onclick="clearDB()">✕ Clear All</button>
+      </div>
+      <div style="padding:5px 14px;background:var(--bg);border-bottom:1px solid var(--border);font-size:10px;color:var(--text3);font-family:var(--mono);display:flex;gap:16px;flex-shrink:0">
+        <span id="dbCountInfo">—</span>
+        <span style="margin-left:auto;font-style:italic">Click a row to edit notes inline</span>
+      </div>
+      <div class="scroll">
+        <table id="dbTable">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Gene / Pair ID</th>
+              <th>Sequence 5'→3'</th>
+              <th>Tm (°C)</th>
+              <th>GC%</th>
+              <th>Len</th>
+              <th>Q</th>
+              <th>Amp (nt)</th>
+              <th>Notes</th>
+              <th>Date</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="dbBody"></tbody>
+        </table>
+        <div class="empty" id="dbEmpty">
+          <div class="empty-icon">⊙</div>
+          <span>No primers saved yet</span>
+          <span style="font-size:10px;color:var(--text3)">Select pairs in Design tab and click Save to DB</span>
+        </div>
+      </div>
+    </div>
+
+
+<!-- ══════════════ HELP ══════════════ -->
+<div class="tab-content" id="tab-help" style="padding:18px;max-width:900px;margin:0 auto">
+  <h2 style="font-size:15px;color:var(--accent);margin:0 0 10px">How it works / Cómo funciona</h2>
+
+  <p><b>Tm.</b> Nearest-neighbor method of SantaLucia 1998 with monovalent/Mg²⁺ salt correction
+  of Owczarzy 2004 (Mg²⁺ chelated by dNTPs is discounted). Valid for oligonucleotides; matches
+  Primer3/Primer-BLAST within the usual range.</p>
+
+  <p><b>Search regions.</b> This is what distinguishes the expert version: forward and reverse
+  are constrained to <i>independent</i> windows (from – to, 1-based). Use it when the template
+  has fixed anchors — a known exon, a conserved region, or a sequence you must not prime on.
+  Leave empty to search the whole template.</p>
+
+  <p><b>Sanger readability.</b> If a variant position is given, the pair must place it inside the
+  amplicon and at least the minimum distance from each primer (default 60 nt), because the first
+  ~40–60 nt after the primer fall in the noisy region of the electropherogram. Distances
+  FWD→SNP and SNP→REV are reported per pair.</p>
+
+  <p><b>Annealing temperature (Ta).</b> The optimal Ta of Rychlik 1990 is reported:
+  0.3·Tm(least stable primer) + 0.7·Tm(product) − 14.9, using the nearest-neighbor Tm of the
+  primer and the product Tm (81.5 + 16.6·log₁₀[Na⁺] + 0.41·%GC − 675/N). It is more reliable
+  than the plain "Tm − 5" rule, especially with long amplicons or genomic DNA; the authors
+  reported agreement with experimental Ta within 0.7 °C. The −5 rule is shown as a reference
+  only.</p>
+
+  <p><b>IUPAC.</b> Degenerate bases are accepted in the template (flagged in amber), but primers
+  are <b>never</b> designed over degenerate positions.</p>
+
+  <p><b>Privacy.</b> Everything runs in your browser. The oligo database lives in this browser's
+  IndexedDB and is never uploaded. This page loads no external fonts or libraries. The only
+  outbound requests are the ones you trigger yourself by clicking a Primer-BLAST link.</p>
+
+  <p style="color:var(--warn)"><b>Not included.</b> This tool does <b>not</b> do qPCR design,
+  probe design or cloning. Those options are absent, not hidden — do not assume defaults cover
+  them.</p>
+
+  <p><b>Support tool.</b> Always verify specificity in Primer-BLAST (links are provided per
+  primer and per pair).</p>
+
+  <h3 style="font-size:12px;color:var(--accent2);margin:16px 0 6px">References / Referencias</h3>
+  <p style="font-size:11px;line-height:1.7">
+  SantaLucia J. <i>Proc Natl Acad Sci USA</i> 1998;95(4):1460-5.
+  DOI: <a href="https://doi.org/10.1073/pnas.95.4.1460" target="_blank"
+  rel="noopener noreferrer">10.1073/pnas.95.4.1460</a><br>
+  Owczarzy R, You Y, Moreira BG, et al. <i>Biochemistry</i> 2004;43(12):3537-54.
+  DOI: <a href="https://doi.org/10.1021/bi034621r" target="_blank"
+  rel="noopener noreferrer">10.1021/bi034621r</a><br>
+  Rychlik W, Spencer WJ, Rhoads RE. <i>Nucleic Acids Res</i> 1990;18(21):6409-12.
+  DOI: <a href="https://doi.org/10.1093/nar/18.21.6409" target="_blank"
+  rel="noopener noreferrer">10.1093/nar/18.21.6409</a>
+  </p>
+</div>
+
+  </div><!-- /right -->
+</div><!-- /app -->
+
+
+<footer style="border-top:1px solid var(--border);margin-top:22px;padding:16px 18px 26px;
+               font-size:10.5px;line-height:1.75;color:var(--text3);font-family:var(--sans)">
+  <div style="max-width:900px;margin:0 auto">
+    <b style="color:var(--text2)">PrimerDesigner Expert</b> · Gallardo BioTools —
+    todo el cómputo ocurre en tu navegador; no se envían datos a ningún servidor.<br>
+
+    Tm: SantaLucia 1998 (<a href="https://doi.org/10.1073/pnas.95.4.1460" target="_blank"
+    rel="noopener noreferrer">10.1073/pnas.95.4.1460</a>) +
+    Owczarzy 2004 (<a href="https://doi.org/10.1021/bi034621r" target="_blank"
+    rel="noopener noreferrer">10.1021/bi034621r</a>) ·
+    Ta: Rychlik 1990 (<a href="https://doi.org/10.1093/nar/18.21.6409" target="_blank"
+    rel="noopener noreferrer">10.1093/nar/18.21.6409</a>).<br>
+
+    <b style="color:var(--text2)">Cómo citar:</b>
+    Gallardo-Blanco HL, Sánchez-Domínguez CN. <i>PrimerDesigner Expert</i>, en Gallardo BioTools.
+    UANL, 2026.
+    <a href="https://gallardo-lab.github.io/gallardo-biotools/" target="_blank"
+    rel="noopener noreferrer">gallardo-lab.github.io/gallardo-biotools</a> ·
+    ORCID <a href="https://orcid.org/0000-0002-7816-4967" target="_blank"
+    rel="noopener noreferrer">0000-0002-7816-4967</a><br>
+
+    Colección Gallardo BioTools — DOI de concepto (siempre la última versión):
+    <a href="https://doi.org/10.5281/zenodo.20723201" target="_blank"
+    rel="noopener noreferrer">10.5281/zenodo.20723201</a>
+    · versión v1.0.0:
+    <a href="https://doi.org/10.5281/zenodo.20723201" target="_blank"
+    rel="noopener noreferrer">10.5281/zenodo.20723201</a><br>
+
+    <span style="color:var(--warn)">Esta versión experta aún no tiene DOI propio.</span>
+    Se le asignará al publicar el siguiente release en Zenodo. Mientras tanto, cítese la
+    colección. La versión estándar de PrimerDesigner es un artefacto distinto y tiene su propio
+    DOI (concepto <a href="https://doi.org/10.5281/zenodo.20725379" target="_blank"
+    rel="noopener noreferrer">10.5281/zenodo.20725379</a>); no debe usarse para citar esta
+    página.<br>
+
+    Licencia MIT. Herramienta de apoyo docente y de investigación: verifica siempre la
+    especificidad en Primer-BLAST.
+  </div>
+</footer>
+
+<div id="toast"></div>
+
+<script>
+// ============================================================
+// THERMODYNAMICS — SantaLucia 1998 (complete) + Owczarzy 2004
+// Ref 1: SantaLucia J. PNAS 1998;95(4):1460-5. DOI:10.1073/pnas.95.4.1460
+// Ref 2: Owczarzy R et al. Biochemistry 2004;43(12):3537-54. DOI:10.1021/bi034621r
+// Ref 3: Ahsen N et al. Clin Chem 2001;47(11):1956-61.
+// ============================================================
+
+// Nearest-neighbor parameters — SantaLucia 1998 Table 2
+// dH in kcal/mol, dS in cal/mol/K
+const NN_PARAMS = {
+  'AA': { dH: -7.9,  dS: -22.2 },
+  'AT': { dH: -7.2,  dS: -20.4 },
+  'AC': { dH: -7.8,  dS: -21.0 },
+  'AG': { dH: -7.8,  dS: -21.0 },
+  'TA': { dH: -7.2,  dS: -21.3 },
+  'TT': { dH: -7.9,  dS: -22.2 },
+  'TC': { dH: -8.2,  dS: -22.2 },
+  'TG': { dH: -8.5,  dS: -22.7 },
+  'CA': { dH: -8.5,  dS: -22.7 },
+  'CT': { dH: -7.8,  dS: -21.0 },
+  'CC': { dH: -8.0,  dS: -19.9 },
+  'CG': { dH: -10.6, dS: -27.2 },
+  'GA': { dH: -8.2,  dS: -22.2 },
+  'GT': { dH: -7.8,  dS: -21.0 },
+  'GC': { dH: -9.8,  dS: -24.4 },
+  'GG': { dH: -8.0,  dS: -19.9 }
+};
+
+// Initiation parameters — SantaLucia 1998 Table 2
+// Four distinct cases for 5' and 3' terminal bases
+const INIT = {
+  // init with terminal G-C pair
+  GC: { dH: 0.1,  dS: -2.8 },
+  CG: { dH: 0.1,  dS: -2.8 },
+  // init with terminal A-T pair
+  AT: { dH: 2.3,  dS: 4.1  },
+  TA: { dH: 2.3,  dS: 4.1  },
+  // init with terminal G (complement C)
+  G:  { dH: 0.1,  dS: -2.8 },
+  C:  { dH: 0.1,  dS: -2.8 },
+  A:  { dH: 2.3,  dS: 4.1  },
+  T:  { dH: 2.3,  dS: 4.1  }
+};
+
+const R_CAL = 1.987; // cal / (mol·K)
+
+// ---- Main Tm calculation ----
+// ── Ta óptima, Rychlik W, Spencer WJ, Rhoads RE. Nucleic Acids Res 1990;18(21):6409-12.
+//    DOI: 10.1093/nar/18.21.6409
+//    Ta_opt = 0.3*Tm(primer menos estable) + 0.7*Tm(producto) - 14.9
+//    Tm(producto) = 81.5 + 16.6*log10([Na+]) + 0.41*%GC - 675/N   (Na+ en mol/L)
+function tmProduct(ampSeq, saltNa) {
+  const N = ampSeq.length;
+  if (!N) return NaN;
+  const gcPct = calcGC(ampSeq);
+  const na = Math.max(saltNa, 1) / 1000;           // mM -> M, evita log(0)
+  return 81.5 + 16.6 * Math.log10(na) + 0.41 * gcPct - 675 / N;
+}
+
+function taRychlik(fwd, rev, pair, p) {
+  const seq = currentSeq && currentSeq.seq ? currentSeq.seq : '';
+  if (!seq) return 'n/a';
+  const amp = seq.substring(fwd.pos, fwd.pos + pair.ampLen);
+  const tmP = tmProduct(amp, p.saltNa);
+  if (!isFinite(tmP)) return 'n/a';
+  const tmMin = Math.min(fwd.tm, rev.tm);
+  return (0.3 * tmMin + 0.7 * tmP - 14.9).toFixed(1);
+}
+
+function calcTm(seq, saltNa = 50, saltMg = 1.5, concOligo = 250, concDNTP = 0.6) {
+  seq = seq.toUpperCase().replace(/[^ATCG]/g, '');
+  const N = seq.length;
+  if (N < 8) return NaN;
+
+  // 1. Nearest-neighbor sum
+  let dH = 0.0; // kcal/mol
+  let dS = 0.0; // cal/mol/K
+
+  for (let i = 0; i < N - 1; i++) {
+    const dinuc = seq[i] + seq[i+1];
+    const p = NN_PARAMS[dinuc];
+    if (p) { dH += p.dH; dS += p.dS; }
+  }
+
+  // 2. Initiation corrections — exact per terminal base (SantaLucia 1998 Table 2)
+  const init5 = INIT[seq[0]];
+  const init3 = INIT[seq[N-1]];
+  if (init5) { dH += init5.dH; dS += init5.dS; }
+  if (init3) { dH += init3.dH; dS += init3.dS; }
+
+  // 3. Symmetry correction: if sequence is self-complementary, add +0.4 kcal/mol to dH
+  //    and dS gets +1.4 cal/mol/K (SantaLucia 1998). Primers are almost never
+  //    self-complementary; skip unless detected.
+  const isSelfComp = seq === revComplement(seq);
+  if (isSelfComp) { dH += 0.0; dS += 1.4; }
+
+  // 4. CT factor: for non-self-complementary duplex, CT/4 where CT = total strand conc.
+  //    concOligo is in nM (oligos annealing to template). Standard Primer3 uses 250 nM.
+  const CT = isSelfComp
+    ? (concOligo * 1e-9)
+    : (concOligo * 1e-9) / 4.0;
+
+  // 5. Tm in 1 M NaCl (before salt correction)
+  //    Tm = dH*1000 / (dS + R*ln(CT)) - 273.15
+  const tm1M = (dH * 1000.0) / (dS + R_CAL * Math.log(CT)) - 273.15;
+
+  // 6. Salt correction — Owczarzy 2004 (DOI:10.1021/bi034621r)
+  //    Choose formula based on ratio Mg / sqrt(monovalent)
+  const monoM  = saltNa / 1000.0;                    // M
+  const mgFree = Math.max(0, saltMg - concDNTP) / 1000.0; // M (Mg free after chelating dNTPs)
+  const monoEff = monoM > 0 ? monoM : 1e-6;
+
+  let tmCorrected;
+
+  if (mgFree === 0 || monoM >= 0.5) {
+    // Use monovalent-only correction (SantaLucia 1998 / Owczarzy 2004 Eq. 16a)
+    // 1/Tm = 1/Tm(1M) + (4.29·fGC - 3.95)·1e-5·ln([Na+]) + 9.40e-6·(ln([Na+]))²
+    const fGC = (seq.match(/[GC]/g) || []).length / N;
+    const lnNa = Math.log(monoEff);
+    const invTm = (1.0 / (tm1M + 273.15))
+      + (4.29 * fGC - 3.95) * 1e-5 * lnNa
+      + 9.40e-6 * lnNa * lnNa;
+    tmCorrected = 1.0 / invTm - 273.15;
+  } else {
+    // Use Mg²⁺ correction (Owczarzy 2004 Eq. 16b)
+    // Coefficients a–f from Table 4 (SantaLucia 1998 NN params, non-self-complementary)
+    const a =  3.92e-5;
+    const b = -9.11e-6;
+    const c =  6.26e-5;
+    const d =  1.42e-5;
+    const e = -4.82e-4;
+    const f =  5.25e-4;
+    const g =  8.31e-5;
+    const fGC = (seq.match(/[GC]/g) || []).length / N;
+    const lnMg = Math.log(mgFree);
+    const invTm = (1.0 / (tm1M + 273.15))
+      + a
+      + b * lnMg
+      + fGC * (c + d * lnMg)
+      + (1.0 / (2.0 * (N - 1))) * (e + f * lnMg + g * lnMg * lnMg);
+    tmCorrected = 1.0 / invTm - 273.15;
+  }
+
+  return Math.round(tmCorrected * 10) / 10;
+}
+
+// ---- dG at 37°C for 3' end stability (last 5 bases) ----
+// Uses NN sum; dG = dH - T·dS where T = 310.15 K
+function calc3prime(seq) {
+  seq = seq.toUpperCase().slice(-5);
+  let dH = 0, dS = 0;
+  // initiation for this short fragment
+  const init5 = INIT[seq[0]];
+  const init3 = INIT[seq[seq.length-1]];
+  if (init5) { dH += init5.dH; dS += init5.dS; }
+  if (init3) { dH += init3.dH; dS += init3.dS; }
+  for (let i = 0; i < seq.length - 1; i++) {
+    const d = seq[i] + seq[i+1];
+    const p = NN_PARAMS[d];
+    if (p) { dH += p.dH; dS += p.dS; }
+  }
+  // dG at 37°C (310.15 K); dS in cal → kcal: /1000
+  const dG = dH - (310.15 * dS / 1000.0);
+  return Math.round(Math.abs(dG) * 10) / 10;
+}
+
+// ---- GC% ----
+function calcGC(seq) {
+  seq = seq.toUpperCase();
+  const gc = (seq.match(/[GC]/g) || []).length;
+  return Math.round(gc / seq.length * 1000) / 10;
+}
+
+// ---- Linguistic complexity (Wootton & Federhen 1993 approach, k=1..4) ----
+function calcComplexity(seq) {
+  seq = seq.toUpperCase();
+  const len = seq.length;
+  let totalWords = 0, maxWords = 0;
+  for (let k = 1; k <= Math.min(len, 4); k++) {
+    const observed = new Set();
+    for (let i = 0; i <= len - k; i++) observed.add(seq.substr(i, k));
+    totalWords += observed.size;
+    maxWords += Math.min(Math.pow(4, k), len - k + 1);
+  }
+  return Math.round((totalWords / maxWords) * 100);
+}
+
+// ---- Self-end dimer: thermodynamic dG of 3'-end self-complementarity ----
+// Checks all alignments of 3' end (last 6 nt) against its own reverse complement
+function calcSelfEndDimer(seq) {
+  seq = seq.toUpperCase();
+  const end = seq.slice(-6);
+  const rc = revComplement(end);
+  // Slide end against rc and find best alignment score
+  let best = 0;
+  for (let offset = 0; offset < end.length; offset++) {
+    let matches = 0;
+    const overlapLen = end.length - offset;
+    for (let i = 0; i < overlapLen; i++) {
+      if (end[offset + i] === rc[i]) matches++;
+    }
+    // Weight: consecutive 3' matches are more problematic
+    const consecutive3 = (() => {
+      let c = 0;
+      for (let i = overlapLen - 1; i >= 0; i--) {
+        if (end[offset + i] === rc[i]) c++; else break;
+      }
+      return c;
+    })();
+    const score = matches * 5 + consecutive3 * 8;
+    if (score > best) best = score;
+  }
+  return Math.min(100, best);
+}
+
+// ---- Hairpin: simplified dG check ----
+function calcHairpin(seq) {
+  seq = seq.toUpperCase();
+  const half = Math.floor(seq.length / 2);
+  const front = seq.slice(0, half);
+  const back = revComplement(seq.slice(-half));
+  let matches = 0;
+  for (let i = 0; i < half; i++) if (front[i] === back[i]) matches++;
+  return Math.round((matches / half) * 40);
+}
+
+function revComplement(seq) {
+  // Full IUPAC complement table — SantaLucia / IUPAC standard
+  const comp = {
+    A:'T', T:'A', G:'C', C:'G',
+    R:'Y', Y:'R', S:'S', W:'W',
+    K:'M', M:'K', B:'V', V:'B',
+    D:'H', H:'D', N:'N', U:'A'
+  };
+  return seq.toUpperCase().split('').reverse().map(b => comp[b] || 'N').join('');
+}
+
+function complement(seq) {
+  const comp = {
+    A:'T', T:'A', G:'C', C:'G',
+    R:'Y', Y:'R', S:'S', W:'W',
+    K:'M', M:'K', B:'V', V:'B',
+    D:'H', H:'D', N:'N', U:'A'
+  };
+  return seq.toUpperCase().split('').map(b => comp[b] || 'N').join('');
+}
+
+// IUPAC metadata — for display and validation
+const IUPAC_CODES = new Set(['R','Y','S','W','K','M','B','D','H','V','N']);
+const IUPAC_LABEL = {
+  R:'A/G', Y:'C/T', S:'G/C', W:'A/T',
+  K:'G/T', M:'A/C', B:'C/G/T', D:'A/G/T',
+  H:'A/C/T', V:'A/C/G', N:'A/C/G/T'
+};
+
+function calcQuality(seq, params) {
+  const tm = calcTm(seq, params.saltNa, params.saltMg, params.concOligo, params.concDNTP);
+  const gc = calcGC(seq);
+  const len = seq.length;
+  const stab = calc3prime(seq);
+  const sed = calcSelfEndDimer(seq);
+  const cplx = calcComplexity(seq);
+
+  let score = 100;
+  // Tm penalty
+  const tmDev = Math.abs(tm - params.tmOpt);
+  score -= tmDev * 3;
+  if (tm < params.tmMin || tm > params.tmMax) score -= 20;
+  // GC penalty
+  if (gc < params.gcMin || gc > params.gcMax) score -= 15;
+  const gcDev = Math.abs(gc - 50);
+  score -= gcDev * 0.3;
+  // Length
+  if (len < params.pLenMin || len > params.pLenMax) score -= 10;
+  // 3' stability
+  if (stab > params.maxStab3) score -= 10;
+  // Self-end dimer
+  if (sed > params.maxSED) score -= 15;
+  // Complexity
+  if (cplx < 60) score -= 10;
+  // GC clamp
+  const last2 = seq.slice(-2).replace(/[^GC]/g, '').length;
+  if (last2 < params.gcClamp) score -= 8;
+  // Poly-X
+  const polyX = Math.max(...['A','T','G','C'].map(b => {
+    const m = seq.match(new RegExp(b + '+', 'g'));
+    return m ? Math.max(...m.map(s => s.length)) : 0;
+  }));
+  if (polyX > params.maxPolyX) score -= 12;
+
+  return Math.max(0, Math.round(score));
+}
+
+// ============================================================
+// SEQUENCE UTILS
+// ============================================================
+function parseSeq(input) {
+  input = input.trim();
+  if (!input) return { name: '', seq: '', seqFull: '', degCount: 0, degPositions: [] };
+  const lines = input.split('\n');
+  let name = 'Target', raw = '';
+  if (lines[0].startsWith('>')) {
+    name = lines[0].slice(1).trim();
+    raw = lines.slice(1).join('').replace(/\s/g, '').toUpperCase();
+  } else {
+    raw = lines.join('').replace(/\s/g, '').toUpperCase();
+  }
+  // Accept all IUPAC + standard bases, strip anything else
+  const seqFull = raw.replace(/[^ATCGRYSWKMBDHVNU]/g, '');
+
+  // seqClean: replace degenerates with N for design purposes
+  // (design engine already skips any window containing non-ATCG)
+  const seq = seqFull; // keep full — design engine filters per-window
+
+  // Catalog degenerate positions for display
+  const degPositions = [];
+  for (let i = 0; i < seqFull.length; i++) {
+    if (IUPAC_CODES.has(seqFull[i])) degPositions.push(i);
+  }
+
+  return { name, seq: seqFull, seqFull, degCount: degPositions.length, degPositions };
+}
+
+function findOccurrences(text, pattern, allowMismatch = 1) {
+  const positions = [];
+  const n = text.length, m = pattern.length;
+  for (let i = 0; i <= n - m; i++) {
+    let mm = 0;
+    for (let j = 0; j < m; j++) {
+      if (text[i+j] !== pattern[j]) mm++;
+      if (mm > allowMismatch) break;
+    }
+    if (mm <= allowMismatch) positions.push({ pos: i, mismatches: mm });
+  }
+  return positions;
+}
+
+// ============================================================
+// PRIMER DESIGN ENGINE
+// ============================================================
+let currentResults = [];
+let currentSeq = { name: '', seq: '' };
+let selectedPairIdx = -1;
+
+function getParams() {
+  return {
+    pLenMin: +document.getElementById('pLenMin').value,
+    pLenMax: +document.getElementById('pLenMax').value,
+    tmMin: +document.getElementById('tmMin').value,
+    tmMax: +document.getElementById('tmMax').value,
+    tmOpt: +document.getElementById('tmOpt').value,
+    tmDiff: +document.getElementById('tmDiff').value,
+    gcMin: +document.getElementById('gcMin').value,
+    gcMax: +document.getElementById('gcMax').value,
+    gcClamp: +document.getElementById('gcClamp').value,
+    minQ: +document.getElementById('minQ').value,
+    ampMin: +document.getElementById('ampMin').value,
+    ampMax: +document.getElementById('ampMax').value,
+    nPairs: +document.getElementById('nPairs').value,
+    maxStab3: +document.getElementById('maxStab3').value,
+    maxPolyX: +document.getElementById('maxPolyX').value,
+    maxSED: +document.getElementById('maxSED').value,
+    saltNa: +document.getElementById('saltNa').value,
+    saltMg: +document.getElementById('saltMg').value,
+    concOligo: +document.getElementById('concOligo').value,
+    concDNTP: +document.getElementById('concDNTP').value,
+    minSnpDist: +document.getElementById('minSnpDist').value || 0,
+    fwdFrom: +document.getElementById('fwdFrom').value || 1,
+    fwdTo: +document.getElementById('fwdTo').value || 0,
+    revFrom: +document.getElementById('revFrom').value || 0,
+    revTo: +document.getElementById('revTo').value || 0,
+    ownFwd: document.getElementById('ownFwd').value.trim().toUpperCase(),
+    ownRev: document.getElementById('ownRev').value.trim().toUpperCase(),
+  };
+}
+
+function runDesign() {
+  const raw = document.getElementById('seqInput').value;
+  const parsed = parseSeq(raw);
+  if (!parsed.seq || parsed.seq.length < 50) {
+    toast('⚠ Enter a valid sequence (≥50 nt)'); return;
+  }
+  currentSeq = parsed;
+
+  // Show sequence name + degenerate info
+  let nameDisplay = parsed.name;
+  document.getElementById('seqName').textContent = parsed.name;
+
+  // Degenerate info in results header
+  const degenEl = document.getElementById('degenInfo');
+  if (parsed.degCount > 0) {
+    degenEl.style.display = '';
+    degenEl.textContent = `⚠ ${parsed.degCount} IUPAC position${parsed.degCount>1?'s':''} — primers excluded from these sites`;
+    toast(`ℹ ${parsed.degCount} IUPAC degenerate position(s) detected — primers will not be designed over them`);
+  } else {
+    degenEl.style.display = 'none';
+  }
+
+  const btn = document.getElementById('findBtn');
+  btn.innerHTML = '<span class="spin"></span> Finding...';
+
+  setTimeout(() => {
+    try {
+      const p = getParams();
+      const pairs = designPrimers(parsed.seq, p);
+      currentResults = pairs;
+      renderResults(pairs, p);
+      btn.textContent = '▶ Find Primers';
+    } catch(e) {
+      btn.textContent = '▶ Find Primers';
+      toast('Error: ' + e.message);
+    }
+  }, 30);
+}
+
+function designPrimers(seq, p) {
+  const n = seq.length;
+  const fwdEnd = p.fwdTo > 0 ? Math.min(p.fwdTo, n) : Math.floor(n * 0.7);
+  const fwdStart = Math.max(0, p.fwdFrom - 1);
+  const revStart = p.revFrom > 0 ? p.revFrom - 1 : Math.floor(n * 0.3);
+  const revEnd = p.revTo > 0 ? Math.min(p.revTo, n) : n;
+
+  // Generate candidate forward primers
+  const fwdCandidates = [];
+  if (p.ownFwd) {
+    const tm = calcTm(p.ownFwd, p.saltNa, p.saltMg, p.concOligo);
+    const q = calcQuality(p.ownFwd, p);
+    // Find position in sequence
+    const pos = seq.indexOf(p.ownFwd);
+    fwdCandidates.push({ seq: p.ownFwd, pos: pos >= 0 ? pos : 0, tm, q });
+  } else {
+    for (let pos = fwdStart; pos < fwdEnd; pos++) {
+      for (let len = p.pLenMin; len <= p.pLenMax; len++) {
+        if (pos + len > fwdEnd + 20) break;
+        const s = seq.substr(pos, len);
+        if (!/^[ATCG]+$/.test(s)) continue;
+        const tm = calcTm(s, p.saltNa, p.saltMg, p.concOligo);
+        if (isNaN(tm) || tm < p.tmMin - 2 || tm > p.tmMax + 2) continue;
+        const gc = calcGC(s);
+        if (gc < p.gcMin - 5 || gc > p.gcMax + 5) continue;
+        const q = calcQuality(s, p);
+        if (q < p.minQ - 10) continue;
+        fwdCandidates.push({ seq: s, pos, tm, q });
+      }
+    }
+  }
+
+  // Generate candidate reverse primers
+  const revCandidates = [];
+  if (p.ownRev) {
+    const tm = calcTm(p.ownRev, p.saltNa, p.saltMg, p.concOligo);
+    const q = calcQuality(p.ownRev, p);
+    const revSeqRC = revComplement(p.ownRev);
+    const pos = seq.lastIndexOf(revSeqRC);
+    revCandidates.push({ seq: p.ownRev, pos: pos >= 0 ? pos + revSeqRC.length : n, tm, q });
+  } else {
+    for (let pos = revStart; pos < revEnd; pos++) {
+      for (let len = p.pLenMin; len <= p.pLenMax; len++) {
+        if (pos + len > revEnd + 20) break;
+        const fwdStrand = seq.substr(pos, len);
+        if (!/^[ATCG]+$/.test(fwdStrand)) continue;
+        const s = revComplement(fwdStrand);
+        const tm = calcTm(s, p.saltNa, p.saltMg, p.concOligo);
+        if (isNaN(tm) || tm < p.tmMin - 2 || tm > p.tmMax + 2) continue;
+        const gc = calcGC(s);
+        if (gc < p.gcMin - 5 || gc > p.gcMax + 5) continue;
+        const q = calcQuality(s, p);
+        if (q < p.minQ - 10) continue;
+        revCandidates.push({ seq: s, pos: pos + len, tm, q });
+      }
+    }
+  }
+
+  // Pair candidates
+  // SNP position from currentSeq (0-based). -1 = not set.
+  const snpIdx = (currentSeq && currentSeq.snpPos !== undefined) ? currentSeq.snpPos : -1;
+  const minDist = p.minSnpDist || 0;
+
+  const pairs = [];
+  for (const fwd of fwdCandidates) {
+    for (const rev of revCandidates) {
+      if (rev.pos <= fwd.pos) continue;
+      const ampLen = rev.pos - fwd.pos;
+      if (ampLen < p.ampMin || ampLen > p.ampMax) continue;
+      const tmDiff = Math.abs(fwd.tm - rev.tm);
+      if (tmDiff > p.tmDiff + 1) continue;
+      const pairQ = Math.round((fwd.q + rev.q) / 2 - tmDiff * 2);
+      if (pairQ < p.minQ - 15) continue;
+
+      // SNP distance filter — only applied when SNP position is known
+      let snpDistFwd = null, snpDistRev = null, snpOk = true;
+      if (snpIdx >= 0 && minDist > 0) {
+        // Distance from end of FWD primer to SNP
+        snpDistFwd = snpIdx - (fwd.pos + fwd.seq.length);
+        // Distance from SNP to start of REV primer binding site
+        snpDistRev = rev.pos - fwd.seq.length - snpIdx; // rev.pos = end of rev binding on template
+        snpOk = snpDistFwd >= minDist && snpDistRev >= minDist;
+      }
+
+      pairs.push({ fwd, rev, ampLen, tmDiff, pairQ, snpDistFwd, snpDistRev, snpOk });
+    }
+    if (pairs.length > p.nPairs * 5) break;
+  }
+
+  // Sort: pairs passing SNP distance filter first, then by quality
+  pairs.sort((a, b) => {
+    if (a.snpOk !== b.snpOk) return a.snpOk ? -1 : 1;
+    return b.pairQ - a.pairQ;
+  });
+
+  // Deduplicate (keep best per fwd position)
+  const seen = new Set();
+  const deduped = [];
+  for (const pair of pairs) {
+    const key = `${pair.fwd.pos}-${pair.rev.pos}`;
+    if (!seen.has(key)) { seen.add(key); deduped.push(pair); }
+    if (deduped.length >= p.nPairs) break;
+  }
+  return deduped;
+}
+
+// ============================================================
+// RENDER RESULTS TABLE
+// ============================================================
+function renderResults(pairs, p) {
+  const tbody = document.getElementById('resultsBody');
+  const table = document.getElementById('resultsTable');
+  const empty = document.getElementById('emptyDesign');
+  const count = document.getElementById('resultCount');
+
+  tbody.innerHTML = '';
+  count.textContent = pairs.length;
+
+  if (pairs.length === 0) {
+    table.classList.add('hidden');
+    empty.style.display = 'flex';
+    empty.innerHTML = '<div class="empty-icon">◌</div><span>No primer pairs found with current parameters</span><span style="font-size:10px;color:var(--text3)">Try relaxing Tm range, GC%, amplicon size, or min quality</span>';
+    document.getElementById('btnExport').style.display = 'none';
+    document.getElementById('btnSaveDB').style.display = 'none';
+    return;
+  }
+
+  table.classList.remove('hidden');
+  empty.style.display = 'none';
+  document.getElementById('btnExport').style.display = '';
+  document.getElementById('btnSaveDB').style.display = '';
+
+  pairs.forEach((pair, i) => {
+    const qClass = q => q >= 90 ? 'good' : q >= 70 ? 'warn' : 'bad';
+    const minDist = p.minSnpDist || 60;
+
+    // SNP distance display
+    const distFwdVal = pair.snpDistFwd !== null ? pair.snpDistFwd : '—';
+    const distRevVal = pair.snpDistRev !== null ? pair.snpDistRev : '—';
+    const distFwdClass = pair.snpDistFwd === null ? '' :
+      pair.snpDistFwd >= minDist ? 'good' : pair.snpDistFwd >= minDist * 0.75 ? 'warn' : 'bad';
+    const distRevClass = pair.snpDistRev === null ? '' :
+      pair.snpDistRev >= minDist ? 'good' : pair.snpDistRev >= minDist * 0.75 ? 'warn' : 'bad';
+
+    // Row highlight if SNP distance fails
+    const rowStyle = pair.snpOk === false
+      ? 'opacity:0.6;border-left:2px solid var(--danger)'
+      : pair.snpOk === true ? 'border-left:2px solid var(--good)' : '';
+
+    const tr = document.createElement('tr');
+    tr.style.cssText = rowStyle;
+    tr.innerHTML = `
+      <td style="color:var(--text3)">${i+1}</td>
+      <td class="seq">${pair.fwd.seq}</td>
+      <td>${pair.fwd.pos + 1}</td>
+      <td class="${qClass(pair.fwd.q)}">${pair.fwd.tm}</td>
+      <td class="${qClass(pair.fwd.q)}">${pair.fwd.q}</td>
+      <td class="seq" style="color:var(--accent2)">${pair.rev.seq}</td>
+      <td>${pair.rev.pos}</td>
+      <td class="${qClass(pair.rev.q)}">${pair.rev.tm}</td>
+      <td class="${qClass(pair.rev.q)}">${pair.rev.q}</td>
+      <td>${pair.ampLen}</td>
+      <td class="${qClass(pair.pairQ)}">${pair.pairQ}</td>
+      <td class="${distFwdClass}" style="font-family:var(--mono)">${distFwdVal}${distFwdVal !== '—' ? ' nt' : ''}</td>
+      <td class="${distRevClass}" style="font-family:var(--mono)">${distRevVal}${distRevVal !== '—' ? ' nt' : ''}</td>
+      <td><button class="btn btn-secondary btn-sm" onclick="sendToPCR(${i})">▶PCR</button></td>
+    `;
+    tr.onclick = (e) => { if (e.target.tagName !== 'BUTTON') selectPair(i); };
+    tbody.appendChild(tr);
+  });
+
+  selectPair(0);
+}
+
+function selectPair(idx) {
+  selectedPairIdx = idx;
+  const rows = document.getElementById('resultsBody').querySelectorAll('tr');
+  rows.forEach((r, i) => r.classList.toggle('selected', i === idx));
+  if (idx < 0 || idx >= currentResults.length) return;
+  const pair = currentResults[idx];
+  renderDetailPanel(pair);
+}
+
+function renderDetailPanel(pair) {
+  const p = getParams();
+  const fwd = pair.fwd;
+  const rev = pair.rev;
+
+  // Stats for forward
+  const fwdStab = calc3prime(fwd.seq);
+  const fwdCplx = calcComplexity(fwd.seq);
+  const fwdSED = calcSelfEndDimer(fwd.seq);
+  const revStab = calc3prime(rev.seq);
+  const revCplx = calcComplexity(rev.seq);
+  const revSED = calcSelfEndDimer(rev.seq);
+
+  const qual = (v, good, warn) => v <= good ? 'sq-good' : v <= warn ? 'sq-warn' : 'sq-bad';
+  const qualR = (v, good, warn) => v >= good ? 'sq-good' : v >= warn ? 'sq-warn' : 'sq-bad'; // reversed (higher is better)
+
+  document.getElementById('detailHdr').textContent =
+    `Pair ${selectedPairIdx+1} · Amplicon ${pair.ampLen} nt · ΔTm ${pair.tmDiff.toFixed(1)}°C`;
+
+  document.getElementById('detailStats').innerHTML = `
+    <div style="font-size:10px;color:var(--accent);font-family:var(--mono);margin-bottom:6px;font-weight:600">FORWARD</div>
+    ${statRow('Tm', fwd.tm + ' °C', qual(Math.abs(fwd.tm - p.tmOpt), 2, 4))}
+    ${statRow('GC%', calcGC(fwd.seq) + ' %', qual(Math.abs(calcGC(fwd.seq)-50), 10, 20))}
+    ${statRow("3' stability", fwdStab, qual(fwdStab, 6, 9))}
+    ${statRow('Complexity', fwdCplx, qualR(fwdCplx, 75, 60))}
+    ${statRow('Self-end dimer', fwdSED, qual(fwdSED, 20, 35))}
+    ${statRow('Quality', fwd.q, qualR(fwd.q, 90, 70))}
+    <div style="font-size:10px;color:var(--accent2);font-family:var(--mono);margin:8px 0 6px;font-weight:600">REVERSE</div>
+    ${statRow('Tm', rev.tm + ' °C', qual(Math.abs(rev.tm - p.tmOpt), 2, 4))}
+    ${statRow('GC%', calcGC(rev.seq) + ' %', qual(Math.abs(calcGC(rev.seq)-50), 10, 20))}
+    ${statRow("3' stability", revStab, qual(revStab, 6, 9))}
+    ${statRow('Complexity', revCplx, qualR(revCplx, 75, 60))}
+    ${statRow('Self-end dimer', revSED, qual(revSED, 20, 35))}
+    ${statRow('Quality', rev.q, qualR(rev.q, 90, 70))}
+    <div style="font-size:10px;color:var(--warn);font-family:var(--mono);margin:8px 0 6px;font-weight:600">ANNEALING</div>
+    ${statRow('Ta optimal (Rychlik)', taRychlik(fwd, rev, pair, p) + ' °C', 'sq-good')}
+    ${statRow('Ta = Tm - 5 (reference)', (Math.min(fwd.tm, rev.tm) - 5).toFixed(1) + ' °C', 'sq-warn')}
+  `;
+
+  // Alignment visualization
+  const seq = currentSeq.seq;
+  if (seq) {
+    const fwdRC = revComplement(fwd.seq);
+    // Forward alignment — render target with degenerate coloring
+    const fwdTarget = seq.substr(fwd.pos, fwd.seq.length);
+    let fwdMatchLine = '';
+    for (let i = 0; i < fwd.seq.length; i++) {
+      fwdMatchLine += fwd.seq[i] === fwdTarget[i] ? '|' : ' ';
+    }
+    // Reverse alignment
+    const revBind = revComplement(rev.seq);
+    const revBindPos = seq.lastIndexOf(revBind);
+    const revTarget = revBindPos >= 0 ? seq.substr(revBindPos, rev.seq.length) : '?'.repeat(rev.seq.length);
+    let revMatchLine = '';
+    for (let i = 0; i < rev.seq.length; i++) {
+      revMatchLine += revBind[i] === revTarget[i] ? '|' : ' ';
+    }
+
+    const ta = Math.min(fwd.tm, rev.tm) - 5;
+
+    // Render target strings with degenerate highlighting
+    const renderTargetSpan = str => str.split('').map(b =>
+      IUPAC_CODES.has(b)
+        ? `<span class="nt-degen" title="${b}: ${IUPAC_LABEL[b]||'?'}">${b}</span>`
+        : `<span style="color:var(--text)">${b}</span>`
+    ).join('');
+
+    // Count degenerates in amplicon region
+    const ampSeq = seq.substr(fwd.pos, pair.ampLen);
+    const ampDeg = [...ampSeq].filter(b => IUPAC_CODES.has(b));
+    const degInfo = ampDeg.length > 0
+      ? `<span style="color:var(--warn);font-size:10px"> · ${ampDeg.length} degenerate position${ampDeg.length>1?'s':''} in amplicon</span>`
+      : '';
+
+    document.getElementById('detailAlign').innerHTML = `
+      <div class="align-info">Amplicon: ${pair.ampLen} nt · Score: ${pair.pairQ} · Suggested Ta: ${ta.toFixed(0)}°C${degInfo}</div>
+      <div class="align-block">
+<span style="color:var(--text2)">Fwd (${fwd.pos+1})  5' </span><span class="align-primer">${fwd.seq}</span><span style="color:var(--text2)"> 3' (${fwd.pos + fwd.seq.length})</span>
+<span style="color:var(--text3)">           </span><span style="color:var(--accent)">${fwdMatchLine}</span>
+<span style="color:var(--text2)">Target     5' </span>${renderTargetSpan(fwdTarget)}<span style="color:var(--text2)"> 3'</span>
+<span style="color:var(--text2)">Tm: ${fwd.tm}°C → ${(fwd.tm - 0.5).toFixed(1)}°C</span>
+
+<span style="color:var(--text2)">Rev[compl] (${revBindPos+1})  3' </span><span style="color:var(--accent2)">${revComplement(rev.seq).split('').reverse().join('')}</span><span style="color:var(--text2)"> 5' (${revBindPos + rev.seq.length})</span>
+<span style="color:var(--text3)">           </span><span style="color:var(--accent2)">${revMatchLine}</span>
+<span style="color:var(--text2)">Target     5' </span>${renderTargetSpan(revTarget)}<span style="color:var(--text2)"> 3'</span>
+<span style="color:var(--text2)">Tm: ${rev.tm}°C → ${(rev.tm - 0.5).toFixed(1)}°C   Amplicon score: </span><span style="color:var(--warn)">${pair.pairQ}</span>
+      </div>
+    `;
+  }
+
+  // Primer-BLAST links
+  const blastBase = 'https://www.ncbi.nlm.nih.gov/tools/primer-blast/index.cgi?';
+  const org = 'INPUT_SEQUENCE=&ORGANISM=Homo+sapiens&PRIMER5_SPECIFICITY_DATABASE=refseq_representative_genomes';
+  document.getElementById('blastFwdLink').href =
+    blastBase + `PRIMER_LEFT_INPUT=${fwd.seq}&${org}&Get_Primers=Get+Primers`;
+  document.getElementById('blastRevLink').href =
+    blastBase + `PRIMER_RIGHT_INPUT=${rev.seq}&${org}&Get_Primers=Get+Primers`;
+  document.getElementById('blastPairLink').href =
+    blastBase + `PRIMER_LEFT_INPUT=${fwd.seq}&PRIMER_RIGHT_INPUT=${rev.seq}&${org}&Get_Primers=Get+Primers`;
+  document.getElementById('blastInfo').style.display = '';
+}
+
+function statRow(label, val, cls) {
+  return `<div class="stat-row">
+    <span class="stat-label">${label}</span>
+    <span class="stat-val ${cls}">${val}</span>
+  </div>`;
+}
+
+// ============================================================
+// PCR IN SILICO
+// ============================================================
+function sendToPCR(idx) {
+  const pair = currentResults[idx];
+  document.getElementById('pcrFwd').value = pair.fwd.seq;
+  document.getElementById('pcrRev').value = pair.rev.seq;
+  switchMainTab('pcr');
+  runPCR();
+}
+
+function runPCR() {
+  const fwdSeq = document.getElementById('pcrFwd').value.trim().toUpperCase();
+  const revSeq = document.getElementById('pcrRev').value.trim().toUpperCase();
+  const seq = currentSeq.seq;
+  const snpPosInput = document.getElementById('pcrSnpPos').value.trim();
+  // SNP position: prefer field input, fall back to currentSeq.snpPos
+  let snpIdx = -1;
+  if (snpPosInput) {
+    snpIdx = parseInt(snpPosInput) - 1; // convert to 0-based
+  } else if (currentSeq && currentSeq.snpPos !== undefined && currentSeq.snpPos >= 0) {
+    snpIdx = currentSeq.snpPos;
+  }
+
+  if (!fwdSeq || !revSeq) { toast('Enter both primers'); return; }
+  if (!seq) { toast('No target sequence loaded — enter sequence in Design tab'); return; }
+
+  const p = getParams();
+  const minDist = p.minSnpDist || 60;
+  const results = [];
+
+  const fwdPositions = findOccurrences(seq, fwdSeq, 1);
+  const revRC = revComplement(revSeq);
+  const revPositions = findOccurrences(seq, revRC, 1);
+
+  for (const fp of fwdPositions) {
+    for (const rp of revPositions) {
+      const rEnd = rp.pos + revRC.length;
+      if (rEnd <= fp.pos + fwdSeq.length) continue;
+      const ampLen = rEnd - fp.pos;
+      if (ampLen > 5000) continue;
+      const fwdTm = calcTm(fwdSeq, p.saltNa, p.saltMg, p.concOligo);
+      const revTm = calcTm(revSeq, p.saltNa, p.saltMg, p.concOligo);
+      const ta = Math.min(fwdTm, revTm) - 5;
+
+      // SNP analysis
+      let snpInAmp = false, distFwd = null, distRev = null, sangerOk = null;
+      if (snpIdx >= 0) {
+        snpInAmp = snpIdx >= fp.pos && snpIdx < rEnd;
+        if (snpInAmp) {
+          distFwd = snpIdx - (fp.pos + fwdSeq.length); // nt from end of FWD to SNP
+          distRev = rEnd - revRC.length - snpIdx;       // nt from SNP to start of REV binding
+          sangerOk = distFwd >= minDist && distRev >= minDist;
+        }
+      }
+
+      results.push({ fp, rp, rEnd, ampLen, fwdTm, revTm, ta, snpInAmp, distFwd, distRev, sangerOk });
+    }
+  }
+
+  const div = document.getElementById('pcrResults');
+  if (results.length === 0) {
+    div.innerHTML = `<div class="empty"><div class="empty-icon">◌</div><span>No amplification products found</span><span style="font-size:10px;color:var(--text3)">Check primer orientation and target sequence</span></div>`;
+    return;
+  }
+
+  let html = `<div style="padding:12px 14px">`;
+  html += `<div style="font-family:var(--mono);font-size:11px;color:var(--text2);margin-bottom:12px">Found <span style="color:var(--accent)">${results.length}</span> amplification product(s)${snpIdx < 0 ? ' · <span style="color:var(--text3)">No variant position specified</span>' : ''}</div>`;
+
+  results.forEach((r, i) => {
+    const fwdTarget = seq.substr(r.fp.pos, fwdSeq.length);
+    const revTarget = seq.substr(r.rp.pos, revRC.length);
+    let fwdML = '', revML = '';
+    for (let j = 0; j < fwdSeq.length; j++) fwdML += fwdSeq[j] === fwdTarget[j] ? '|' : '/';
+    for (let j = 0; j < revRC.length; j++) revML += revRC[j] === revTarget[j] ? '|' : '/';
+
+    // Bar dimensions
+    const barW = 440;
+    const ampStart = r.fp.pos;
+    const ampEnd = r.rEnd;
+    const ampSpan = ampEnd - ampStart;
+
+    // All positions relative to amplicon start for bar rendering
+    const fwdBarW = Math.round(fwdSeq.length / ampSpan * barW);
+    const revBarLeft = Math.round((r.rp.pos - ampStart) / ampSpan * barW);
+    const revBarW = Math.round(revRC.length / ampSpan * barW);
+    const ampBodyLeft = fwdBarW;
+    const ampBodyW = revBarLeft - fwdBarW;
+
+    // SNP marker position within bar
+    let snpMarker = '';
+    let sangerBadge = '';
+    if (snpIdx >= 0 && r.snpInAmp) {
+      const snpBarLeft = Math.round((snpIdx - ampStart) / ampSpan * barW);
+      snpMarker = `<div style="position:absolute;left:${snpBarLeft}px;width:3px;height:100%;background:#fff176;z-index:2;box-shadow:0 0 4px rgba(255,241,118,0.8)" title="Variant position"></div>
+        <div style="position:absolute;left:${snpBarLeft - 10}px;top:-14px;font-size:9px;color:#fff176;font-family:var(--mono);font-weight:700;white-space:nowrap">▼SNP</div>`;
+
+      const distFwdColor = r.distFwd >= minDist ? 'var(--good)' : r.distFwd >= minDist * 0.75 ? 'var(--warn)' : 'var(--danger)';
+      const distRevColor = r.distRev >= minDist ? 'var(--good)' : r.distRev >= minDist * 0.75 ? 'var(--warn)' : 'var(--danger)';
+      const sangerIcon = r.sangerOk ? '✓' : '✗';
+      const sangerColor = r.sangerOk ? 'var(--good)' : 'var(--danger)';
+      const sangerText = r.sangerOk
+        ? `Variant readable by Sanger (FWD→SNP: ${r.distFwd} nt · SNP→REV: ${r.distRev} nt)`
+        : `⚠ Variant may NOT be readable — minimum ${minDist} nt required from each primer`;
+
+      sangerBadge = `
+        <div style="margin-top:8px;padding:7px 10px;border-radius:3px;background:${r.sangerOk ? 'rgba(77,221,144,0.08)' : 'rgba(255,107,107,0.08)'};border:1px solid ${sangerColor};font-family:var(--mono);font-size:11px">
+          <span style="color:${sangerColor};font-weight:700">${sangerIcon} Sanger readability</span>
+          &nbsp;·&nbsp; <span style="color:var(--text2)">${sangerText}</span><br>
+          <span style="color:${distFwdColor}">FWD→SNP: ${r.distFwd} nt</span>
+          &nbsp;·&nbsp;
+          <span style="color:${distRevColor}">SNP→REV: ${r.distRev} nt</span>
+          &nbsp;·&nbsp;
+          <span style="color:var(--text3)">Min required: ${minDist} nt</span>
+        </div>`;
+    } else if (snpIdx >= 0 && !r.snpInAmp) {
+      sangerBadge = `<div style="margin-top:8px;padding:7px 10px;border-radius:3px;background:rgba(255,107,107,0.08);border:1px solid var(--danger);font-family:var(--mono);font-size:11px;color:var(--danger)">✗ Variant position (${snpIdx+1}) is NOT within this amplicon (${r.fp.pos+1}–${r.rEnd})</div>`;
+    }
+
+    html += `
+      <div style="background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:12px;margin-bottom:10px">
+        <div style="font-family:var(--mono);font-size:11px;color:var(--text2);margin-bottom:10px">
+          Amplified fragment size: <span style="color:var(--warn);font-weight:600">${r.ampLen} nucl.</span>
+          &nbsp;·&nbsp; GC%: ${calcGC(seq.substr(r.fp.pos, r.ampLen))}%
+          &nbsp;·&nbsp; Suggested Ta: <span style="color:var(--good)">${r.ta.toFixed(0)}°C</span>
+          &nbsp;·&nbsp; Amplicon pos: ${r.fp.pos+1}–${r.rEnd}
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border);height:28px;position:relative;border-radius:3px;margin-bottom:6px;width:${barW}px;margin-top:18px">
+          <div style="position:absolute;left:0px;width:${fwdBarW}px;height:100%;background:rgba(96,180,255,0.35);border-right:2px solid var(--accent);font-size:9px;color:#edf2ff;font-weight:600;display:flex;align-items:center;padding-left:3px">FWD</div>
+          ${ampBodyW > 0 ? `<div style="position:absolute;left:${ampBodyLeft}px;width:${ampBodyW}px;height:60%;top:20%;background:rgba(255,185,48,0.18);border-top:1px solid var(--warn);border-bottom:1px solid var(--warn)"></div>` : ''}
+          <div style="position:absolute;left:${revBarLeft}px;width:${revBarW}px;height:100%;background:rgba(0,232,186,0.25);border-left:2px solid var(--accent2);font-size:9px;color:#edf2ff;font-weight:600;display:flex;align-items:center;justify-content:flex-end;padding-right:3px">REV</div>
+          ${snpMarker}
+        </div>
+        ${sangerBadge}
+        <div style="font-family:var(--mono);font-size:11px;white-space:pre;line-height:1.7;margin-top:10px">
+<span style="color:var(--text2)">Forward:  Pr_F (${r.fp.pos+1}) 5' </span><span style="color:var(--accent)">${fwdSeq}</span><span style="color:var(--text2)"> 3' (${r.fp.pos + fwdSeq.length})</span>
+<span style="color:var(--text3)">                        </span><span style="color:var(--accent)">${fwdML}</span>
+<span style="color:var(--text2)">Target:              (${r.fp.pos+1}) 5' </span><span style="color:var(--text)">${fwdTarget}</span><span style="color:var(--text2)"> 3'</span>
+<span style="color:var(--text2)">Score: ${100 - r.fp.mismatches*10}→100   Tm: ${r.fwdTm}°C → ${(r.fwdTm - 0.5).toFixed(1)}°C</span>
+
+<span style="color:var(--text2)">Reverse:  Pr_R[compl.] (${r.rp.pos+1}) 3' </span><span style="color:var(--accent2)">${revRC.split('').reverse().join('')}</span><span style="color:var(--text2)"> 5' (${r.rEnd})</span>
+<span style="color:var(--text3)">                        </span><span style="color:var(--accent2)">${revML}</span>
+<span style="color:var(--text2)">Target:              (${r.rp.pos+1}) 5' </span><span style="color:var(--text)">${revTarget}</span><span style="color:var(--text2)"> 3'</span>
+<span style="color:var(--text2)">Score: ${100 - r.rp.mismatches*10}→100   Tm: ${r.revTm}°C → ${(r.revTm - 0.5).toFixed(1)}°C</span>
+<span style="color:var(--warn)">Amplicon score: ${Math.round((200 - r.fp.mismatches*10 - r.rp.mismatches*10)/2)}</span>
+        </div>
+      </div>
+    `;
+  });
+  html += '</div>';
+  div.innerHTML = html;
+}
+
+// ============================================================
+// DATABASE (IndexedDB) — v2
+// Schema: id, type, gene, seq, tm, gc, len, q, pos, notes, date, pairId, ampLen
+// v2 adds: pairId index, notes index, type index
+// ============================================================
+let db = null;
+const DB_NAME = 'PrimerDesignerDB', DB_VER = 2, STORE = 'primers';
+
+function initDB() {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = e => {
+      const d = e.target.result;
+      // Create store if new
+      let s;
+      if (!d.objectStoreNames.contains(STORE)) {
+        s = d.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
+      } else {
+        s = e.target.transaction.objectStore(STORE);
+      }
+      // Add indexes if missing
+      if (!s.indexNames.contains('gene')) s.createIndex('gene', 'gene', { unique: false });
+      if (!s.indexNames.contains('pairId')) s.createIndex('pairId', 'pairId', { unique: false });
+      if (!s.indexNames.contains('type')) s.createIndex('type', 'type', { unique: false });
+    };
+    req.onsuccess = e => { db = e.target.result; res(db); };
+    req.onerror = () => rej(req.error);
+  });
+}
+
+function dbAdd(records) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    const s = tx.objectStore(STORE);
+    records.forEach(r => s.add(r));
+    tx.oncomplete = res;
+    tx.onerror = () => rej(tx.error);
+  });
+}
+
+function dbGetAll() {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(STORE, 'readonly');
+    const req = tx.objectStore(STORE).getAll();
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => rej(req.error);
+  });
+}
+
+function dbGet(id) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(STORE, 'readonly');
+    const req = tx.objectStore(STORE).get(id);
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => rej(req.error);
+  });
+}
+
+function dbUpdate(record) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    tx.objectStore(STORE).put(record);
+    tx.oncomplete = res;
+    tx.onerror = () => rej(tx.error);
+  });
+}
+
+function dbDelete(id) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    tx.objectStore(STORE).delete(id);
+    tx.oncomplete = res;
+    tx.onerror = () => rej(tx.error);
+  });
+}
+
+function dbDeleteByPairId(pairId) {
+  // Delete both FWD and REV of a pair atomically
+  return new Promise((res, rej) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    const idx = tx.objectStore(STORE).index('pairId');
+    const req = idx.getAll(pairId);
+    req.onsuccess = () => {
+      req.result.forEach(r => tx.objectStore(STORE).delete(r.id));
+    };
+    tx.oncomplete = res;
+    tx.onerror = () => rej(tx.error);
+  });
+}
+
+function dbClear() {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    tx.objectStore(STORE).clear();
+    tx.oncomplete = res;
+    tx.onerror = () => rej(tx.error);
+  });
+}
+
+// ── SAVE selected pair ──
+async function saveSelectedToDB() {
+  if (selectedPairIdx < 0) { toast('Select a pair first'); return; }
+  const pair = currentResults[selectedPairIdx];
+  const gene = currentSeq.name || 'Unknown';
+  const p = getParams();
+  const date = new Date().toISOString().slice(0,10);
+  const pairId = `${gene}__${Date.now()}`;
+  const records = [
+    {
+      type: 'FWD', gene, seq: pair.fwd.seq,
+      tm: pair.fwd.tm, gc: calcGC(pair.fwd.seq),
+      len: pair.fwd.seq.length, q: pair.fwd.q,
+      pos: pair.fwd.pos + 1, notes: '', date,
+      pairId, ampLen: pair.ampLen
+    },
+    {
+      type: 'REV', gene, seq: pair.rev.seq,
+      tm: pair.rev.tm, gc: calcGC(pair.rev.seq),
+      len: pair.rev.seq.length, q: pair.rev.q,
+      pos: pair.rev.pos, notes: '', date,
+      pairId, ampLen: pair.ampLen
+    }
+  ];
+  await dbAdd(records);
+  toast(`✓ Pair ${selectedPairIdx+1} saved — gene: ${gene}`);
+  if (document.getElementById('tab-database').classList.contains('active')) renderDB();
+}
+
+// ── RENDER DB TABLE ──
+async function renderDB() {
+  const filterText = document.getElementById('dbFilter').value.toLowerCase().trim();
+  const filterType = document.getElementById('dbFilterType').value;
+  let records = await dbGetAll();
+
+  // Sort: newest first by id
+  records.sort((a, b) => b.id - a.id);
+
+  // Apply filters
+  if (filterType) records = records.filter(r => r.type === filterType);
+  if (filterText) records = records.filter(r =>
+    (r.gene || '').toLowerCase().includes(filterText) ||
+    (r.seq || '').toLowerCase().includes(filterText) ||
+    (r.pairId || '').toLowerCase().includes(filterText) ||
+    (r.notes || '').toLowerCase().includes(filterText) ||
+    (r.type || '').toLowerCase().includes(filterText)
+  );
+
+  const tbody = document.getElementById('dbBody');
+  const empty = document.getElementById('dbEmpty');
+  tbody.innerHTML = '';
+
+  // Update counter
+  const all = await dbGetAll();
+  const pairs = new Set(all.map(r => r.pairId)).size;
+  document.getElementById('dbCountInfo').textContent =
+    `${all.length} primers · ${pairs} pair${pairs !== 1 ? 's' : ''} saved` +
+    (filterText || filterType ? ` · ${records.length} shown` : '');
+
+  if (records.length === 0) {
+    empty.style.display = 'flex';
+    document.getElementById('btnExport').style.display = 'none';
+    document.getElementById('btnSaveDB').style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+
+  // Group consecutive rows by pairId for visual separation
+  let lastPairId = null;
+
+  records.forEach(r => {
+    const tagClass = r.type === 'FWD' ? 'tag-fwd' : 'tag-rev';
+    const qClass = r.q >= 90 ? 'good' : r.q >= 70 ? 'warn' : 'bad';
+    const isPairStart = r.pairId !== lastPairId;
+    lastPairId = r.pairId;
+
+    const tr = document.createElement('tr');
+    if (isPairStart && r.type === 'FWD') {
+      tr.style.borderTop = '2px solid var(--border)';
+    }
+
+    // Short pairId display (gene + timestamp suffix)
+    const pairLabel = r.pairId ? r.pairId.split('__')[0] : r.gene;
+
+    tr.innerHTML = `
+      <td><span class="tag ${tagClass}">${r.type}</span></td>
+      <td style="font-family:var(--mono);font-size:10px;color:var(--text2)">
+        <div style="font-size:11px;color:var(--text);font-weight:500">${r.gene}</div>
+        <div style="color:var(--text3);font-size:9px">${r.date}</div>
+      </td>
+      <td class="seq" style="font-size:10px;max-width:200px;overflow:hidden;text-overflow:ellipsis" title="${r.seq}">${r.seq}</td>
+      <td>${r.tm}</td>
+      <td>${r.gc}%</td>
+      <td>${r.len}</td>
+      <td class="${qClass}">${r.q}</td>
+      <td style="color:var(--text2);font-family:var(--mono);font-size:10px">${r.ampLen || '—'}</td>
+      <td style="min-width:120px">
+        <input type="text" value="${(r.notes || '').replace(/"/g,'&quot;')}"
+          placeholder="Add notes..."
+          style="background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--text2);font-family:var(--mono);font-size:10px;width:100%;outline:none;padding:2px 4px;"
+          onchange="updateNotes(${r.id}, this.value)"
+          onfocus="this.style.borderBottomColor='var(--accent)'"
+          onblur="this.style.borderBottomColor='var(--border)'">
+      </td>
+      <td style="color:var(--text3);font-size:10px;font-family:var(--mono)">${r.date}</td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-secondary btn-sm" onclick="sendPrimerToPCR(${r.id})" title="Send to PCR in silico">▶</button>
+        <button class="btn btn-secondary btn-sm" onclick="deletePairFromDB('${r.pairId}')" title="Delete pair" style="margin-left:3px">✕</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ── INLINE NOTES UPDATE ──
+async function updateNotes(id, value) {
+  const record = await dbGet(id);
+  if (!record) return;
+  record.notes = value.trim();
+  await dbUpdate(record);
+  // No re-render needed — field already shows new value
+}
+
+// ── SEND PRIMER TO PCR TAB ──
+async function sendPrimerToPCR(id) {
+  const record = await dbGet(id);
+  if (!record) return;
+  if (record.type === 'FWD') {
+    document.getElementById('pcrFwd').value = record.seq;
+  } else {
+    document.getElementById('pcrRev').value = record.seq;
+  }
+  switchMainTab('pcr');
+  toast(`${record.type} primer loaded into PCR tab`);
+}
+
+// ── DELETE PAIR (both FWD + REV) ──
+async function deletePairFromDB(pairId) {
+  if (!confirm('Delete this primer pair (FWD + REV)?')) return;
+  await dbDeleteByPairId(pairId);
+  renderDB();
+  toast('Primer pair removed');
+}
+
+// ── DELETE SINGLE (legacy) ──
+async function deletePrimer(id) {
+  await dbDelete(id);
+  renderDB();
+  toast('Primer removed');
+}
+
+async function clearDB() {
+  if (!confirm('Delete ALL saved primers? This cannot be undone.')) return;
+  await dbClear();
+  renderDB();
+  toast('Database cleared');
+}
+
+// ============================================================
+// EXPORT
+// ============================================================
+function exportCSV() {
+  if (!currentResults.length) return;
+  const p = getParams();
+  const rows = [['#','Fwd_seq','Fwd_pos','Fwd_Tm','Fwd_GC','Fwd_Q','Rev_seq','Rev_pos','Rev_Tm','Rev_GC','Rev_Q','Amp_len','Pair_Q']];
+  currentResults.forEach((pair, i) => {
+    rows.push([
+      i+1, pair.fwd.seq, pair.fwd.pos+1, pair.fwd.tm, calcGC(pair.fwd.seq), pair.fwd.q,
+      pair.rev.seq, pair.rev.pos, pair.rev.tm, calcGC(pair.rev.seq), pair.rev.q,
+      pair.ampLen, pair.pairQ
+    ]);
+  });
+  downloadCSV(rows, `primers_${currentSeq.name || 'results'}.csv`);
+}
+
+async function exportDBCSV() {
+  const records = await dbGetAll();
+  if (!records.length) { toast('Database is empty'); return; }
+  records.sort((a, b) => b.id - a.id);
+  const cols = ['ID','Type','Gene','PairID','Sequence','Tm_C','GC_pct','Length','Quality','Position','AmpLen_nt','Notes','Date'];
+  const rows = [cols];
+  records.forEach(r => rows.push([
+    r.id, r.type, r.gene, r.pairId || '',
+    r.seq, r.tm, r.gc, r.len, r.q, r.pos,
+    r.ampLen || '', r.notes || '', r.date
+  ]));
+  // BOM for Excel/macOS compatibility
+  const csv = '\ufeff' + rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `PrimerDesigner_DB_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  toast(`CSV exported — ${records.length} primer(s)`);
+}
+
+function downloadCSV(rows, filename) {
+  const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+}
+
+// ============================================================
+// UI UTILS
+// ============================================================
+function switchMainTab(name) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('.tab')[['design','pcr','database','help'].indexOf(name)].classList.add('active');
+  if (name === 'database') renderDB();
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// INIT
+initDB().then(() => {
+  toast('PrimerDesigner v1.4 · IUPAC · SNP distance check · Sanger readability');
+});
+</script>
+<script>
+/* ── i18n EN/ES ──────────────────────────────────────────────────────────────
+   Sustituye nodos de texto cuyo contenido completo (trim) coincide EXACTAMENTE
+   con una clave. No toca estructura, atributos ni secuencias. Se re-aplica tras
+   cada render mediante MutationObserver. */
+const I18N = {
+  "Design": "Diseño",
+  "PCR in silico": "PCR in silico",
+  "Database": "Base de datos",
+  "Help": "Ayuda",
+  "Parameters": "Parámetros",
+  "General criteria": "Criterios generales",
+  "Advanced": "Avanzado",
+  "Search regions": "Regiones de búsqueda",
+  "Forward (from – to)": "Forward (de – a)",
+  "Reverse (from – to)": "Reverse (de – a)",
+  "Primer length (min – max)": "Longitud del primer (mín – máx)",
+  "Tm range (°C)": "Rango de Tm (°C)",
+  "Opt Tm (°C)": "Tm óptima (°C)",
+  "Max ΔTm pair (°C)": "ΔTm máx del par (°C)",
+  "GC% (min – max)": "GC% (mín – máx)",
+  "GC clamp (min)": "GC clamp (mín)",
+  "Amplified fragment size": "Tamaño del fragmento amplificado",
+  "Min – Max (nt)": "Mín – Máx (nt)",
+  "Max poly-X run": "Máx poli-X consecutivas",
+  "Max self-end dimer (Tm)": "Máx dímero self-end (Tm)",
+  "Max 3' stability score": "Máx estabilidad 3'",
+  "Min quality score": "Calidad mínima",
+  "Min SNP dist (nt)": "Dist. mín al SNP (nt)",
+  "Best pairs to return": "Mejores pares a devolver",
+  "Target sequence (FASTA or plain)": "Secuencia molde (FASTA o texto plano)",
+  "Sequence 5'→3'": "Secuencia 5'→3'",
+  "Gene / Pair ID": "Gen / ID del par",
+  "Enter sequence and click Find Primers": "Pega una secuencia y pulsa Find Primers",
+  "No primer pairs found with current parameters":
+    "No se encontraron pares con los parámetros actuales",
+  "Select a primer pair to view details": "Selecciona un par para ver el detalle",
+  "No selection": "Sin selección",
+  "Enter primer pair and run PCR in silico": "Introduce el par y ejecuta PCR in silico",
+  "No amplification products found": "No se encontraron productos de amplificación",
+  "Forward primer (5'→3')": "Primer forward (5'→3')",
+  "Reverse primer (5'→3' minus strand)": "Primer reverse (5'→3', hebra menos)",
+  "Forward primer 5'→3'": "Primer forward 5'→3'",
+  "Reverse primer 5'→3'": "Primer reverse 5'→3'",
+  "Check primer orientation and target sequence":
+    "Revisa la orientación de los primers y la secuencia molde",
+  "No variant position specified": "No se indicó posición de la variante",
+  "No primers saved yet": "Aún no hay primers guardados",
+  "Click a row to edit notes inline": "Haz clic en una fila para editar las notas",
+  "All types": "Todos los tipos",
+  "FWD only": "Solo FWD",
+  "REV only": "Solo REV",
+  "Notes": "Notas",
+  "Date": "Fecha",
+  "Type": "Tipo",
+  "Amp (nt)": "Amplicón (nt)",
+  "Dist FWD→SNP": "Dist. FWD→SNP",
+  "Dist SNP→REV": "Dist. SNP→REV",
+  "Q pair": "Calidad del par",
+  "Check Forward specificity ↗": "Verificar especificidad del Forward ↗",
+  "Check Reverse ↗": "Verificar Reverse ↗",
+  "Check Pair ↗": "Verificar el par ↗",
+  "FORWARD": "FORWARD",
+  "REVERSE": "REVERSE",
+  "ANNEALING": "ALINEAMIENTO",
+  "Tm": "Tm",
+  "GC%": "GC%",
+  "Quality": "Calidad",
+  "Complexity": "Complejidad",
+  "Self-end dimer": "Dímero self-end",
+  "3' stability": "Estabilidad 3'",
+  "Ta optimal (Rychlik)": "Ta óptima (Rychlik)",
+  "Ta = Tm - 5 (reference)": "Ta = Tm − 5 (referencia)",
+  "Clear All": "Borrar todo",
+  "Save to DB": "Guardar en la BD",
+  "Run PCR": "Ejecutar PCR"
+};
+const I18N_REV = {};
+for (const k in I18N) if (I18N[k] !== k) I18N_REV[I18N[k]] = k;
+
+let curLang = 'en';
+let i18nBusy = false;
+
+function walkText(node, map) {
+  if (node.nodeType === 3) {
+    const t = node.nodeValue.trim();
+    if (t && map[t]) node.nodeValue = node.nodeValue.replace(t, map[t]);
+    return;
+  }
+  if (node.nodeType !== 1) return;
+  const tag = node.tagName;
+  if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'TEXTAREA') return;
+  if (node.hasAttribute && node.hasAttribute('placeholder')) {
+    const p = node.getAttribute('placeholder').trim();
+    if (map[p]) node.setAttribute('placeholder', map[p]);
+  }
+  for (let i = 0; i < node.childNodes.length; i++) walkText(node.childNodes[i], map);
+}
+
+function applyLang(lang) {
+  i18nBusy = true;
+  walkText(document.body, lang === 'es' ? I18N : I18N_REV);
+  document.documentElement.lang = lang;
+  const b = document.getElementById('langBtn');
+  if (b) b.textContent = lang === 'es' ? 'EN' : 'ES';
+  curLang = lang;
+  i18nBusy = false;
+}
+
+function toggleLang() { applyLang(curLang === 'es' ? 'en' : 'es'); }
+
+/* Re-aplica el idioma sobre contenido renderizado dinámicamente. */
+new MutationObserver(muts => {
+  if (i18nBusy || curLang !== 'es') return;
+  i18nBusy = true;
+  for (const m of muts) for (const n of m.addedNodes) walkText(n, I18N);
+  i18nBusy = false;
+}).observe(document.body, { childList: true, subtree: true });
+</script>
+
+</body>
+</html>

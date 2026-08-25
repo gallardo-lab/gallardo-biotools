@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-X5BT5RP5WF"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-X5BT5RP5WF');
+</script>
+
+<title>Pipeline HBB — Bioinformática Médica P14 | BioLab</title>
+<style>
+  :root {
+    --bg:#0f172a;--surface:#1e293b;--surface2:#263147;
+    --accent:#ef4444;--accent2:#f97316;--accent3:#fbbf24;
+    --text:#f1f5f9;--muted:#94a3b8;--border:#334155;
+    --green:#22c55e;--blue:#3b82f6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;min-height:100vh}
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600;700&display=swap');
+
+  header{background:linear-gradient(135deg,#7f1d1d,#1e293b);padding:1.4rem 2rem;display:flex;align-items:center;gap:1rem;border-bottom:2px solid var(--accent);flex-wrap:wrap}
+  header h1{font-family:'Orbitron',sans-serif;font-size:1.2rem;color:var(--accent3)}
+  header p{font-size:.82rem;color:var(--muted)}
+  .badge{background:var(--accent);color:#fff;font-size:.7rem;font-weight:700;padding:.2rem .5rem;border-radius:4px;white-space:nowrap}
+  .back{color:var(--muted);font-size:.82rem;text-decoration:none;display:inline-flex;align-items:center;gap:.3rem;padding:.3rem .6rem;border:1px solid var(--border);border-radius:6px}
+  .back:hover{color:var(--text);border-color:var(--accent)}
+
+  main{max-width:900px;margin:0 auto;padding:2rem 1rem}
+
+  /* nav de pasos */
+  .step-nav{display:flex;align-items:center;gap:.3rem;flex-wrap:wrap;margin-bottom:2rem;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:.8rem 1rem}
+  .step-dot{width:34px;height:34px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;cursor:pointer;transition:all .2s;flex-shrink:0;color:var(--muted)}
+  .step-dot:hover{border-color:var(--accent);color:var(--text)}
+  .step-dot.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  .step-dot.done{background:#14532d;border-color:var(--green);color:var(--green)}
+  .step-connector{flex:1;height:2px;background:var(--border);min-width:8px;max-width:30px}
+  .step-connector.done{background:var(--green)}
+
+  /* tarjeta de paso */
+  .step-card{display:none;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.6rem 1.8rem}
+  .step-card.active-card{display:block}
+  .step-header{display:flex;align-items:center;gap:.8rem;margin-bottom:1.2rem;flex-wrap:wrap}
+  .step-num{background:var(--accent);color:#fff;font-weight:700;font-size:.8rem;padding:.3rem .7rem;border-radius:8px;white-space:nowrap}
+  .step-title{font-size:1.1rem;font-weight:700}
+  .tool-links{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.2rem}
+  .tool-link{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:.35rem .8rem;font-size:.8rem;color:var(--blue);text-decoration:none;transition:all .15s}
+  .tool-link:hover{border-color:var(--blue);background:#1e3a5f}
+
+  .info-box{background:var(--surface2);border-left:3px solid var(--accent3);border-radius:6px;padding:.9rem 1rem;margin-bottom:1rem;font-size:.9rem;line-height:1.6}
+  .info-box.blue{border-color:var(--blue)}
+  .info-box.green{border-color:var(--green)}
+  .info-box strong{color:var(--accent3)}
+  .info-box.blue strong{color:var(--blue)}
+  .info-box.green strong{color:var(--green)}
+
+  .seq-block{font-family:monospace;font-size:.82rem;background:#0f172a;border:1px solid var(--border);border-radius:8px;padding:1rem;line-height:1.8;color:#a5f3fc;word-break:break-all;margin:.8rem 0}
+  .seq-block .mut{background:#7f1d1d;color:#fca5a5;border-radius:3px;padding:0 2px}
+  .seq-block .normal-pos{background:#14532d;color:#bbf7d0;border-radius:3px;padding:0 2px}
+
+  label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:.3rem;margin-top:.9rem}
+  input[type=text],textarea,select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.6rem .9rem;color:var(--text);font-size:.9rem;font-family:inherit;resize:vertical}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent)}
+  .table-input{width:100%;border-collapse:collapse;margin:.6rem 0}
+  .table-input th{background:var(--surface2);color:var(--muted);font-size:.78rem;padding:.5rem .7rem;border:1px solid var(--border);text-align:left}
+  .table-input td{border:1px solid var(--border);padding:.2rem .3rem}
+  .table-input td input{border:none;background:transparent;padding:.4rem .5rem;width:100%;color:var(--text);font-size:.85rem}
+  .table-input td input:focus{outline:none;background:var(--surface2)}
+
+  /* respuesta */
+  .ans-toggle{background:transparent;border:1px dashed var(--border);color:var(--muted);border-radius:8px;padding:.5rem 1rem;font-size:.82rem;cursor:pointer;margin-top:1rem;transition:all .2s}
+  .ans-toggle:hover{border-color:var(--accent3);color:var(--accent3)}
+  .ans-box{display:none;background:#1a2a0a;border:1px solid var(--green);border-radius:8px;padding:1rem;margin-top:.6rem;font-size:.88rem;line-height:1.6;color:#bbf7d0}
+  .ans-box.show{display:block}
+  .ans-box .warn{color:var(--accent3);font-weight:600}
+
+  /* pubmed */
+  .pubmed-row{display:grid;grid-template-columns:90px 70px 1fr;gap:.4rem;align-items:center;margin-bottom:.4rem}
+  .pubmed-row input{font-size:.82rem;padding:.4rem .6rem}
+
+  /* navegacion */
+  .step-nav-btns{display:flex;gap:.8rem;margin-top:1.5rem;flex-wrap:wrap}
+  .btn{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:.6rem 1.4rem;font-weight:700;cursor:pointer;font-size:.92rem;transition:opacity .2s}
+  .btn:hover{opacity:.85}
+  .btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted)}
+  .btn-outline:hover{border-color:var(--accent);color:var(--text);opacity:1}
+  .btn-green{background:#166534}
+  .btn-green:hover{background:#14532d;opacity:1}
+
+  /* resumen final */
+  #summarySection{display:none;background:var(--surface);border:1px solid var(--green);border-radius:14px;padding:2rem;margin-top:2rem;text-align:center}
+  #summarySection h2{font-family:'Orbitron',sans-serif;font-size:1.3rem;color:var(--green);margin-bottom:1rem}
+  .step-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin:1rem 0}
+  .step-cell{background:var(--surface2);border-radius:8px;padding:.6rem;font-size:.78rem;text-align:center;color:var(--muted)}
+  .step-cell.done{background:#14532d;color:#bbf7d0;border:1px solid var(--green)}
+  .share-box{background:var(--surface2);border:1px dashed var(--border);border-radius:8px;padding:.8rem 1rem;margin:1rem 0;font-family:monospace;font-size:.72rem;word-break:break-all;color:#a5f3fc;text-align:left}
+
+  footer{text-align:center;padding:2rem;color:var(--muted);font-size:.78rem}
+</style>
+</head>
+<body>
+
+<header>
+  <div style="flex:1">
+    <h1>🔬 Pipeline HBB — Práctica 14</h1>
+    <p>Bioinformática Médica · Gen <strong>HBB</strong> · Anemia de Células Falciformes · 8 pasos</p>
+  </div>
+  <a href="quiz_HBB.html" class="back">← Quiz previo</a>
+  <span class="badge">P14</span>
+</header>
+
+<main>
+
+  <!-- nav de pasos -->
+  <div class="step-nav" id="stepNav"></div>
+
+  <!-- nombre -->
+  <div style="margin-bottom:1.5rem;display:flex;gap:.8rem;flex-wrap:wrap;align-items:center">
+    <input type="text" id="studentName" placeholder="Tu nombre completo" style="max-width:320px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:.55rem 1rem;color:var(--text);font-size:.95rem">
+    <span style="color:var(--muted);font-size:.82rem">Completa cada paso y revela la respuesta al terminar.</span>
+  </div>
+
+  <!-- PASO 1 -->
+  <div class="step-card active-card" id="step1">
+    <div class="step-header">
+      <span class="step-num">Paso 1</span>
+      <span class="step-title">BLASTn — Identificación del gen</span>
+    </div>
+    <div class="tool-links">
+      <a class="tool-link" href="https://blast.ncbi.nlm.nih.gov/Blast.cgi?PROGRAM=blastn" target="_blank">🔗 BLASTn / NCBI</a>
+    </div>
+    <div class="info-box">
+      <strong>Instrucción:</strong> Abre BLASTn en NCBI. Pega la secuencia siguiente. Usa base de datos <em>RefSeq RNA</em>, organismo <em>Homo sapiens</em>. Anota el top hit.
+    </div>
+    <div class="seq-block">&gt;Secuencia_problema_grupo_2026<br>
+ATGGTGCACCTGACTCCT<span class="mut">GTG</span>GAGAAGTCTGCCGTTACTGCCCTGTGGGGCAAGGTGAAC<br>
+GTGGATGAAGTTGGTGGTGAGGCCCTGGGCAGGCTGCTGGTGGTCTACCCTTGGACCCAG<br>
+AGGTTCTTTGAGTCC</div>
+    <table class="table-input">
+      <tr><th>Top hit (nombre del gen)</th><th>Accesión RefSeq</th><th>% identidad</th><th>E-value</th></tr>
+      <tr><td><input type="text" id="p1_gene" placeholder="ej. HBB, Homo sapiens..."></td>
+          <td><input type="text" id="p1_acc" placeholder="NM_..."></td>
+          <td><input type="text" id="p1_id" placeholder="99.x%"></td>
+          <td><input type="text" id="p1_eval" placeholder="1e-..."></td></tr>
+    </table>
+    <button class="ans-toggle" onclick="toggleAns(this)">👁 Revelar respuesta</button>
+    <div class="ans-box">
+      <strong>Top hit:</strong> NM_000518.5 — <em>Homo sapiens hemoglobin subunit beta (HBB)</em>, mRNA completo.<br>
+      <strong>% identidad:</strong> ~99.3 % (134/135 nt — solo 1 mismatch en posición 20).<br>
+      <strong>E-value:</strong> muy bajo (~1×10⁻⁶⁰ a 1×10⁻⁷⁰).<br><br>
+      <span class="warn">Descarga la secuencia normal del top hit en FASTA</span> — la necesitarás para el Paso 2 (Bl2seq).
+    </div>
+    <div class="step-nav-btns">
+      <button class="btn" onclick="nextStep(1)">Siguiente →</button>
+    </div>
+  </div>
+
+  <!-- PASO 2 -->
+  <div class="step-card" id="step2">
+    <div class="step-header">
+      <span class="step-num">Paso 2</span>
+      <span class="step-title">Bl2seq — Alineamiento pareado</span>
+    </div>
+    <div class="tool-links">
+      <a class="tool-link" href="https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastSearch&PROG_DEF=blastn&BLAST_SPEC=blast2seq" target="_blank">🔗 Bl2seq / NCBI</a>
+    </div>
+    <div class="info-box">
+      <strong>Instrucción:</strong> Compara la secuencia problema (mutada) como Query y la secuencia normal descargada del top hit como Subject. Identifica la posición exacta del mismatch y escribe la notación HGVS.
+    </div>
+    <div class="seq-block">
+      <strong style="color:var(--muted);font-size:.75rem">Secuencia NORMAL de referencia (NM_000518.5, fragmento exón 1):</strong><br>
+      &gt;HBB_NM_000518.5_partial_exon1<br>
+      ATGGTGCACCTGACTCCT<span class="normal-pos">GAG</span>GAGAAGTCTGCCGTTACTGCCCTGTGGGGCAAGGTGAAC<br>
+      GTGGATGAAGTTGGTGGTGAGGCCCTGGGCAGGCTGCTGGTGGTCTACCCTTGGACCCAG<br>
+      AGGTTCTTTGAGTCC
+    </div>
+    <table class="table-input">
+      <tr><th>Posición del cambio</th><th>Nt normal</th><th>Nt mutado</th><th>Notación HGVS</th></tr>
+      <tr><td><input type="text" id="p2_pos" placeholder="ej. 20"></td>
+          <td><input type="text" id="p2_ref" placeholder="A"></td>
+          <td><input type="text" id="p2_alt" placeholder="T"></td>
+          <td><input type="text" id="p2_hgvs" placeholder="NM_000518.5:c...."></td></tr>
+    </table>
+    <button class="ans-toggle" onclick="toggleAns(this)">👁 Revelar respuesta</button>
+    <div class="ans-box">
+      <strong>Posición:</strong> 20 (contando desde el A del codón de inicio ATG).<br>
+      <strong>Cambio:</strong> A (normal, GAG) → T (mutada, GTG).<br>
+      <strong>Notación HGVS:</strong> NM_000518.5:c.20A&gt;T<br><br>
+      Este mismatch único convierte el codón 7 de GAG (Glu) a GTG (Val), generando la hemoglobina S (HbS).
+    </div>
+    <div class="step-nav-btns">
+      <button class="btn btn-outline" onclick="prevStep(2)">← Anterior</button>
+      <button class="btn" onclick="nextStep(2)">Siguiente →</button>
+    </div>
+  </div>
+
+  <!-- PASO 3 -->
+  <div class="step-card" id="step3">
+    <div class="step-header">
+      <span class="step-num">Paso 3</span>
+      <span class="step-title">ORF Finder — Efecto en la proteína</span>
+    </div>
+    <div class="tool-links">
+      <a class="tool-link" href="https://www.ncbi.nlm.nih.gov/orffinder/" target="_blank">🔗 ORF Finder / NCBI</a>
+    </div>
+    <div class="info-box">
+      <strong>Instrucción:</strong> Carga por separado la secuencia normal y la mutada en ORF Finder. Compara el ORF principal. Identifica el aminoácido que cambia y clasifica la mutación.
+    </div>
+    <table class="table-input">
+      <tr><th>aa normal</th><th>aa mutado</th><th>Notación p.</th><th>Tipo de mutación</th></tr>
+      <tr><td><input type="text" id="p3_aaref" placeholder="Glu (E)"></td>
+          <td><input type="text" id="p3_aaalt" placeholder="Val (V)"></td>
+          <td><input type="text" id="p3_pnot" placeholder="p.Glu7Val"></td>
+          <td><input type="text" id="p3_type" placeholder="missense / nonsense..."></td></tr>
+    </table>
+    <button class="ans-toggle" onclick="toggleAns(this)">👁 Revelar respuesta</button>
+    <div class="ans-box">
+      <strong>aa normal:</strong> Ácido glutámico (E, Glu) — codón GAG.<br>
+      <strong>aa mutado:</strong> Valina (V, Val) — codón GTG.<br>
+      <strong>Notación p.:</strong> p.Glu7Val (HGVS, contando Met) / p.Glu6Val (numeración clásica de hemoglobinas, sin Met escindida post-traduccionalmente). <span class="warn">Ambas son correctas.</span><br>
+      <strong>Tipo:</strong> Mutación missense (sustitución de un solo aminoácido sin cambio de marco).<br><br>
+      La sustitución Glu→Val en el extremo N-terminal de la cadena β introduce un parche hidrofóbico que promueve la polimerización de HbS en hipoxia.
+    </div>
+    <div class="step-nav-btns">
+      <button class="btn btn-outline" onclick="prevStep(3)">← Anterior</button>
+      <button class="btn" onclick="nextStep(3)">Siguiente →</button>
+    </div>
+  </div>
+
+  <!-- PASO 4 -->
+  <div class="step-card" id="step4">
+    <div class="step-header">
+      <span class="step-num">Paso 4</span>
+      <span class="step-title">OMIM — Identificación de la enfermedad</span>
+    </div>
+    <div class="tool-links">
+      <a class="tool-link" href="https://omim.org/" target="_blank">🔗 OMIM</a>
+      <a class="tool-link" href="https://omim.org/entry/141900" target="_blank">🔗 OMIM HBB (141900)</a>
+      <a class="tool-link" href="https://omim.org/entry/603903" target="_blank">🔗 OMIM #603903</a>
+    </div>
+    <div class="info-box">
+      <strong>Instrucción:</strong> Busca "HBB" en OMIM. Localiza el ID del gen y de la enfermedad asociada a c.20A&gt;T. Anota el patrón de herencia.
+    </div>
+    <table class="table-input">
+      <tr><th>OMIM gen (HBB)</th><th>OMIM enfermedad</th><th>Nombre clínico</th><th>Herencia</th></tr>
+      <tr><td><input type="text" id="p4_gene" placeholder="141900"></td>
+          <td><input type="text" id="p4_dis" placeholder="#603903"></td>
+          <td><input type="text" id="p4_name" placeholder="Sickle Cell..."></td>
+          <td><input type="text" id="p4_her" placeholder="AD/AR/LX"></td></tr>
+    </table>
+    <button class="ans-toggle" onclick="toggleAns(this)">👁 Revelar respuesta</button>
+    <div class="ans-box">
+      <strong>OMIM gen HBB:</strong> 141900<br>
+      <strong>OMIM enfermedad:</strong> #603903 (SICKLE CELL ANEMIA; SCA)<br>
+      <strong>Nombre clínico:</strong> Anemia de células falciformes / Sickle Cell Disease (SCD)<br>
+      <strong>Herencia:</strong> Autosómica recesiva (AR) — los homocigotos HbS/HbS presentan la enfermedad; los heterocigotos HbA/HbS son portadores con rasgo falciforme (generalmente asintomáticos).
+    </div>
+    <div class="step-nav-btns">
+      <button class="btn btn-outline" onclick="prevStep(4)">← Anterior</button>
+      <button class="btn" onclick="nextStep(4)">Siguiente →</button>
+    </div>
+  </div>
+
+  <!-- PASO 5 -->
+  <div class="step-card" id="step5">
+    <div class="step-header">
+      <span class="step-num">Paso 5</span>
+      <span class="step-title">Resumen clínico de la enfermedad</span>
+    </div>
+    <div class="tool-links">
+      <a class="tool-link" href="https://omim.org/entry/603903" target="_blank">🔗 OMIM #603903</a>
+      <a class="tool-link" href="https://www.ncbi.nlm.nih.gov/books/NBK1362/" target="_blank">🔗 GeneReviews HBB</a>
+      <a class="tool-link" href="https://medlineplus.gov/sicklecelldisease.html" target="_blank">🔗 MedlinePlus</a>
+    </div>
+    <div class="info-box">
+      <strong>Instrucción:</strong> Redacta 5–6 puntos clave sobre la anemia de células falciformes usando OMIM, GeneReviews y MedlinePlus. Incluye: prevalencia, fisiopatología, manifestaciones, diagnóstico, tratamiento y pronóstico.
+    </div>
+    <label>Tu redacción (mínimo 5 puntos):</label>
+    <textarea id="p5_text" rows="7" placeholder="1. Prevalencia y origen…&#10;2. Fisiopatología (HbS, polimerización)…&#10;3. Manifestaciones clínicas…&#10;4. Diagnóstico…&#10;5. Tratamiento…&#10;6. Pronóstico…"></textarea>
+    <button class="ans-toggle" onclick="toggleAns(this)">👁 Revelar respuesta</button>
+    <div class="ans-box">
+      <strong>1. Epidemiología:</strong> Hemoglobinopatía estructural más prevalente a nivel mundial. Alta frecuencia en África subsahariana, Mediterráneo, Medio Oriente e India — relacionada evolutivamente con resistencia parcial a malaria (<em>P. falciparum</em>) en heterocigotos.<br><br>
+      <strong>2. Fisiopatología:</strong> La Val hidrofóbica en posición β6 forma polímeros de HbS en hipoxia → eritrocitos en hoz → anemia hemolítica crónica + crisis vasooclusivas.<br><br>
+      <strong>3. Manifestaciones:</strong> Anemia, ictericia, esplenomegalia (→ autoesplenectomía funcional), crisis dolorosas, síndrome torácico agudo, ACV, daño renal, retinopatía.<br><br>
+      <strong>4. Diagnóstico:</strong> HPLC de hemoglobinas, electroforesis (HbS migra diferente a HbA), secuenciación de HBB, PCR-RFLP con MstII (diagnóstico histórico). Tamizaje neonatal en muchos países.<br><br>
+      <strong>5. Tratamiento:</strong> Hidroxiurea (induce HbF), transfusiones, profilaxis antibiótica y vacunación en niños, manejo de crisis. Trasplante hematopoyético curativo. Terapia génica: <em>exa-cel/Casgevy</em> (edición CRISPR-Cas9 de BCL11A, aprobada FDA diciembre 2023).<br><br>
+      <strong>6. Pronóstico:</strong> Muy variable. Con manejo integral la supervivencia ha mejorado, pero sigue siendo una enfermedad crónica con morbimortalidad significativa.
+    </div>
+    <div class="step-nav-btns">
+      <button class="btn btn-outline" onclick="prevStep(5)">← Anterior</button>
+      <button class="btn" onclick="nextStep(5)">Siguiente →</button>
+    </div>
+  </div>
+
+  <!-- PASO 6 -->
+  <div class="step-card" id="step6">
+    <div class="step-header">
+      <span class="step-num">Paso 6</span>
+      <span class="step-title">PubMed — Literatura biomédica (5 artículos)</span>
+    </div>
+    <div class="tool-links">
+      <a class="tool-link" href="https://pubmed.ncbi.nlm.nih.gov/" target="_blank">🔗 PubMed</a>
+    </div>
+    <div class="info-box blue">
+      <strong>Instrucción:</strong> Busca en PubMed al menos 5 artículos relevantes. Usa las queries sugeridas. Anota PMID, primer autor, año y título. Prefiere revisiones de los últimos 5 años.
+    </div>
+    <div class="info-box" style="border-color:var(--muted);margin-bottom:.8rem;font-size:.82rem">
+      <strong>Queries sugeridas:</strong><br>
+      · <code>("sickle cell disease"[MeSH] OR "sickle cell anemia"[MeSH]) AND Review[PT] AND "last 5 years"[PDat]</code><br>
+      · <code>"sickle cell"[Title] AND ("MstII"[TIAB] OR "RFLP"[TIAB] OR "molecular diagnosis"[TIAB])</code><br>
+      · <code>"sickle cell"[Title] AND "hydroxyurea"[Title] AND (Review[PT] OR Clinical Trial[PT])</code><br>
+      · <code>"sickle cell"[Title] AND ("exa-cel"[TIAB] OR "Casgevy"[TIAB] OR "CRISPR"[TIAB] OR "BCL11A"[TIAB])</code><br>
+      · <code>"sickle cell"[Title] AND ("newborn screening"[TIAB] OR "epidemiology"[TIAB])</code>
+    </div>
+
+    <div id="pubmedRows">
+      <div class="pubmed-row" style="font-size:.75rem;color:var(--muted);font-weight:700;margin-bottom:.2rem">
+        <span>#PMID</span><span>Año</span><span>Primer autor — Título</span>
+      </div>
+    </div>
+    <button class="btn btn-outline" style="font-size:.8rem;margin-top:.3rem" onclick="addPubmedRow()">+ Agregar fila</button>
+
+    <div class="step-nav-btns" style="margin-top:1.5rem">
+      <button class="btn btn-outline" onclick="prevStep(6)">← Anterior</button>
+      <button class="btn" onclick="nextStep(6)">Siguiente →</button>
+    </div>
+  </div>
+
+  <!-- PASO 7 -->
+  <div class="step-card" id="step7">
+    <div class="step-header">
+      <span class="step-num">Paso 7</span>
+      <span class="step-title">Restriction Map — Diagnóstico molecular in silico</span>
+    </div>
+    <div class="tool-links">
+      <a class="tool-link" href="https://www.bioinformatics.org/sms2/rest_map.html" target="_blank">🔗 SMS2 — Restriction Map</a>
+    </div>
+    <div class="info-box">
+      <strong>Instrucción:</strong> Carga las secuencias normal y mutada en SMS2 → Restriction Map. Identifica una enzima cuyo sitio esté presente en una secuencia y ausente en la otra. Anota nombre y motivo.
+    </div>
+    <div class="seq-block" style="font-size:.78rem">
+      <strong style="color:var(--muted)">Normal (HbA) — buscar sitio MstII:</strong><br>
+      …CCTGAGG… ← CC↓TNAGG → <span style="color:#22c55e">MstII CORTA aquí</span><br><br>
+      <strong style="color:var(--muted)">Mutada (HbS) — sitio destruido:</strong><br>
+      …CCT<span class="mut">GTG</span>G… ← CC↓T<strong>G</strong>TGG → <span style="color:#ef4444">MstII NO corta (G en lugar de A/T en posición N)</span>
+    </div>
+    <table class="table-input">
+      <tr><th>Enzima propuesta</th><th>Motivo (5'→3')</th><th>¿Corta en normal?</th><th>¿Corta en mutada?</th></tr>
+      <tr><td><input type="text" id="p7_enz" placeholder="MstII / DdeI..."></td>
+          <td><input type="text" id="p7_mot" placeholder="CC↓TNAGG..."></td>
+          <td><input type="text" id="p7_norm" placeholder="Sí / No"></td>
+          <td><input type="text" id="p7_mut" placeholder="No / Sí"></td></tr>
+    </table>
+    <button class="ans-toggle" onclick="toggleAns(this)">👁 Revelar respuesta</button>
+    <div class="ans-box">
+      <strong>Enzima:</strong> MstII (sinónimos: Bsu36I, CvnI, Eco81I, AccB7I)<br>
+      <strong>Motivo:</strong> CC↓TNAGG (5'→3') — reconoce 7 nt con una N degenerada.<br>
+      <strong>Normal HbA:</strong> Sitio CCTGAGG presente → <span style="color:#22c55e">SÍ corta.</span><br>
+      <strong>Mutada HbS:</strong> Sitio CCTGTGG → N = T en posición degenerada. <span class="warn">Importante:</span> aunque T es una base válida para N, en la práctica MstII requiere que la posición N no rompa el contexto flanqueante. La sustitución A→T en posición 20 convierte CCTGAGG→CCTGTGG, destruyendo el sitio en condiciones experimentales estándar. Verificar con SMS2.<br><br>
+      <span class="warn">Nota pedagógica:</span> DdeI (C↓TNAG) también puede ser una respuesta válida si el alumno justifica correctamente el patrón de digestión.
+    </div>
+    <div class="step-nav-btns">
+      <button class="btn btn-outline" onclick="prevStep(7)">← Anterior</button>
+      <button class="btn" onclick="nextStep(7)">Siguiente →</button>
+    </div>
+  </div>
+
+  <!-- PASO 8 -->
+  <div class="step-card" id="step8">
+    <div class="step-header">
+      <span class="step-num">Paso 8</span>
+      <span class="step-title">Restriction Digest — Fragmentos en gel</span>
+    </div>
+    <div class="tool-links">
+      <a class="tool-link" href="https://www.bioinformatics.org/sms2/rest_digest.html" target="_blank">🔗 SMS2 — Restriction Digest</a>
+    </div>
+    <div class="info-box">
+      <strong>Instrucción:</strong> Usa Restriction Digest en SMS2 con la enzima del Paso 7. Anota el tamaño de los fragmentos esperados en cada alelo y describe cómo los distinguirías en un gel de agarosa.
+    </div>
+    <div class="info-box blue" style="font-size:.85rem;margin-bottom:.8rem">
+      <strong>Fragmento amplificado de esta práctica:</strong> 135 pb total.<br>
+      El sitio de corte de Bsu36I/MstII cae a ~17 nt del extremo 5' del fragmento.
+    </div>
+    <table class="table-input">
+      <tr><th>Fragmentos — Normal (HbA)</th><th>Fragmentos — Mutada (HbS)</th><th>Lectura del gel</th></tr>
+      <tr><td><input type="text" id="p8_fn" placeholder="ej. 17 pb + 118 pb"></td>
+          <td><input type="text" id="p8_fm" placeholder="ej. 135 pb (sin corte)"></td>
+          <td><input type="text" id="p8_gel" placeholder="HbA: banda ~118 pb / HbS: banda 135 pb..."></td></tr>
+    </table>
+    <label>Conclusión e interpretación clínica:</label>
+    <textarea id="p8_concl" rows="5" placeholder="Integra: ¿qué gen es?, ¿qué enfermedad?, ¿cómo usarías el RFLP-MstII como diagnóstico molecular?"></textarea>
+    <button class="ans-toggle" onclick="toggleAns(this)">👁 Revelar respuesta</button>
+    <div class="ans-box">
+      <strong>HbA (normal):</strong> Bsu36I/MstII corta → 2 fragmentos: <strong>~17 pb + ~118 pb</strong>.<br>
+      <span class="warn">⚠ Importante:</span> El fragmento de 17 pb es demasiado pequeño para ser visible en gel de agarosa estándar (migra fuera del gel o no retiene bromuro de etidio). En la práctica <strong>solo verás 1 banda de ~118 pb</strong> para el alelo HbA.<br><br>
+      <strong>HbS (mutada):</strong> Bsu36I/MstII no corta → <strong>1 banda de 135 pb</strong> (fragmento intacto).<br><br>
+      <strong>Heterocigoto HbA/HbS:</strong> <strong>2 bandas visibles</strong>: 135 pb (alelo HbS) + 118 pb (alelo HbA). El fragmento de 17 pb no se visualiza.<br><br>
+      <strong>Lectura del gel:</strong>
+      <div style="margin:.6rem 0 .6rem 1rem;font-size:.85rem;line-height:1.8">
+        HbS/HbS (enfermo): 1 banda — 135 pb<br>
+        HbA/HbA (normal): 1 banda — 118 pb<br>
+        HbA/HbS (portador): 2 bandas — 135 pb + 118 pb
+      </div>
+      <strong>Contexto histórico:</strong> Este RFLP con MstII/Bsu36I fue el <strong>primer diagnóstico molecular de una enfermedad genética humana</strong>. Kan & Dozy lo describieron en <em>Lancet</em> (1978) y Saiki et al. lo aplicaron con PCR en <em>Science</em> (1985), inaugurando la era del diagnóstico molecular clínico.<br><br>
+      <span class="warn">Diferencia clave respecto a CFTR/ΔF508:</span> Para la deleción ΔF508 de CFTR no existe un sitio de restricción convenientemente destruido por la mutación; el RFLP-Bsu36I es específico del alelo HbS de HBB.
+    </div>
+    <div class="step-nav-btns">
+      <button class="btn btn-outline" onclick="prevStep(8)">← Anterior</button>
+      <button class="btn btn-green" onclick="finishPipeline()">✅ Finalizar pipeline</button>
+    </div>
+  </div>
+
+  <!-- Resumen final -->
+  <div id="summarySection">
+    <h2>🎉 Pipeline Completado</h2>
+    <p style="color:var(--muted);margin-bottom:1rem">Gen <strong style="color:var(--text)">HBB</strong> · Mutación <strong style="color:var(--text)">c.20A&gt;T · p.Glu7Val</strong> · Enfermedad <strong style="color:var(--text)">Anemia de Células Falciformes</strong></p>
+    <div class="step-grid" id="stepGrid"></div>
+    <div class="share-box" id="shareCode"></div>
+    <div style="display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-top:1rem">
+      <button class="btn btn-outline" onclick="copyCode()">📋 Copiar código</button>
+      <button class="btn" onclick="location.reload()">🔄 Reiniciar</button>
+    </div>
+  </div>
+
+</main>
+<footer>BioLab Interactive · UANL Facultad de Medicina · Laboratorio de Bioquímica 2026</footer>
+
+<script>
+const STEPS = ['BLASTn','Bl2seq','ORF Finder','OMIM','Clínica','PubMed','Rest. Map','Rest. Digest'];
+let doneSteps = new Array(8).fill(false);
+let currentStep = 1;
+
+// Inicializa PubMed rows
+(function initPubmed(){
+  for(let i=0;i<5;i++) addPubmedRow();
+})();
+
+// Construye nav de pasos
+function buildNav(){
+  const nav = document.getElementById('stepNav');
+  nav.innerHTML = '';
+  STEPS.forEach((s,i)=>{
+    const dot = document.createElement('div');
+    dot.className = 'step-dot' + (i+1===currentStep?' active':'') + (doneSteps[i]?' done':'');
+    dot.textContent = i+1;
+    dot.title = s;
+    dot.onclick = ()=>goStep(i+1);
+    nav.appendChild(dot);
+    if(i<STEPS.length-1){
+      const conn = document.createElement('div');
+      conn.className = 'step-connector' + (doneSteps[i]?' done':'');
+      nav.appendChild(conn);
+    }
+  });
+}
+buildNav();
+
+function goStep(n){
+  document.querySelectorAll('.step-card').forEach(c=>c.classList.remove('active-card'));
+  document.getElementById('step'+n).classList.add('active-card');
+  currentStep = n;
+  buildNav();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function nextStep(n){
+  doneSteps[n-1] = true;
+  goStep(n+1);
+}
+function prevStep(n){ goStep(n-1); }
+
+function toggleAns(btn){
+  const box = btn.nextElementSibling;
+  const show = !box.classList.contains('show');
+  box.classList.toggle('show', show);
+  btn.textContent = show ? '🔒 Ocultar respuesta' : '👁 Revelar respuesta';
+}
+
+function addPubmedRow(){
+  const container = document.getElementById('pubmedRows');
+  const idx = container.querySelectorAll('.pubmed-row').length;
+  const row = document.createElement('div');
+  row.className = 'pubmed-row';
+  row.innerHTML = `
+    <input type="text" placeholder="PMID">
+    <input type="text" placeholder="Año">
+    <input type="text" placeholder="Autor — Título del artículo">
+  `;
+  container.appendChild(row);
+}
+
+function finishPipeline(){
+  doneSteps[7] = true;
+  buildNav();
+
+  const name = document.getElementById('studentName').value.trim() || 'Estudiante';
+  const done = doneSteps.filter(Boolean).length;
+
+  // step grid
+  const grid = document.getElementById('stepGrid');
+  grid.innerHTML = STEPS.map((s,i)=>
+    `<div class="step-cell${doneSteps[i]?' done':''}">
+      <div>${i+1}. ${s}</div>
+      <div style="font-size:.85rem;margin-top:.2rem">${doneSteps[i]?'✅':' '}</div>
+    </div>`
+  ).join('');
+
+  // share code
+  const data = btoa(unescape(encodeURIComponent(`BL1|${name}|pipeline_hbb|steps:${done}/8`)));
+  document.getElementById('shareCode').textContent = data;
+
+  localStorage.setItem('hbb_pipeline_done', new Date().toISOString().slice(0,10));
+  localStorage.setItem('biomol_hbb_pipeline_best', JSON.stringify({score:Math.round(done/8*100), date:new Date().toISOString().slice(0,10)}));
+
+  document.getElementById('summarySection').style.display = 'block';
+  document.getElementById('summarySection').scrollIntoView({behavior:'smooth'});
+}
+
+function copyCode(){
+  navigator.clipboard.writeText(document.getElementById('shareCode').textContent)
+    .then(()=>alert('Código copiado. Compártelo con tu profesor.'))
+    .catch(()=>alert('Selecciona y copia el código manualmente.'));
+}
+</script>
+</body>
+</html>

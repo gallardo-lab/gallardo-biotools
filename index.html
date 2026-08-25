@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b2545">
+  <title>Gallardo BioTools — Educational Tools in Cancer Biology & Nanomedicine</title>
+  <meta name="description" content="Open interactive educational tools in cancer biology, molecular biology, and nanomedicine. Developed by Hugo L. Gallardo-Blanco · UANL. Free to use for all educational levels." />
+  <meta name="author" content="Hugo Leonid Gallardo-Blanco">
+  <link rel="canonical" href="https://gallardo-lab.github.io/gallardo-biotools/" />
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X5BT5RP5WF"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-X5BT5RP5WF');
+  </script>
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Gallardo BioTools — Cancer Biology & Nanomedicine Tools" />
+  <meta property="og:description" content="Free browser-based interactive tools for learning molecular biology, cell biology, and nanomedicine. All levels." />
+  <meta property="og:url" content="https://gallardo-lab.github.io/gallardo-biotools/" />
+  <style>
+    :root{
+      --ink:#0b2545;
+      --accent:#2a6f97;
+      --bg:#f5f7fa;
+      --card:#ffffff;
+      --muted:#556070;
+      --border:#c8d3df;
+      --green:#1a7a4a;
+      --amber:#7a5200;
+      --amber-bg:#fff8e1;
+    }
+    html{ scroll-behavior:smooth; }
+    *{ box-sizing:border-box; }
+    body{
+      font-family:Arial, Helvetica, sans-serif;
+      margin:0;
+      background:var(--bg);
+      color:#222;
+    }
+
+    /* Skip link */
+    .skip-link{
+      position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden;
+    }
+    .skip-link:focus{
+      position:fixed; top:10px; left:10px; width:auto; height:auto;
+      padding:10px 16px; background:var(--ink); color:#fff;
+      border-radius:8px; font-weight:700; z-index:10000; text-decoration:none;
+    }
+
+    /* Header */
+    header{
+      background:var(--ink);
+      color:#fff;
+      padding:10px 20px 24px;
+      text-align:center;
+    }
+    header .logo{
+      font-size:13px;
+      font-weight:700;
+      letter-spacing:2px;
+      opacity:0.7;
+      text-transform:uppercase;
+      margin-bottom:10px;
+    }
+    header h1{
+      margin:0 0 10px;
+      font-size:30px;
+      line-height:1.2;
+    }
+    header .tagline{
+      font-size:15px;
+      opacity:0.88;
+      max-width:680px;
+      margin:0 auto 18px;
+      line-height:1.5;
+    }
+    .header-badges{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      justify-content:center;
+      margin-bottom:6px;
+    }
+    .badge{
+      background:rgba(255,255,255,0.14);
+      border:1px solid rgba(255,255,255,0.3);
+      color:#fff;
+      font-size:12px;
+      font-weight:700;
+      padding:4px 12px;
+      border-radius:999px;
+    }
+
+    /* Nav */
+    .topnav-wrap{
+      position:sticky; top:0; z-index:999;
+      background:rgba(245,247,250,0.96);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--border);
+    }
+    .topnav{
+      max-width:1000px; margin:0 auto;
+      padding:8px 16px;
+      display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;
+    }
+    .navlinks{ display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; }
+    .navlinks a{
+      color:var(--ink); text-decoration:none; font-weight:700; font-size:12.5px;
+      padding:5px 9px; border-radius:10px; border:1px solid transparent;
+    }
+    .navlinks a:hover{ border-color:rgba(42,111,151,0.35); background:#fff; }
+    .langbtn{
+      border:1px solid var(--border); background:#fff; color:var(--ink);
+      padding:6px 10px; border-radius:10px; cursor:pointer;
+      font-weight:800; margin-left:4px; font-size:13px;
+    }
+    .langbtn.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+
+    /* Sections */
+    .section{
+      max-width:1000px; margin:22px auto; padding:20px;
+      background:var(--card); border-radius:12px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.08);
+    }
+    .section h2{
+      color:var(--ink);
+      border-bottom:3px solid var(--accent);
+      padding-bottom:6px;
+      margin-top:0;
+    }
+    section[id]{ scroll-margin-top:62px; }
+
+    /* Level filter */
+    .filter-row{
+      display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;
+    }
+    .filter-btn{
+      border:1px solid var(--border); background:#fff; color:var(--ink);
+      padding:6px 14px; border-radius:999px; cursor:pointer;
+      font-weight:700; font-size:13px;
+    }
+    .filter-btn.active{
+      background:var(--ink); color:#fff; border-color:var(--ink);
+    }
+
+    /* Tool grid */
+    .tool-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill, minmax(270px, 1fr));
+      gap:14px;
+      margin-top:4px;
+    }
+    .tool-card{
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:16px;
+      background:#f8fafc;
+      display:flex; flex-direction:column; gap:8px;
+      transition:box-shadow 0.15s, transform 0.15s;
+      text-decoration:none;
+      color:inherit;
+    }
+    .tool-card:hover{
+      box-shadow:0 6px 20px rgba(42,111,151,0.18);
+      transform:translateY(-2px);
+    }
+    .tool-card .card-top{
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .tool-icon{ font-size:26px; }
+    .tool-lang{
+      display:flex; gap:4px;
+    }
+    .lang-tag{
+      font-size:10px; font-weight:800;
+      padding:2px 6px; border-radius:4px;
+      background:rgba(42,111,151,0.1);
+      color:var(--accent);
+      border:1px solid rgba(42,111,151,0.2);
+    }
+    .tool-title{
+      font-weight:700; color:var(--ink); font-size:15px; margin:0;
+    }
+    .tool-desc{
+      font-size:13px; color:var(--muted); margin:0; line-height:1.5;
+    }
+    .tool-footer{
+      display:flex; align-items:center; justify-content:space-between;
+      margin-top:4px;
+    }
+    .level-tag{
+      font-size:11px; font-weight:700;
+      padding:3px 9px; border-radius:999px;
+    }
+    .level-prepa{ background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
+    .level-lic{ background:#e3f2fd; color:#1565c0; border:1px solid #90caf9; }
+    .level-grad{ background:#f3e5f5; color:#6a1b9a; border:1px solid #ce93d8; }
+    .level-all{ background:#fff8e1; color:#e65100; border:1px solid #ffcc80; }
+    .open-btn{
+      font-size:12px; font-weight:700; color:var(--accent);
+      text-decoration:none; padding:4px 10px;
+      border:1px solid rgba(42,111,151,0.3);
+      border-radius:8px; background:#fff;
+    }
+    .open-btn:hover{ background:var(--accent); color:#fff; }
+
+    /* Series label */
+    .series-label{
+      font-size:12px; font-weight:700; letter-spacing:0.5px;
+      color:var(--muted); text-transform:uppercase;
+      margin:20px 0 8px;
+    }
+
+    /* Info box */
+    .info-box{
+      background:rgba(42,111,151,0.06);
+      border:1px solid rgba(42,111,151,0.2);
+      border-radius:10px;
+      padding:12px 16px;
+      font-size:14px;
+      color:var(--ink);
+      margin-bottom:10px;
+    }
+
+    /* Smallnote */
+    .smallnote{ font-size:14px; color:var(--muted); }
+
+    /* Logo header */
+    .header-logo-img{
+      display:block;
+      margin:0 auto 6px;
+      height:480px;
+      width:auto;
+      max-width:90%;
+      object-fit:contain;
+    }
+
+    /* Footer */
+    footer{
+      text-align:center; padding:28px 12px 40px;
+      font-size:13px; color:#777;
+    }
+    footer a{ color:var(--accent); }
+    .footer-logo-img{
+      display:block;
+      margin:0 auto 12px;
+      height:120px;
+      width:auto;
+      object-fit:contain;
+      opacity:0.85;
+    }
+
+    /* Back to top */
+    #backToTop{
+      position:fixed; bottom:24px; right:20px;
+      background:var(--ink); color:#fff; border:none;
+      border-radius:50%; width:42px; height:42px;
+      font-size:18px; cursor:pointer;
+      box-shadow:0 4px 12px rgba(0,0,0,0.2);
+      display:none; align-items:center; justify-content:center;
+      z-index:998;
+    }
+    #backToTop:hover{ background:var(--accent); }
+  </style>
+</head>
+<body>
+
+<a class="skip-link" href="#tools">Skip to tools</a>
+
+<header>
+  <img
+    src="Gallardo-Biotools-logo.png"
+    alt="Gallardo-Lab logo"
+    class="header-logo-img"
+  />
+  <div class="logo">Gallardo BioTools</div>
+  <h1>
+    <span data-lang="en">Interactive Educational Tools</span>
+    <span data-lang="es" style="display:none;">Herramientas Educativas Interactivas</span>
+  </h1>
+  <p class="tagline" data-lang="en">
+    Open, browser-based tools for learning cancer biology, molecular biology, and nanomedicine.
+  </p>
+  <p class="tagline" data-lang="es" style="display:none;">
+    Herramientas de acceso abierto para aprender biología del cáncer, biología molecular y nanomedicina.
+  </p>
+  <div class="header-badges">
+    <span class="badge" data-lang="en">🆓 Free &amp; Open Access</span>
+    <span class="badge" data-lang="es" style="display:none;">🆓 Libre y de acceso abierto</span>
+    <span class="badge" data-lang="en">🌐 No install required</span>
+    <span class="badge" data-lang="es" style="display:none;">🌐 Sin instalación</span>
+    <span class="badge" data-lang="en">🇲🇽 EN / ES</span>
+    <span class="badge" data-lang="es" style="display:none;">🇲🇽 ES / EN</span>
+    <span class="badge" data-lang="en">🎓 All educational levels</span>
+    <span class="badge" data-lang="es" style="display:none;">🎓 Todos los niveles</span>
+  </div>
+</header>
+
+<!-- Sticky nav -->
+<div class="topnav-wrap">
+  <div class="topnav">
+    <div class="navlinks">
+      <a href="#tools">
+        <span data-lang="en">All Tools</span>
+        <span data-lang="es" style="display:none;">Herramientas</span>
+      </a>
+      <a href="#citopolis">Citopolis</a>
+      <a href="#biomol">BioMol</a>
+      <a href="#biolab">BioLab</a>
+      <a href="tools/tarjetas-bioquimica-2026.html">
+        <span data-lang="en">Flashcards</span>
+        <span data-lang="es" style="display:none;">Tarjetas</span>
+      </a>
+      <a href="#nanomision">NanoMisión</a>
+      <a href="#standalone">
+        <span data-lang="en">Standalone</span>
+        <span data-lang="es" style="display:none;">Independientes</span>
+      </a>
+      <a href="#about">
+        <span data-lang="en">About</span>
+        <span data-lang="es" style="display:none;">Acerca de</span>
+      </a>
+    </div>
+    <div>
+      <button class="langbtn" id="btnEN" aria-pressed="true" onclick="setLang('en')">EN</button>
+      <button class="langbtn" id="btnES" aria-pressed="false" onclick="setLang('es')">ES</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function setLang(lang){
+    document.querySelectorAll('[data-lang]').forEach(el=>{
+      el.style.display = (el.getAttribute('data-lang') === lang) ? '' : 'none';
+    });
+    localStorage.setItem('libac_lang', lang);
+    ['btnEN','btnES'].forEach(id=>{
+      const btn = document.getElementById(id);
+      if(!btn) return;
+      const isActive = (id === 'btnEN' && lang==='en') || (id === 'btnES' && lang==='es');
+      btn.classList.toggle('active', isActive);
+      btn.setAttribute('aria-pressed', String(isActive));
+    });
+    document.documentElement.lang = lang;
+  }
+  (function(){
+    const saved = localStorage.getItem('libac_lang')
+      || (navigator.language && navigator.language.startsWith('es') ? 'es' : 'en');
+    setLang(saved);
+  })();
+</script>
+
+<!-- Filter + All tools -->
+<section id="tools" class="section">
+  <h2>
+    <span data-lang="en">🗂️ Browse by Category</span>
+    <span data-lang="es" style="display:none;">🗂️ Explorar por categoría</span>
+  </h2>
+  <div class="filter-row" id="catFilter">
+    <button class="filter-btn active" data-cat="all" onclick="filterCategory('all')"><span data-lang="en">All</span><span data-lang="es" style="display:none;">Todas</span></button>
+    <button class="filter-btn" data-cat="citopolis" onclick="filterCategory('citopolis')">🏙️ Citopolis</button>
+    <button class="filter-btn" data-cat="biomol" onclick="filterCategory('biomol')">🧬 BioMol</button>
+    <button class="filter-btn" data-cat="biolab" onclick="filterCategory('biolab')">🔬 BioLab</button>
+    <button class="filter-btn" data-cat="nanomision" onclick="filterCategory('nanomision')">🚀 NanoMisión</button>
+    <button class="filter-btn" data-cat="standalone" onclick="filterCategory('standalone')">🧰 <span data-lang="en">Tools</span><span data-lang="es" style="display:none;">Herramientas</span></button>
+  </div>
+  <h2 style="margin-top:14px">
+    <span data-lang="en">🧰 Filter by Level</span>
+    <span data-lang="es" style="display:none;">🧰 Filtrar por nivel</span>
+  </h2>
+  <div class="filter-row" id="levelFilter">
+    <button class="filter-btn active" data-level="all" onclick="filterLevel('all')">
+      <span data-lang="en">All levels</span>
+      <span data-lang="es" style="display:none;">Todos los niveles</span>
+    </button>
+    <button class="filter-btn" data-level="prepa" onclick="filterLevel('prepa')">
+      <span data-lang="en">High school</span>
+      <span data-lang="es" style="display:none;">Preparatoria</span>
+    </button>
+    <button class="filter-btn" data-level="lic" onclick="filterLevel('lic')">
+      <span data-lang="en">Undergraduate</span>
+      <span data-lang="es" style="display:none;">Licenciatura</span>
+    </button>
+    <button class="filter-btn" data-level="grad" onclick="filterLevel('grad')">
+      <span data-lang="en">Graduate</span>
+      <span data-lang="es" style="display:none;">Posgrado</span>
+    </button>
+  </div>
+</section>
+
+<script>
+  function filterLevel(level){
+    document.querySelectorAll('#levelFilter .filter-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelector(`#levelFilter .filter-btn[data-level="${level}"]`).classList.add('active');
+    document.querySelectorAll('.tool-card').forEach(card=>{
+      const cardLevel = card.getAttribute('data-level') || '';
+      if(level === 'all' || cardLevel.includes(level)){
+        card.style.display = '';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+  // Filtro por categoría: muestra una sección de programa a la vez (no mueve archivos ni cambia enlaces)
+  const CAT_SECTIONS = ['citopolis','biomol','biolab','nanomision','standalone'];
+  function filterCategory(cat){
+    document.querySelectorAll('#catFilter .filter-btn').forEach(b=>b.classList.remove('active'));
+    const btn = document.querySelector(`#catFilter .filter-btn[data-cat="${cat}"]`);
+    if(btn) btn.classList.add('active');
+    CAT_SECTIONS.forEach(id=>{
+      const s = document.getElementById(id);
+      if(s) s.style.display = (cat==='all' || cat===id) ? '' : 'none';
+    });
+    try{ localStorage.setItem('gbt_cat', cat); }catch(e){}
+  }
+  (function(){
+    let c='all'; try{ c=localStorage.getItem('gbt_cat')||'all'; }catch(e){}
+    filterCategory(c);
+  })();
+</script>
+
+<!-- CITOPOLIS -->
+<section id="citopolis" class="section">
+  <h2>🏙️ Citopolis — <span data-lang="en">Cell Biology</span><span data-lang="es" style="display:none;">Biología Celular</span></h2>
+  <p class="smallnote" data-lang="en">City-building metaphor for learning cell biology — organelles, signaling, and cancer mechanisms.</p>
+  <p class="smallnote" data-lang="es" style="display:none;">Metáfora de construcción urbana para aprender biología celular — organelos, señalización y mecanismos del cáncer.</p>
+  <div class="tool-grid">
+
+    <a class="tool-card" href="citopolis/index.html" data-level="all lic grad">
+      <div class="card-top">
+        <span class="tool-icon">🗺️</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span><span class="lang-tag">EN</span></div>
+      </div>
+      <p class="tool-title">Citopolis Hub</p>
+      <p class="tool-desc" data-lang="en">Main entry point — navigate all Citopolis modules from here.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">Punto de entrada principal — navega todos los módulos de Citopolis.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-all">All levels</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="citopolis/main.html" data-level="lic grad">
+      <div class="card-top">
+        <span class="tool-icon">🏙️</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span><span class="lang-tag">EN</span></div>
+      </div>
+      <p class="tool-title">Citopolis Main</p>
+      <p class="tool-desc" data-lang="en">Core cell biology — organelles, membrane, and cellular functions as a city.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">Biología celular central — organelos, membrana y funciones celulares como una ciudad.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-lic">Undergrad / Grad</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="citopolis/inmuno.html" data-level="lic grad">
+      <div class="card-top">
+        <span class="tool-icon">🛡️</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span></div>
+      </div>
+      <p class="tool-title">Citopolis: Immunology</p>
+      <p class="tool-desc" data-lang="en">Immune system mechanisms in the cell city framework.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">Mecanismos del sistema inmune en el marco de la ciudad celular.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-lic">Undergrad / Grad</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="citopolis/p53.html" data-level="grad">
+      <div class="card-top">
+        <span class="tool-icon">🔴</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span></div>
+      </div>
+      <p class="tool-title">Citopolis: p53 & Cancer</p>
+      <p class="tool-desc" data-lang="en">p53 tumor suppressor pathway — mutations, loss of function, and cancer progression.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">Vía del supresor tumoral p53 — mutaciones, pérdida de función y progresión del cáncer.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-grad">Graduate</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="citopolis/parp.html" data-level="grad">
+      <div class="card-top">
+        <span class="tool-icon">🧬</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span></div>
+      </div>
+      <p class="tool-title">Citopolis: PARP</p>
+      <p class="tool-desc" data-lang="en">PARP signaling and DNA damage repair in the context of cancer therapy.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">Señalización de PARP y reparación del daño al ADN en el contexto de la terapia del cáncer.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-grad">Graduate</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- BIOMOL -->
+<section id="biomol" class="section">
+  <h2>🧬 BioMol — <span data-lang="en">Molecular Biology</span><span data-lang="es" style="display:none;">Biología Molecular</span></h2>
+  <p class="smallnote" data-lang="en">Step-by-step interactive visualizations of core molecular biology processes.</p>
+  <p class="smallnote" data-lang="es" style="display:none;">Visualizaciones interactivas paso a paso de los procesos fundamentales de la biología molecular.</p>
+  <div class="tool-grid">
+
+    <a class="tool-card" href="biomol/estructura.html" data-level="prepa lic">
+      <div class="card-top">
+        <span class="tool-icon">⚛️</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span></div>
+      </div>
+      <p class="tool-title">Molecular Structure</p>
+      <p class="tool-desc" data-lang="en">Atoms, bonds, and the structure of biological macromolecules.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">Átomos, enlaces y estructura de las macromoléculas biológicas.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-prepa">High school / Undergrad</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="biomol/mutaciones.html" data-level="prepa lic">
+      <div class="card-top">
+        <span class="tool-icon">🔀</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span></div>
+      </div>
+      <p class="tool-title">Mutations</p>
+      <p class="tool-desc" data-lang="en">Types of DNA mutations and their consequences at the molecular level.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">Tipos de mutaciones del ADN y sus consecuencias a nivel molecular.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-prepa">High school / Undergrad</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="biomol/replicacion.html" data-level="lic">
+      <div class="card-top">
+        <span class="tool-icon">🔁</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span></div>
+      </div>
+      <p class="tool-title">DNA Replication</p>
+      <p class="tool-desc" data-lang="en">Semi-conservative replication — enzymes, forks, and fidelity mechanisms.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">Replicación semiconservativa — enzimas, horquillas y mecanismos de fidelidad.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-lic">Undergraduate</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="biomol/transcripcion.html" data-level="lic">
+      <div class="card-top">
+        <span class="tool-icon">📝</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span></div>
+      </div>
+      <p class="tool-title">Transcription</p>
+      <p class="tool-desc" data-lang="en">DNA → RNA: promoters, RNA polymerase, and mRNA processing.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">ADN → ARN: promotores, ARN polimerasa y procesamiento del ARNm.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-lic">Undergraduate</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="biomol/traduccion.html" data-level="lic">
+      <div class="card-top">
+        <span class="tool-icon">🏗️</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span></div>
+      </div>
+      <p class="tool-title">Translation</p>
+      <p class="tool-desc" data-lang="en">RNA → Protein: ribosomes, codons, and protein synthesis.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">ARN → Proteína: ribosomas, codones y síntesis de proteínas.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-lic">Undergraduate</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- BIOLAB -->
+<section id="biolab" class="section">
+  <h2>🔬 BioLab — <span data-lang="en">Lab Interactive</span><span data-lang="es" style="display:none;">Laboratorio Interactivo</span></h2>
+  <p class="smallnote" data-lang="en">Gamified laboratory experience for biomedical sciences students.</p>
+  <p class="smallnote" data-lang="es" style="display:none;">Experiencia de laboratorio gamificada para estudiantes de ciencias biomédicas.</p>
+  <div class="tool-grid">
+    <a class="tool-card" href="biolab/index.html" data-level="lic grad">
+      <div class="card-top">
+        <span class="tool-icon">🧪</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span></div>
+      </div>
+      <p class="tool-title">BioLab (ES)</p>
+      <p class="tool-desc" data-lang="en">Interactive laboratory simulations — techniques, protocols, and results interpretation.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">Simulaciones de laboratorio interactivas — técnicas, protocolos e interpretación de resultados.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-lic">Undergrad / Grad</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+    <a class="tool-card" href="biolab/index_en.html" data-level="lic grad">
+      <div class="card-top">
+        <span class="tool-icon">🧪</span>
+        <div class="tool-lang"><span class="lang-tag">EN</span></div>
+      </div>
+      <p class="tool-title">BioLab (EN)</p>
+      <p class="tool-desc" data-lang="en">Interactive laboratory simulations — techniques, protocols, and results interpretation.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">Simulaciones de laboratorio interactivas — técnicas, protocolos e interpretación de resultados.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-lic">Undergrad / Grad</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="tools/tarjetas-bioquimica-2026.html" data-level="lic">
+      <div class="card-top">
+        <span class="tool-icon">🃏</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span></div>
+      </div>
+      <p class="tool-title" data-lang="en">Flashcards — Biochemistry Lab 2026</p>
+      <p class="tool-title" data-lang="es" style="display:none;">Tarjetas de estudio — Lab Bioquímica 2026</p>
+      <p class="tool-desc" data-lang="en">80 study flashcards for the Molecular Biology lab practicals (P11–P14): DNA extraction, PCR, electrophoresis, and bioinformatics. Reveal answer + extended explanation per card.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">80 tarjetas de estudio para el laboratorio de Biología Molecular (P11–P14): extracción de ADN, PCR, electroforesis y bioinformática. Muestra la respuesta y una explicación extendida por tarjeta.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-lic">Licenciatura · UANL 2026</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="tools/cuestionario_P11-P14.html" data-level="lic">
+      <div class="card-top">
+        <span class="tool-icon">📋</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span></div>
+      </div>
+      <p class="tool-title" data-lang="en">Quiz P11–P14 · Multiple Choice</p>
+      <p class="tool-title" data-lang="es" style="display:none;">Cuestionario P11–P14 · Opción Múltiple</p>
+      <p class="tool-desc" data-lang="en">10-question graded quiz covering P11 (DNA extraction), P12 (PCR), P13 (electrophoresis) and P14 (bioinformatics). Downloadable certificate upon completion.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">Cuestionario de 10 preguntas con calificación automática: P11 (extracción ADN), P12 (PCR), P13 (electroforesis) y P14 (bioinformática). Constancia descargable al terminar.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-lic">Licenciatura · UANL 2026</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="tools/cuestionario-nanotheranostics.html" data-level="grad">
+      <div class="card-top">
+        <span class="tool-icon">🏆</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span></div>
+      </div>
+      <p class="tool-title" data-lang="en">Competition · Nanotheranostic NPs</p>
+      <p class="tool-title" data-lang="es" style="display:none;">Competencia · Nanopartículas Teranósticas</p>
+      <p class="tool-desc" data-lang="en">Sequential activity: 30 mandatory flashcards → 10-question graded exam (3 attempts, 70 pts to pass) → downloadable certificate. Biochemistry Dept., School of Medicine, UANL.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">Actividad secuencial: 30 flashcards obligatorias → examen de 10 preguntas (3 intentos, aprobación 70 pts) → comprobante descargable. Dpto. de Bioquímica, Fac. de Medicina, UANL.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-grad">Posgrado · Biomedicina UANL</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="tools/flashcards-nanotheranostics.html" data-level="grad">
+      <div class="card-top">
+        <span class="tool-icon">🧲</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span></div>
+      </div>
+      <p class="tool-title" data-lang="en">Flashcards · Nanotheranostics Functionalization</p>
+      <p class="tool-title" data-lang="es" style="display:none;">Flashcards · Funcionalización Nanoteranóstica</p>
+      <p class="tool-desc" data-lang="en">30 flip cards on AuNP/polymer surface chemistry, HER2 aptamers, c-Myc/Max peptides, nucleic acid payloads and translational gaps. Graduate level.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">30 tarjetas de volteo sobre química de superficie AuNP/polímero, aptámeros HER2, péptidos c-Myc/Max, cargas de ácido nucleico y brechas traslacionales. Nivel posgrado.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-grad">Posgrado · Gallardo-Lab</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="tools/cuestionario-np-caso.html" data-level="grad">
+      <div class="card-top">
+        <span class="tool-icon">🏅</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span></div>
+      </div>
+      <p class="tool-title" data-lang="en">Competition · The NP That Didn't Arrive</p>
+      <p class="tool-title" data-lang="es" style="display:none;">Competencia · La NP que no llegaba</p>
+      <p class="tool-desc" data-lang="en">Sequential activity: 24 mandatory flashcards → 10-question graded exam (3 attempts, 70 pts to pass) → downloadable certificate. Case study on AuNP design failure, redesign and cognitive biases. Biochemistry Dept., School of Medicine, UANL.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">Actividad secuencial: 24 flashcards obligatorias → examen de 10 preguntas (3 intentos, aprobación 70 pts) → comprobante descargable. Caso de fallo de AuNP, rediseño y sesgos cognitivos. Dpto. de Bioquímica, Fac. de Medicina, UANL.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-grad">Posgrado · Biomedicina UANL</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="tools/flashcards-np-caso.html" data-level="grad">
+      <div class="card-top">
+        <span class="tool-icon">🔬</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span></div>
+      </div>
+      <p class="tool-title" data-lang="en">Flashcards · The NP That Didn't Arrive</p>
+      <p class="tool-title" data-lang="es" style="display:none;">Flashcards · La NP que no llegaba</p>
+      <p class="tool-desc" data-lang="en">24 flip cards on the AuNP case study: G-quadruplex failure, buffer redesign, in vitro validation, cognitive biases and epistemology in experimental nanomedicine. Graduate level.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">24 tarjetas sobre el caso de AuNP: fallo del G-cuadruplex, rediseño de buffer, validación in vitro, sesgos cognitivos y epistemología en nanomedicina experimental. Nivel posgrado.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-grad">Posgrado · Gallardo-Lab</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="biomol/Bioinformatica_Medica/HBB/quiz_HBB.html" data-level="lic">
+      <div class="card-top">
+        <span class="tool-icon">🧬</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span></div>
+      </div>
+      <p class="tool-title" data-lang="en">Quiz HBB · Pre-lab P14</p>
+      <p class="tool-title" data-lang="es" style="display:none;">Quiz HBB · Pre-práctica P14</p>
+      <p class="tool-desc" data-lang="en">10-question pre-practice quiz on the HBB gene, sickle cell anemia (c.20A>T, p.Glu6Val), MstII RFLP and OMIM #603903.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">Quiz previo de 10 preguntas: gen HBB, anemia de células falciformes (c.20A>T, p.Glu6Val), RFLP con Bsu36I/MstII y OMIM #603903.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-lic">Licenciatura · UANL 2026</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="biomol/Bioinformatica_Medica/HBB/pipeline_HBB.html" data-level="lic">
+      <div class="card-top">
+        <span class="tool-icon">🔬</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span></div>
+      </div>
+      <p class="tool-title" data-lang="en">Pipeline HBB · Bioinformatics P14</p>
+      <p class="tool-title" data-lang="es" style="display:none;">Pipeline HBB · Bioinformática P14</p>
+      <p class="tool-desc" data-lang="en">8-step interactive pipeline guide: BLASTn → Bl2seq → ORF Finder → OMIM → Clinical summary → PubMed → Restriction Map → Restriction Digest.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">Guía interactiva de 8 pasos: BLASTn → Bl2seq → ORF Finder → OMIM → Resumen clínico → PubMed → Mapa de restricción → Digestión in silico.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-lic">Licenciatura · UANL 2026</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- NANOMISIÓN -->
+<section id="nanomision" class="section">
+  <h2>🚀 NanoMisión — <span data-lang="en">Nanomedicine</span><span data-lang="es" style="display:none;">Nanomedicina</span></h2>
+  <p class="smallnote" data-lang="en">Mission-based exploration of nanomedicine concepts and targeted drug delivery.</p>
+  <p class="smallnote" data-lang="es" style="display:none;">Exploración por misiones de conceptos de nanomedicina y liberación dirigida de fármacos.</p>
+  <div class="tool-grid">
+    <a class="tool-card" href="nanomision/index.html" data-level="lic grad">
+      <div class="card-top">
+        <span class="tool-icon">🔬</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span></div>
+      </div>
+      <p class="tool-title">NanoMisión (ES)</p>
+      <p class="tool-desc" data-lang="en">Interactive missions exploring nanoparticle design, targeting, and cancer therapy.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">Misiones interactivas sobre diseño de nanopartículas, direccionamiento y terapia del cáncer.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-lic">Undergrad / Grad</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+    <a class="tool-card" href="nanomision/index_en.html" data-level="lic grad">
+      <div class="card-top">
+        <span class="tool-icon">🔬</span>
+        <div class="tool-lang"><span class="lang-tag">EN</span></div>
+      </div>
+      <p class="tool-title">NanoMission (EN)</p>
+      <p class="tool-desc" data-lang="en">Interactive missions exploring nanoparticle design, targeting, and cancer therapy.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">Misiones interactivas sobre diseño de nanopartículas, direccionamiento y terapia del cáncer.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-lic">Undergrad / Grad</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- STANDALONE TOOLS -->
+<section id="standalone" class="section">
+  <h2>🧰 <span data-lang="en">Standalone Tools</span><span data-lang="es" style="display:none;">Herramientas independientes</span></h2>
+  <p class="smallnote" data-lang="en">Individual interactive tools and classroom activities.</p>
+  <p class="smallnote" data-lang="es" style="display:none;">Herramientas interactivas individuales y actividades para el aula.</p>
+  <div class="tool-grid">
+
+    <a class="tool-card" href="tools/dna-helix.html" data-level="prepa lic">
+      <div class="card-top">
+        <span class="tool-icon">🌀</span>
+        <div class="tool-lang"><span class="lang-tag">EN</span></div>
+      </div>
+      <p class="tool-title">DNA Double Helix</p>
+      <p class="tool-desc" data-lang="en">Interactive 3D-style visualization of the DNA double helix structure.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">Visualización interactiva estilo 3D de la estructura de la doble hélice del ADN.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-prepa">High school / Undergrad</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="tools/strider-web.html" data-level="lic grad">
+      <div class="card-top">
+        <span class="tool-icon">🧬</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span></div>
+      </div>
+      <p class="tool-title" data-lang="en">StriderWeb — Sequence analysis</p>
+      <p class="tool-title" data-lang="es" style="display:none;">StriderWeb — Análisis de secuencias</p>
+      <p class="tool-desc" data-lang="en">DNA Strider-style toolkit: translation, ORFs, restriction map, digestion &amp; virtual gel, dot plot, codon usage.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">Tipo DNA Strider: traducción, ORFs, mapa de restricción, digestión y gel virtual, dot plot, uso de codones.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-lic">Undergrad / Grad</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="tools/primer-designer.html" data-level="lic grad">
+      <div class="card-top">
+        <span class="tool-icon">🧪</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span></div>
+      </div>
+      <p class="tool-title" data-lang="en">PrimerDesigner — PCR primers</p>
+      <p class="tool-title" data-lang="es" style="display:none;">PrimerDesigner — Diseño de primers</p>
+      <p class="tool-desc" data-lang="en">Design PCR primers with nearest-neighbor Tm, in-silico PCR, Sanger readability and a local primer database.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">Diseña primers PCR con Tm nearest-neighbor, PCR in silico, legibilidad Sanger y base de datos local.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-lic">Undergrad / Grad</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+    <a class="tool-card" href="tools/primer-designer-expert.html" data-level="grad">
+      <div class="card-top">
+        <span class="tool-icon">🔬</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span><span class="lang-tag">EN</span></div>
+      </div>
+      <p class="tool-title" data-lang="en">PrimerDesigner Expert — Sanger sequencing</p>
+      <p class="tool-title" data-lang="es" style="display:none;">PrimerDesigner Expert — secuenciación Sanger</p>
+      <p class="tool-desc" data-lang="en">Expert version for Sanger: independent forward and reverse search regions, quality filter, self-end dimer, 3' stability, Rychlik optimal Ta and per-primer BLAST links.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">Versión experta para Sanger: regiones de búsqueda independientes para forward y reverse, filtro de calidad, dímero self-end, estabilidad 3', Ta óptima de Rychlik y enlaces BLAST por primer.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-grad">Grad</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+    <a class="tool-card" href="tools/competencia-grupal.html" data-level="all lic grad">
+      <div class="card-top">
+        <span class="tool-icon">🏆</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span></div>
+      </div>
+      <p class="tool-title" data-lang="en">Group Competition</p>
+      <p class="tool-title" data-lang="es" style="display:none;">Competencia grupal</p>
+      <p class="tool-desc" data-lang="en">Competitive quiz platform designed for classroom team activities.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">Plataforma de cuestionario competitivo para actividades de equipo en el aula.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-all">All levels</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="tools/mapa-misiones.html" data-level="all lic grad">
+      <div class="card-top">
+        <span class="tool-icon">🗺️</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span></div>
+      </div>
+      <p class="tool-title" data-lang="en">Mission Map</p>
+      <p class="tool-title" data-lang="es" style="display:none;">Mapa de misiones</p>
+      <p class="tool-desc" data-lang="en">Visual navigation map linking all educational missions and modules.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">Mapa de navegación visual que enlaza todas las misiones y módulos educativos.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-all">All levels</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+    <a class="tool-card" href="tools/oro-caballo-troya.html" data-level="lic grad">
+      <div class="card-top">
+        <span class="tool-icon">🐴</span>
+        <div class="tool-lang"><span class="lang-tag">ES</span></div>
+      </div>
+      <p class="tool-title" data-lang="en">Gold &amp; Trojan Horse</p>
+      <p class="tool-title" data-lang="es" style="display:none;">Oro y Caballo de Troya</p>
+      <p class="tool-desc" data-lang="en">Drug delivery metaphor — gold nanoparticles and the Trojan horse concept in targeted therapy.</p>
+      <p class="tool-desc" data-lang="es" style="display:none;">Metáfora de liberación dirigida — nanopartículas de oro y el concepto del Caballo de Troya en terapia dirigida.</p>
+      <div class="tool-footer">
+        <span class="level-tag level-lic">Undergrad / Grad</span>
+        <span class="open-btn">Open →</span>
+      </div>
+    </a>
+
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" class="section">
+  <h2>
+    <span data-lang="en">About Gallardo BioTools</span>
+    <span data-lang="es" style="display:none;">Acerca de Gallardo BioTools</span>
+  </h2>
+  <div data-lang="en">
+    <p>
+      These tools are developed and maintained by <b>Hugo L. Gallardo-Blanco</b>
+      and <b>Celia N. Sánchez-Domínguez</b>
+      at the School of Medicine &amp; University Hospital "Dr. José Eleuterio González",
+      Universidad Autónoma de Nuevo León (UANL), México.
+    </p>
+    <p>
+      All tools are free to use for non-commercial educational purposes.
+      For questions, collaborations, or to report issues, contact us via
+      <a href="https://github.com/gallardo-lab/gallardo-biotools/issues" target="_blank" rel="noopener noreferrer">GitHub Issues</a>
+      or email <a href="mailto:hugo.gallardobl@uanl.edu.mx">hugo.gallardobl@uanl.edu.mx</a>.
+    </p>
+  </div>
+  <div data-lang="es" style="display:none;">
+    <p>
+      Estas herramientas son desarrolladas y mantenidas por <b>Hugo L. Gallardo-Blanco</b>
+      y <b>Celia N. Sánchez-Domínguez</b>
+      en la Facultad de Medicina y Hospital Universitario "Dr. José Eleuterio González",
+      Universidad Autónoma de Nuevo León (UANL), México.
+    </p>
+    <p>
+      Todas las herramientas son de uso libre para fines educativos no comerciales.
+      Para dudas, colaboraciones o reportar errores, contáctanos por
+      <a href="https://github.com/gallardo-lab/gallardo-biotools/issues" target="_blank" rel="noopener noreferrer">GitHub Issues</a>
+      o al correo <a href="mailto:hugo.gallardobl@uanl.edu.mx">hugo.gallardobl@uanl.edu.mx</a>.
+    </p>
+  </div>
+  <p style="margin-top:14px;">
+    <a href="https://gallardo-lab.github.io/" target="_blank" rel="noopener noreferrer">
+      <span data-lang="en">→ PI Web Biosketch: Dr. Hugo Gallardo-Blanco</span>
+      <span data-lang="es" style="display:none;">→ Biosketch web del PI: Dr. Hugo Gallardo-Blanco</span>
+    </a>
+  </p>
+</section>
+
+<footer>
+  <img
+    src="Gallardo-Biotools-logo.png"
+    alt="Gallardo-Lab logo"
+    class="footer-logo-img"
+  />
+  <p>
+    <span data-lang="en">Gallardo BioTools · School of Medicine, UANL · MIT License</span>
+    <span data-lang="es" style="display:none;">Gallardo BioTools · Facultad de Medicina, UANL · Licencia MIT</span>
+  </p>
+  <p>
+    <a href="https://github.com/gallardo-lab/gallardo-biotools" target="_blank" rel="noopener noreferrer">GitHub</a> ·
+    <a href="https://gallardo-lab.github.io/" target="_blank" rel="noopener noreferrer">
+      <span data-lang="en">PI Biosketch</span>
+      <span data-lang="es" style="display:none;">Biosketch del PI</span>
+    </a> ·
+    <a href="https://orcid.org/0000-0002-7816-4967" target="_blank" rel="noopener noreferrer">ORCID</a>
+  </p>
+  <p style="font-size:12px;opacity:.85;max-width:760px;margin:8px auto 0">
+    <span data-lang="en"><b>How to cite:</b> Gallardo-Blanco, H. L. (2026). <i>Gallardo BioTools: herramientas educativas e interactivas de biología molecular</i>. Zenodo. <a href="https://doi.org/10.5281/zenodo.20723201" target="_blank" rel="noopener noreferrer">https://doi.org/10.5281/zenodo.20723201</a></span>
+    <span data-lang="es" style="display:none;"><b>Cómo citar:</b> Gallardo-Blanco, H. L. (2026). <i>Gallardo BioTools: herramientas educativas e interactivas de biología molecular</i>. Zenodo. <a href="https://doi.org/10.5281/zenodo.20723201" target="_blank" rel="noopener noreferrer">https://doi.org/10.5281/zenodo.20723201</a></span>
+  </p>
+</footer>
+
+<button id="backToTop" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+<script>
+  window.addEventListener('scroll', ()=>{
+    const btn = document.getElementById('backToTop');
+    btn.style.display = window.scrollY > 400 ? 'flex' : 'none';
+  }, {passive:true});
+</script>
+
+</body>
+</html>

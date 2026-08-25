@@ -1,0 +1,15 @@
+#!/bin/sh
+# Aborta el commit si se intenta versionar material privado.
+PATRON='(^|/)(bitacora|bitácora).*\.md$|\.(docx|doc|pages|numbers|key|ris)$|(^|/)review_|(^|/)[Mm]anuscript|_concepcion|PCT'
+SOSPECHOSOS=$(git diff --cached --name-only --diff-filter=ACM | grep -iE "$PATRON")
+if [ -n "$SOSPECHOSOS" ]; then
+  echo "=========================================================="
+  echo " COMMIT ABORTADO. Material privado en el area de preparacion:"
+  echo "$SOSPECHOSOS" | sed 's/^/   /'
+  echo ""
+  echo " El material privado vive en el DMG cifrado, no en un repo."
+  echo " Quitarlo del indice:  git restore --staged <archivo>"
+  echo " Saltarlo a conciencia: git commit --no-verify"
+  echo "=========================================================="
+  exit 1
+fi

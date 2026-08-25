@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X5BT5RP5WF"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag("js", new Date());
+    gtag("config", "G-X5BT5RP5WF");
+  </script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuestionario P11–P14 · Laboratorio de Bioquímica UANL 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg:#0f172a; --surface:#1e293b; --surface2:#263147;
+    --accent:#3b82f6; --accent2:#06b6d4; --accent3:#fbbf24;
+    --text:#f1f5f9; --muted:#94a3b8; --border:#334155;
+    --green:#22c55e; --red:#ef4444;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sans-serif; min-height:100vh; }
+
+  /* ── PANTALLA DE REGISTRO ── */
+  #registerScreen {
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:2rem;
+  }
+  .register-card {
+    background:var(--surface); border:1px solid var(--border); border-radius:20px;
+    padding:2.5rem; max-width:480px; width:100%; text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+  }
+  .register-card .logo { font-family:'Orbitron',sans-serif; font-size:1.5rem; color:var(--accent); margin-bottom:.3rem; }
+  .register-card .inst { font-size:.8rem; color:var(--muted); margin-bottom:2rem; line-height:1.5; }
+  .register-card h2 { font-size:1.1rem; color:var(--accent3); margin-bottom:1.5rem; }
+  .field { text-align:left; margin-bottom:1.2rem; }
+  .field label { display:block; font-size:.82rem; color:var(--muted); margin-bottom:.4rem; font-weight:600; letter-spacing:.03em; }
+  .field input, .field select {
+    width:100%; background:var(--surface2); border:1px solid var(--border);
+    border-radius:10px; padding:.7rem 1rem; color:var(--text); font-size:.95rem;
+    font-family:inherit; transition:border-color .2s;
+  }
+  .field input:focus, .field select:focus { outline:none; border-color:var(--accent); }
+  .btn-start {
+    width:100%; background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#fff; border:none; border-radius:12px; padding:.9rem; font-size:1rem;
+    font-weight:700; cursor:pointer; margin-top:.5rem; transition:opacity .2s;
+    font-family:inherit; letter-spacing:.03em;
+  }
+  .btn-start:hover { opacity:.88; }
+  .btn-start:disabled { opacity:.4; cursor:default; }
+  .meta-pills { display:flex; gap:.5rem; justify-content:center; flex-wrap:wrap; margin-bottom:1.5rem; }
+  .pill { background:var(--surface2); border:1px solid var(--border); border-radius:20px; padding:.3rem .8rem; font-size:.75rem; color:var(--muted); }
+
+  /* ── QUIZ ── */
+  #quizScreen { display:none; }
+  header {
+    background:linear-gradient(135deg,#0f2849,#1e293b);
+    padding:1rem 2rem; border-bottom:2px solid var(--accent);
+    display:flex; align-items:center; gap:1rem; flex-wrap:wrap;
+    position:sticky; top:0; z-index:100;
+  }
+  header h1 { font-family:'Orbitron',sans-serif; font-size:1rem; color:var(--accent2); flex:1; }
+  .hdr-info { font-size:.8rem; color:var(--muted); }
+  .progress-wrap { width:100%; height:5px; background:var(--border); border-radius:3px; margin-top:.5rem; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:3px; transition:width .4s; width:0%; }
+
+  main { max-width:780px; margin:0 auto; padding:2rem 1rem 4rem; }
+
+  .q-card {
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:1.5rem 1.6rem; margin-bottom:1.3rem; transition:border-color .2s;
+  }
+  .q-card.answered { border-color:var(--accent2); }
+  .q-header { display:flex; gap:.7rem; align-items:flex-start; margin-bottom:1.1rem; }
+  .q-badge {
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#fff; font-weight:700; font-size:.75rem; padding:.25rem .6rem;
+    border-radius:6px; white-space:nowrap; flex-shrink:0; margin-top:2px;
+  }
+  .q-text { font-size:.97rem; line-height:1.6; }
+  .options { display:flex; flex-direction:column; gap:.5rem; }
+  .opt {
+    background:var(--surface2); border:1.5px solid var(--border); border-radius:10px;
+    padding:.65rem 1rem; cursor:pointer; font-size:.92rem; transition:all .15s;
+    display:flex; align-items:center; gap:.7rem; user-select:none;
+  }
+  .opt:hover:not(.locked) { border-color:var(--accent); background:#1e3a5f; }
+  .opt.selected { border-color:var(--accent); background:#1e3a5f; }
+  .opt.locked { cursor:default; }
+  .opt-letter { font-weight:700; color:var(--muted); font-size:.85rem; min-width:1.2rem; flex-shrink:0; }
+
+  .submit-wrap { text-align:center; margin-top:2rem; }
+  .btn-submit {
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#fff; border:none; border-radius:12px; padding:.85rem 2.5rem;
+    font-size:1rem; font-weight:700; cursor:pointer; font-family:inherit;
+    transition:opacity .2s; letter-spacing:.03em;
+  }
+  .btn-submit:hover { opacity:.88; }
+  .btn-submit:disabled { opacity:.35; cursor:default; }
+
+  /* ── RESULTADOS ── */
+  #resultsScreen {
+    display:none; min-height:100vh; padding:2rem 1rem;
+    background:radial-gradient(ellipse at top,#0f2849 0%,#0f172a 60%);
+  }
+  .results-inner { max-width:700px; margin:0 auto; }
+  .score-hero { text-align:center; padding:2.5rem 1rem; }
+  .score-hero .title { font-family:'Orbitron',sans-serif; font-size:1rem; color:var(--muted); margin-bottom:1rem; letter-spacing:.1em; text-transform:uppercase; }
+  .score-circle {
+    width:160px; height:160px; border-radius:50%; margin:0 auto 1.2rem;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    border:4px solid var(--accent);
+    background:conic-gradient(var(--accent) 0%, var(--surface2) 0%);
+  }
+  .score-pct { font-family:'Orbitron',sans-serif; font-size:2.4rem; font-weight:900; line-height:1; }
+  .score-sub { font-size:.78rem; color:var(--muted); margin-top:.2rem; }
+  .score-label { font-size:1.1rem; font-weight:700; margin-bottom:.3rem; }
+
+  .breakdown {
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:1.4rem 1.6rem; margin-bottom:1.2rem;
+  }
+  .breakdown h3 { font-size:.85rem; color:var(--muted); margin-bottom:1rem; text-transform:uppercase; letter-spacing:.06em; }
+  .bk-row { display:flex; align-items:center; gap:.8rem; margin-bottom:.6rem; font-size:.88rem; }
+  .bk-tag { background:var(--surface2); border-radius:6px; padding:.2rem .55rem; font-size:.75rem; font-weight:700; color:var(--accent2); min-width:40px; text-align:center; }
+  .bk-bar-wrap { flex:1; height:8px; background:var(--border); border-radius:4px; overflow:hidden; }
+  .bk-bar { height:100%; border-radius:4px; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .6s; }
+  .bk-score { font-size:.8rem; color:var(--muted); min-width:40px; text-align:right; }
+
+  .action-btns { display:flex; gap:.8rem; justify-content:center; flex-wrap:wrap; margin:1.5rem 0; }
+  .btn-cert {
+    background:linear-gradient(135deg,#854d0e,var(--accent3));
+    color:#000; border:none; border-radius:12px; padding:.8rem 1.8rem;
+    font-size:.95rem; font-weight:700; cursor:pointer; font-family:inherit;
+    transition:opacity .2s; letter-spacing:.02em;
+  }
+  .btn-cert:hover { opacity:.88; }
+  .btn-outline {
+    background:transparent; border:1.5px solid var(--border); color:var(--muted);
+    border-radius:12px; padding:.8rem 1.8rem; font-size:.95rem; font-weight:600;
+    cursor:pointer; font-family:inherit; transition:all .2s;
+  }
+  .btn-outline:hover { border-color:var(--accent); color:var(--text); }
+
+  /* ── CANVAS CERTIFICADO ── */
+  #certCanvas { display:none; }
+
+  footer { text-align:center; padding:2rem; color:var(--muted); font-size:.75rem; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ REGISTRO ══════════════ -->
+<div id="registerScreen">
+  <div class="register-card">
+    <div class="logo">🧬 BioLab</div>
+    <p class="inst">UNIVERSIDAD AUTÓNOMA DE NUEVO LEÓN<br>Facultad de Medicina · Laboratorio de Bioquímica · Ciclo 2026</p>
+    <h2>Cuestionario de Opción Múltiple<br><span style="color:var(--muted);font-size:.85rem;font-weight:400">Prácticas 11 · 12 · 13 · 14</span></h2>
+    <div class="meta-pills">
+      <span class="pill">📋 10 preguntas</span>
+      <span class="pill">⏱ Sin límite de tiempo</span>
+      <span class="pill">1 intento</span>
+    </div>
+    <div class="field">
+      <label>Nombre completo</label>
+      <input type="text" id="regNombre" placeholder="Apellido Paterno Materno, Nombre(s)" maxlength="80">
+    </div>
+    <div class="field">
+      <label>Matrícula</label>
+      <input type="text" id="regMatricula" placeholder="ej. 1845632" maxlength="12" pattern="[0-9]*">
+    </div>
+    <div class="field">
+      <label>Grupo</label>
+      <select id="regGrupo">
+        <option value="">— Selecciona tu grupo —</option>
+        <option>101</option><option>102</option><option>103</option>
+        <option>104</option><option>105</option><option>106</option>
+        <option>107</option><option>108</option><option>109</option>
+        <option>110</option><option>201</option><option>202</option>
+        <option>203</option><option>204</option><option>205</option>
+      </select>
+    </div>
+    <button class="btn-start" id="startBtn" onclick="startQuiz()" disabled>Iniciar cuestionario →</button>
+    <p style="font-size:.72rem;color:var(--muted);margin-top:1rem">Al iniciar aceptas que las respuestas son de tu autoría. Una vez iniciado no se puede interrumpir.</p>
+  </div>
+</div>
+
+<!-- ══════════════ QUIZ ══════════════ -->
+<div id="quizScreen">
+  <header>
+    <h1>Cuestionario P11–P14 · Bioquímica UANL</h1>
+    <span class="hdr-info" id="hdrInfo"></span>
+    <div class="progress-wrap" style="width:100%">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </header>
+  <main id="questionsArea"></main>
+  <div class="submit-wrap">
+    <button class="btn-submit" id="submitBtn" onclick="submitQuiz()" disabled>Entregar cuestionario</button>
+    <p style="font-size:.78rem;color:var(--muted);margin-top:.6rem" id="submitHint">Responde todas las preguntas para habilitar la entrega.</p>
+  </div>
+  <footer>BioLab Interactive · UANL · 2026</footer>
+</div>
+
+<!-- ══════════════ RESULTADOS ══════════════ -->
+<div id="resultsScreen">
+  <div class="results-inner">
+    <div class="score-hero">
+      <div class="title">Resultado final</div>
+      <div class="score-circle" id="scoreCircle">
+        <span class="score-pct" id="scorePct">—</span>
+        <span class="score-sub" id="scoreSub"></span>
+      </div>
+      <div class="score-label" id="scoreLabel"></div>
+      <p id="scoreMsg" style="color:var(--muted);font-size:.88rem;margin-top:.4rem"></p>
+    </div>
+
+    <div class="breakdown" id="breakdown"></div>
+
+    <div class="action-btns">
+      <button class="btn-cert" onclick="downloadCert()">🏅 Descargar certificado</button>
+      <button class="btn-outline" onclick="location.reload()">↩ Nuevo intento</button>
+    </div>
+  </div>
+  <footer>BioLab Interactive · UANL Facultad de Medicina · Laboratorio de Bioquímica 2026</footer>
+</div>
+
+<canvas id="certCanvas" width="1200" height="850"></canvas>
+
+<script>
+// ══════════════════════════════════════════
+//  BANCO DE PREGUNTAS  (sin retroalimentación)
+// ══════════════════════════════════════════
+const QUESTIONS = [
+  {
+    tag:'P11',
+    text:'Al cuantificar una muestra de ADN por espectrofotometría UV, ¿cuál es el rango de la relación A₂₆₀/A₂₈₀ que indica una pureza aceptable libre de contaminación proteica significativa?',
+    opts:['1.0 – 1.4','1.5 – 1.7','1.8 – 2.0','2.1 – 2.5'],
+    ans:2
+  },
+  {
+    tag:'P11',
+    text:'En la técnica TSNT, después de lisar las células con buffer SDS/Tritón X-100, las proteínas desnaturalizadas se extraen utilizando:',
+    opts:[
+      'Únicamente fenol saturado con Tris-HCl.',
+      'Cloroformo puro a baja temperatura.',
+      'Fenol saturado y Sevag (cloroformo : alcohol isoamílico 24:1).',
+      'Únicamente etanol al 96 % seguido de centrifugación.'
+    ],
+    ans:2
+  },
+  {
+    tag:'P12',
+    text:'Según el programa B-GLOBINA del manual, después de la desnaturalización inicial de 94 °C por 5 minutos, ¿cuántos ciclos se realizan repitiendo los pasos de desnaturalización, alineamiento y extensión?',
+    opts:['20 ciclos','25 ciclos','30 ciclos','35 ciclos'],
+    ans:1
+  },
+  {
+    tag:'P12',
+    text:'En la preparación del tubo M (mezcla maestra de 80 µL) descrita en la práctica, la concentración final de MgCl₂ en la reacción es:',
+    opts:['1 mM','2 mM','2.5 mM','3 mM'],
+    ans:1
+  },
+  {
+    tag:'P12',
+    text:'El fragmento del gen β-globina que se amplifica en esta práctica, visualizado en gel de agarosa al 1.5 %, tiene un tamaño aproximado de:',
+    opts:['150 pb','200 pb','268 pb','350 pb'],
+    ans:2
+  },
+  {
+    tag:'P13',
+    text:'La carga neta negativa del ADN que permite su migración hacia el ánodo durante la electroforesis se debe a:',
+    opts:[
+      'Las bases nitrogenadas.',
+      'Los grupos hidroxilo de la desoxirribosa.',
+      'Los grupos fosfato del esqueleto.',
+      'Los puentes de hidrógeno entre cadenas.'
+    ],
+    ans:2
+  },
+  {
+    tag:'P13',
+    text:'Durante el corrimiento electroforético en gel de agarosa al 1.5 %, el voltaje recomendado para la fase principal del corrimiento (una vez que las muestras han entrado al gel) es:',
+    opts:['25 V','50 V','100 V','150 V'],
+    ans:2
+  },
+  {
+    tag:'P14',
+    text:'De acuerdo con el manual de la práctica 14, la diferencia principal entre bioinformática y biología computacional es:',
+    opts:[
+      'La bioinformática usa software libre y la biología computacional software propietario.',
+      'La bioinformática se limita al análisis de secuencias, estructura y función de los genes y genomas, mientras que la biología computacional engloba todas las áreas biológicas que involucran a la computación.',
+      'La biología computacional se aplica únicamente al estudio de microorganismos.',
+      'Son términos idénticos sin diferencia conceptual alguna.'
+    ],
+    ans:1
+  },
+  {
+    tag:'P14',
+    text:'Según el manual, la base de datos PubMed comprende más de cuántos millones de citas de la literatura biomédica de MEDLINE:',
+    opts:['5 millones','15 millones','26 millones','50 millones'],
+    ans:2
+  },
+  {
+    tag:'P14',
+    text:'¿Cuál herramienta del NCBI permite identificar los marcos de lectura abiertos en una secuencia de ADN introducida, prediciendo además las posibles proteínas traducidas?',
+    opts:['BLASTn','Bl2seq','ORF Finder','Restriction Map'],
+    ans:2
+  }
+];
+
+// ══════════════════════════════════════════
+//  ESTADO
+// ══════════════════════════════════════════
+let student = {};
+let answers = new Array(QUESTIONS.length).fill(null);
+
+// ══════════════════════════════════════════
+//  REGISTRO — habilitar botón
+// ══════════════════════════════════════════
+['regNombre','regMatricula','regGrupo'].forEach(id => {
+  document.getElementById(id).addEventListener('input', checkRegForm);
+});
+function checkRegForm() {
+  const ok = document.getElementById('regNombre').value.trim().length > 3
+    && document.getElementById('regMatricula').value.trim().length >= 5
+    && document.getElementById('regGrupo').value !== '';
+  document.getElementById('startBtn').disabled = !ok;
+}
+
+// ══════════════════════════════════════════
+//  INICIAR QUIZ
+// ══════════════════════════════════════════
+function startQuiz() {
+  student = {
+    nombre: document.getElementById('regNombre').value.trim(),
+    matricula: document.getElementById('regMatricula').value.trim(),
+    grupo: document.getElementById('regGrupo').value,
+    fecha: new Date().toLocaleDateString('es-MX',{year:'numeric',month:'long',day:'numeric'})
+  };
+  document.getElementById('registerScreen').style.display = 'none';
+  document.getElementById('quizScreen').style.display = 'block';
+  document.getElementById('hdrInfo').textContent = `${student.nombre} · Mat. ${student.matricula} · Gr. ${student.grupo}`;
+  renderQuestions();
+}
+
+// ══════════════════════════════════════════
+//  RENDERIZAR PREGUNTAS
+// ══════════════════════════════════════════
+function renderQuestions() {
+  const area = document.getElementById('questionsArea');
+  area.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  QUESTIONS.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.id = `qcard${qi}`;
+    card.innerHTML = `
+      <div class="q-header">
+        <span class="q-badge">${qi+1} · ${q.tag}</span>
+        <span class="q-text">${q.text}</span>
+      </div>
+      <div class="options">
+        ${q.opts.map((o,oi)=>`
+          <div class="opt" id="opt_${qi}_${oi}" onclick="choose(${qi},${oi})">
+            <span class="opt-letter">${letters[oi]}</span>
+            <span>${o}</span>
+          </div>`).join('')}
+      </div>`;
+    area.appendChild(card);
+  });
+}
+
+// ══════════════════════════════════════════
+//  SELECCIÓN DE RESPUESTA
+// ══════════════════════════════════════════
+function choose(qi, oi) {
+  // Deselect previous
+  if (answers[qi] !== null) {
+    document.getElementById(`opt_${qi}_${answers[qi]}`).classList.remove('selected');
+  }
+  answers[qi] = oi;
+  document.getElementById(`opt_${qi}_${oi}`).classList.add('selected');
+  document.getElementById(`qcard${qi}`).classList.add('answered');
+  updateProgress();
+}
+
+function updateProgress() {
+  const done = answers.filter(a => a !== null).length;
+  document.getElementById('progressFill').style.width = (done / QUESTIONS.length * 100) + '%';
+  const submitBtn = document.getElementById('submitBtn');
+  const hint = document.getElementById('submitHint');
+  if (done === QUESTIONS.length) {
+    submitBtn.disabled = false;
+    hint.textContent = 'Todas las preguntas contestadas. Puedes entregar.';
+    hint.style.color = 'var(--green)';
+  } else {
+    submitBtn.disabled = true;
+    hint.textContent = `Responde todas las preguntas para habilitar la entrega. (${done}/${QUESTIONS.length})`;
+    hint.style.color = 'var(--muted)';
+  }
+}
+
+// ══════════════════════════════════════════
+//  ENTREGAR CUESTIONARIO
+// ══════════════════════════════════════════
+function submitQuiz() {
+  // Lock all options
+  document.querySelectorAll('.opt').forEach(el => el.classList.add('locked'));
+  document.getElementById('submitBtn').disabled = true;
+
+  // Calcular
+  let correct = 0;
+  const byTag = {P11:{c:0,t:0},P12:{c:0,t:0},P13:{c:0,t:0},P14:{c:0,t:0}};
+  QUESTIONS.forEach((q,qi) => {
+    byTag[q.tag].t++;
+    if (answers[qi] === q.ans) { correct++; byTag[q.tag].c++; }
+  });
+
+  const pct = Math.round(correct / QUESTIONS.length * 100);
+  showResults(correct, pct, byTag);
+}
+
+// ══════════════════════════════════════════
+//  MOSTRAR RESULTADOS
+// ══════════════════════════════════════════
+function showResults(correct, pct, byTag) {
+  document.getElementById('quizScreen').style.display = 'none';
+  document.getElementById('resultsScreen').style.display = 'block';
+
+  // Score circle animado
+  const circle = document.getElementById('scoreCircle');
+  setTimeout(() => {
+    circle.style.background = `conic-gradient(var(--accent) ${pct*3.6}deg, var(--surface2) 0deg)`;
+  }, 100);
+  document.getElementById('scorePct').textContent = pct + '%';
+  document.getElementById('scoreSub').textContent = `${correct}/${QUESTIONS.length}`;
+
+  let label, msg, color;
+  if (pct >= 90)      { label='¡Excelente!';   msg='Dominio sobresaliente de los contenidos.'; color='var(--green)'; }
+  else if (pct >= 80) { label='Muy bien';       msg='Buen dominio general de los temas.'; color='var(--accent2)'; }
+  else if (pct >= 70) { label='Aprobado';       msg='Suficiente. Repasa los temas con menor puntaje.'; color='var(--accent3)'; }
+  else if (pct >= 60) { label='Suficiente';     msg='Revisa el manual con atención antes del examen.'; color='#f97316'; }
+  else                { label='No aprobado';    msg='Se recomienda repasar el manual completo.'; color='var(--red)'; }
+
+  document.getElementById('scoreLabel').innerHTML = `<span style="color:${color}">${label}</span>`;
+  document.getElementById('scoreMsg').textContent = msg;
+  document.getElementById('scorePct').style.color = color;
+
+  // Breakdown por práctica
+  const bd = document.getElementById('breakdown');
+  const tagNames = {P11:'P11 — Extracción ADN',P12:'P12 — PCR',P13:'P13 — Electroforesis',P14:'P14 — Bioinformática'};
+  bd.innerHTML = `<h3>Detalle por práctica</h3>` +
+    Object.entries(byTag).map(([tag,{c,t}]) => {
+      const p = t ? Math.round(c/t*100) : 0;
+      return `<div class="bk-row">
+        <span class="bk-tag">${tag}</span>
+        <span style="font-size:.82rem;color:var(--muted);min-width:160px">${tagNames[tag]}</span>
+        <div class="bk-bar-wrap"><div class="bk-bar" style="width:${p}%"></div></div>
+        <span class="bk-score">${c}/${t}</span>
+      </div>`;
+    }).join('');
+
+  window.scrollTo({top:0,behavior:'smooth'});
+  window._quizResult = {correct, pct, byTag};
+}
+
+// ══════════════════════════════════════════
+//  CERTIFICADO EN CANVAS
+// ══════════════════════════════════════════
+function downloadCert() {
+  const canvas = document.getElementById('certCanvas');
+  canvas.style.display = 'block';
+  const ctx = canvas.getContext('2d');
+  const W = 1200, H = 850;
+  const {correct, pct} = window._quizResult;
+
+  // Fondo
+  const bg = ctx.createLinearGradient(0,0,W,H);
+  bg.addColorStop(0,'#0a1628');
+  bg.addColorStop(1,'#0f2849');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0,0,W,H);
+
+  // Borde decorativo doble
+  ctx.strokeStyle = '#b45309';
+  ctx.lineWidth = 8;
+  ctx.strokeRect(20,20,W-40,H-40);
+  ctx.strokeStyle = '#fbbf24';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(32,32,W-64,H-64);
+
+  // Esquinas ornamentales
+  const corners = [[50,50],[W-50,50],[50,H-50],[W-50,H-50]];
+  corners.forEach(([x,y]) => {
+    ctx.fillStyle = '#fbbf24';
+    ctx.font = 'bold 22px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('✦', x, y+8);
+  });
+
+  // Logo / institución
+  ctx.fillStyle = '#60a5fa';
+  ctx.font = 'bold 18px "Arial", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('UNIVERSIDAD AUTÓNOMA DE NUEVO LEÓN', W/2, 100);
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '15px Arial';
+  ctx.fillText('Facultad de Medicina · Laboratorio de Bioquímica · Ciclo 2026', W/2, 125);
+
+  // Línea separadora
+  ctx.strokeStyle = '#fbbf24';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(100,145); ctx.lineTo(W-100,145); ctx.stroke();
+
+  // Título certificado
+  ctx.fillStyle = '#fbbf24';
+  ctx.font = 'bold 46px "Arial", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('CONSTANCIA DE PARTICIPACIÓN', W/2, 215);
+
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '17px Arial';
+  ctx.fillText('Cuestionario de Opción Múltiple · Prácticas 11 – 14', W/2, 250);
+
+  // "Se hace constar"
+  ctx.fillStyle = '#cbd5e1';
+  ctx.font = '18px Arial';
+  ctx.fillText('Se hace constar que', W/2, 315);
+
+  // Nombre
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 38px "Arial", sans-serif';
+  ctx.fillText(student.nombre.toUpperCase(), W/2, 370);
+
+  // Línea bajo nombre
+  ctx.strokeStyle = '#3b82f6';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(W/2-300,382); ctx.lineTo(W/2+300,382); ctx.stroke();
+
+  // Matrícula y grupo
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '16px Arial';
+  ctx.fillText(`Matrícula: ${student.matricula}   ·   Grupo: ${student.grupo}`, W/2, 408);
+
+  // Texto central
+  ctx.fillStyle = '#cbd5e1';
+  ctx.font = '18px Arial';
+  ctx.fillText('completó satisfactoriamente el cuestionario de evaluación formativa sobre:', W/2, 450);
+  ctx.fillStyle = '#e2e8f0';
+  ctx.font = 'bold 20px Arial';
+  ctx.fillText('Extracción de ADN · PCR · Electroforesis · Bioinformática Médica', W/2, 485);
+
+  // Calificación
+  const scoreColor = pct>=70 ? '#22c55e' : '#ef4444';
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '18px Arial';
+  ctx.fillText('Calificación obtenida:', W/2, 540);
+
+  ctx.fillStyle = scoreColor;
+  ctx.font = 'bold 72px "Arial", sans-serif';
+  ctx.fillText(pct + '%', W/2, 620);
+
+  ctx.fillStyle = '#64748b';
+  ctx.font = '15px Arial';
+  ctx.fillText(`(${correct} de 10 respuestas correctas)`, W/2, 648);
+
+  // Fecha
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = '15px Arial';
+  ctx.fillText(`Fecha de presentación: ${student.fecha}`, W/2, 690);
+
+  // Línea firma
+  ctx.strokeStyle = '#334155';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(W/2-150,745); ctx.lineTo(W/2+150,745); ctx.stroke();
+  ctx.fillStyle = '#64748b';
+  ctx.font = '13px Arial';
+  ctx.fillText('Dr. Hugo Leonid Gallardo-Blanco', W/2, 762);
+  ctx.fillText('Laboratorio de Bioquímica · UANL FM', W/2, 778);
+
+  // Sello BioLab
+  ctx.fillStyle = '#1e3a5f';
+  ctx.beginPath(); ctx.arc(W-110, H-110, 55, 0, Math.PI*2); ctx.fill();
+  ctx.strokeStyle = '#3b82f6'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(W-110, H-110, 55, 0, Math.PI*2); ctx.stroke();
+  ctx.fillStyle = '#60a5fa';
+  ctx.font = 'bold 14px Arial';
+  ctx.fillText('BioLab', W-110, H-107);
+  ctx.font = '11px Arial';
+  ctx.fillText('Interactive', W-110, H-90);
+
+  // Descargar
+  const link = document.createElement('a');
+  link.download = `Constancia_${student.matricula}_P11-P14.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  canvas.style.display = 'none';
+}
+</script>
+</body>
+</html>

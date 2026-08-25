@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "Si usas Gallardo BioTools o alguna de sus herramientas, por favor cítalo como se indica a continuación."
+title: "Gallardo BioTools: herramientas educativas e interactivas de biología molecular"
+abstract: "Colección de herramientas y juegos educativos de biología molecular ejecutados 100% en el navegador (sin servidor), incluyendo StriderWeb (análisis de secuencias) y PrimerDesigner (diseño de primers para PCR)."
+type: software
+authors:
+  - family-names: "Gallardo-Blanco"
+    given-names: "Hugo Leonid"
+    orcid: "https://orcid.org/0000-0002-7816-4967"
+    affiliation: "Universidad Autónoma de Nuevo León (UANL), Facultad de Medicina"
+version: "1.0.0"
+date-released: "2026-06-16"
+url: "https://gallardo-lab.github.io/gallardo-biotools/"
+repository-code: "https://github.com/gallardo-lab/gallardo-biotools"
+license: MIT
+doi: "10.5281/zenodo.20723201"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.20723201"
+    description: "DOI (Zenodo) — Gallardo BioTools v1.0.0"
+keywords:
+  - educación en biología molecular
+  - diseño de primers
+  - análisis de secuencias
+  - PCR
+  - herramientas educativas
+# Tras registrar el repositorio en Zenodo, añade aquí el DOID emitido, por ejemplo:
+# doi: "10.5281/zenodo.XXXXXXX"
+# identifiers:
+#   - type: doi
+#     value: "10.5281/zenodo.XXXXXXX"
+#     description: "DOI concept (todas las versiones) emitido por Zenodo"

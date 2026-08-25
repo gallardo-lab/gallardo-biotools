@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-X5BT5RP5WF"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-X5BT5RP5WF');
+</script>
+
+<title>Quiz HBB — Bioinformática Médica P14 | BioLab</title>
+<style>
+  :root {
+    --bg: #0f172a; --surface: #1e293b; --surface2: #263147;
+    --accent: #ef4444; --accent2: #f97316; --accent3: #fbbf24;
+    --text: #f1f5f9; --muted: #94a3b8; --border: #334155;
+    --green: #22c55e; --red: #ef4444; --blue: #3b82f6;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui, sans-serif; min-height: 100vh; }
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600;700&display=swap');
+
+  header { background: linear-gradient(135deg,#7f1d1d,#1e293b); padding: 1.5rem 2rem; display: flex; align-items: center; gap: 1rem; border-bottom: 2px solid var(--accent); }
+  header h1 { font-family: 'Orbitron', sans-serif; font-size: 1.3rem; color: var(--accent3); }
+  header p { font-size: .85rem; color: var(--muted); }
+  .badge { background: var(--accent); color: #fff; font-size: .7rem; font-weight: 700; padding: .2rem .5rem; border-radius: 4px; }
+
+  main { max-width: 860px; margin: 0 auto; padding: 2rem 1rem; }
+
+  /* secuencia */
+  .seq-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.2rem 1.5rem; margin-bottom: 2rem; }
+  .seq-card h2 { font-size: .9rem; color: var(--accent3); margin-bottom: .6rem; text-transform: uppercase; letter-spacing: .05em; }
+  .seq { font-family: monospace; font-size: .85rem; line-height: 1.7; color: #a5f3fc; word-break: break-all; }
+  .seq .mut { background: #7f1d1d; color: #fca5a5; border-radius: 3px; padding: 0 2px; }
+
+  /* nombre */
+  .name-row { display: flex; gap: 1rem; margin-bottom: 2rem; align-items: center; flex-wrap: wrap; }
+  .name-row input { flex: 1; min-width: 200px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: .6rem 1rem; color: var(--text); font-size: 1rem; }
+  .name-row input:focus { outline: none; border-color: var(--accent); }
+  .btn { background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: .6rem 1.4rem; font-weight: 700; cursor: pointer; font-size: .95rem; transition: opacity .2s; }
+  .btn:hover { opacity: .85; }
+  .btn:disabled { opacity: .4; cursor: default; }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .btn-outline:hover { border-color: var(--accent); color: var(--text); opacity: 1; }
+
+  /* pregunta */
+  .question { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem 1.5rem; margin-bottom: 1.2rem; transition: border-color .2s; }
+  .question.answered { border-color: var(--border); }
+  .question.correct { border-color: var(--green); }
+  .question.wrong { border-color: var(--red); }
+  .q-header { display: flex; gap: .6rem; align-items: flex-start; margin-bottom: 1rem; }
+  .q-num { background: var(--accent); color: #fff; font-weight: 700; font-size: .8rem; padding: .2rem .55rem; border-radius: 6px; white-space: nowrap; margin-top: 2px; }
+  .q-text { font-size: 1rem; line-height: 1.5; }
+  .options { display: flex; flex-direction: column; gap: .5rem; }
+  .option { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: .65rem 1rem; cursor: pointer; font-size: .92rem; transition: all .15s; display: flex; align-items: center; gap: .6rem; }
+  .option:hover:not(.disabled) { border-color: var(--accent); background: #2d3f5a; }
+  .option.selected { border-color: var(--blue); background: #1e3a5f; }
+  .option.correct-ans { border-color: var(--green) !important; background: #14532d !important; color: #bbf7d0; }
+  .option.wrong-ans { border-color: var(--red) !important; background: #450a0a !important; color: #fca5a5; }
+  .option.disabled { cursor: default; }
+  .opt-letter { font-weight: 700; color: var(--muted); font-size: .85rem; min-width: 1.2rem; }
+  .feedback { margin-top: .8rem; font-size: .88rem; padding: .6rem .9rem; border-radius: 8px; display: none; line-height: 1.5; }
+  .feedback.show { display: block; }
+  .feedback.ok { background: #14532d; color: #bbf7d0; border: 1px solid #166534; }
+  .feedback.fail { background: #450a0a; color: #fca5a5; border: 1px solid #7f1d1d; }
+
+  /* resultados */
+  #results { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; margin-top: 2rem; text-align: center; }
+  #results h2 { font-family: 'Orbitron', sans-serif; font-size: 1.4rem; color: var(--accent3); margin-bottom: .5rem; }
+  .score-big { font-size: 3.5rem; font-weight: 700; color: var(--accent); line-height: 1; margin: 1rem 0; }
+  .skill-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: .6rem; margin: 1.5rem 0; }
+  .skill-pill { background: var(--surface2); border-radius: 8px; padding: .5rem .8rem; font-size: .8rem; text-align: left; }
+  .skill-pill span { display: block; color: var(--muted); font-size: .7rem; margin-bottom: .2rem; }
+  .share-box { background: var(--surface2); border: 1px dashed var(--border); border-radius: 8px; padding: .8rem 1rem; margin: 1rem 0; font-family: monospace; font-size: .75rem; word-break: break-all; color: #a5f3fc; text-align: left; }
+  .radar-wrap { margin: 1.5rem auto; max-width: 340px; }
+
+  /* radar svg */
+  .radar-axis { stroke: var(--border); stroke-width: 1; fill: none; }
+  .radar-web { stroke: var(--border); stroke-width: .5; fill: none; }
+  .radar-area { fill: rgba(239,68,68,.25); stroke: var(--accent); stroke-width: 2; }
+  .radar-label { fill: var(--muted); font-size: 10px; text-anchor: middle; }
+
+  .progress-bar { height: 6px; background: var(--border); border-radius: 3px; margin: 1.5rem 0; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width .3s; width: 0%; }
+
+  footer { text-align: center; padding: 2rem; color: var(--muted); font-size: .8rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🧬 Quiz Previo — Práctica 14</h1>
+    <p>Bioinformática Médica · Gen <strong>HBB</strong> · Anemia de Células Falciformes</p>
+  </div>
+  <span class="badge">10 preguntas</span>
+</header>
+
+<main>
+  <!-- Secuencia problema -->
+  <div class="seq-card">
+    <h2>Secuencia problema (FASTA)</h2>
+    <div class="seq">&gt;Secuencia_problema_grupo_2026<br>
+ATGGTGCACCTGACTCCT<span class="mut">GTG</span>GAGAAGTCTGCCGTTACTGCCCTGTGGGGCAAGGTGAAC<br>
+GTGGATGAAGTTGGTGGTGAGGCCCTGGGCAGGCTGCTGGTGGTCTACCCTTGGACCCAG<br>
+AGGTTCTTTGAGTCC</div>
+    <p style="font-size:.78rem;color:var(--muted);margin-top:.5rem;">El fragmento resaltado en rojo es la región de la mutación. Úsala para responder las preguntas.</p>
+  </div>
+
+  <!-- Nombre -->
+  <div class="name-row">
+    <input type="text" id="studentName" placeholder="Tu nombre completo" maxlength="60">
+    <button class="btn" id="startBtn" onclick="startQuiz()">Comenzar Quiz</button>
+  </div>
+
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+  <!-- Preguntas -->
+  <div id="quizArea" style="display:none"></div>
+
+  <!-- Resultados -->
+  <div id="results">
+    <h2>Resultados</h2>
+    <div class="score-big" id="scoreBig"></div>
+    <p id="scoreLabel" style="color:var(--muted);margin-bottom:1rem;"></p>
+    <div class="skill-grid" id="skillGrid"></div>
+    <div class="radar-wrap"><svg id="radarSvg" viewBox="0 0 300 300" width="300" height="300"></svg></div>
+    <div class="share-box" id="shareCode"></div>
+    <div style="display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-top:1rem;">
+      <button class="btn btn-outline" onclick="copyCode()">📋 Copiar código</button>
+      <button class="btn" onclick="location.reload()">🔄 Reintentar</button>
+      <a href="pipeline_HBB.html" style="text-decoration:none;"><button class="btn" style="background:var(--accent2);">▶ Ir al Pipeline</button></a>
+    </div>
+  </div>
+</main>
+
+<footer>BioLab Interactive · UANL Facultad de Medicina · Laboratorio de Bioquímica 2026</footer>
+
+<script>
+const SKILLS = [
+  { id:'blast',  label:'BLASTn',       color:'#3b82f6' },
+  { id:'mut',    label:'Mutación',      color:'#ef4444' },
+  { id:'prot',   label:'Proteína',      color:'#8b5cf6' },
+  { id:'omim',   label:'OMIM',          color:'#f472b6' },
+  { id:'clinica',label:'Clínica',       color:'#fbbf24' },
+  { id:'rflp',   label:'RFLP/MstII',   color:'#10b981' },
+  { id:'diag',   label:'Diagnóstico',  color:'#06b6d4' },
+  { id:'trat',   label:'Tratamiento',  color:'#a78bfa' },
+];
+
+const QUESTIONS = [
+  {
+    skill:'blast',
+    text:'Cuando pegas la secuencia problema en BLASTn (base de datos RefSeq RNA, organismo Homo sapiens), ¿cuál es el top hit esperado?',
+    opts:['NM_000518.5 — HBB (hemoglobin subunit beta)','NM_000492.4 — CFTR (cystic fibrosis transmembrane conductance regulator)','NM_004360.5 — CDH1 (cadherin 1)','NM_007294.4 — BRCA1 (breast cancer gene 1)'],
+    ans:0,
+    fb:'La secuencia es un fragmento del exón 1 de HBB. BLAST identifica NM_000518.5 con ~99.3 % de identidad (134/135 nt) y un solo mismatch en la posición 20 (A→T).'
+  },
+  {
+    skill:'mut',
+    text:'Al comparar la secuencia problema con la referencia HBB normal en Bl2seq, ¿qué cambio nucleotídico encuentras y cómo se escribe en notación HGVS?',
+    opts:['NM_000518.5:c.20A>T (posición 20, adenina por timina)','NM_000518.5:c.20T>A (posición 20, timina por adenina)','NM_000518.5:c.17G>A (posición 17, guanina por adenina)','NM_000518.5:c.1521_1523delCTT (deleción de 3 nt)'],
+    ans:0,
+    fb:'En la secuencia problema, el nucleótido 20 es T (GTG) en lugar de A (GAG) de la referencia. HGVS: c.20A>T.'
+  },
+  {
+    skill:'prot',
+    text:'¿Qué cambio aminoacídico produce la mutación c.20A>T y cómo se clasifica?',
+    opts:['p.Glu7Val — sustitución missense (Ácido glutámico → Valina)','p.Glu7Lys — sustitución missense (Ácido glutámico → Lisina)','p.Phe508del — deleción en marco (Fenilalanina 508 eliminada)','p.Glu7* — mutación nonsense (codón de stop prematuro)'],
+    ans:0,
+    fb:'GAG (Glu) → GTG (Val): missense. En numeración HGVS es p.Glu7Val; en numeración clásica de hemoglobinas es p.Glu6Val (no se cuenta la Met inicial que se escinde). Ambas son aceptables.'
+  },
+  {
+    skill:'omim',
+    text:'¿Cuáles son los IDs OMIM correctos para el gen HBB y para la anemia de células falciformes?',
+    opts:['Gen HBB: 141900 · Enfermedad (Sickle Cell Anemia): #603903','Gen HBB: 219700 · Enfermedad: #602421','Gen HBB: 176000 · Enfermedad: #141900','Gen HBB: 600185 · Enfermedad: #219700'],
+    ans:0,
+    fb:'OMIM 141900 es el locus del gen HBB. #603903 es la entrada de Sickle Cell Anemia. Herencia: autosómica recesiva (AR).'
+  },
+  {
+    skill:'clinica',
+    text:'¿Cuál de las siguientes NO es una manifestación clínica típica de la anemia de células falciformes?',
+    opts:['Cálculos de oxalato en conductos pancreáticos','Crisis vasooclusivas dolorosas','Síndrome torácico agudo','Autoesplenectomía funcional'],
+    ans:0,
+    fb:'Los cálculos pancreáticos de oxalato son característicos de fibrosis quística (CFTR), no de HbS. Las otras tres opciones son manifestaciones clásicas de la anemia de células falciformes.'
+  },
+  {
+    skill:'rflp',
+    text:'¿Cuál es la enzima de restricción cuyo sitio de corte está PRESENTE en el alelo HBB normal (HbA) pero DESTRUIDO por la mutación HbS?',
+    opts:['MstII (motivo CC↓TNAGG) — sitio CCTGAGG destruido a CCTGTGG','DdeI (motivo C↓TNAG) — sitio único en exón 2','EcoRI (motivo G↓AATTC) — sitio en intrón 1','HpaI (motivo GTT↓AAC) — sitio en región promotora'],
+    ans:0,
+    fb:'MstII reconoce CC↓TNAGG. El codón 5–7 normal tiene CCTGAGG (sitio presente). La mutación c.20A>T cambia este codón a CCTGTGG, destruyendo el sitio. Este RFLP fue el primer diagnóstico molecular de una enfermedad genética humana (Kan & Dozy, Lancet 1978).'
+  },
+  {
+    skill:'diag',
+    text:'En un gel de agarosa tras PCR + digestión con MstII, ¿cómo distingues el alelo HbA del alelo HbS?',
+    opts:['HbA produce 2 fragmentos (sitio cortado); HbS produce 1 fragmento (sitio intacto sin corte)','HbA produce 1 fragmento; HbS produce 2 fragmentos','Ambos alelos producen el mismo patrón; se distinguen por tamaño del único fragmento','HbS produce 3 fragmentos; HbA produce 2 fragmentos'],
+    ans:0,
+    fb:'Exacto. El alelo normal HbA tiene el sitio MstII intacto → se corta → 2 bandas. El alelo HbS tiene el sitio destruido → no se corta → 1 banda (el fragmento completo). Un heterocigoto HbA/HbS muestra las 3 bandas.'
+  },
+  {
+    skill:'trat',
+    text:'¿Qué fármaco induce la producción de hemoglobina fetal (HbF) y es el tratamiento estándar de primera línea en la anemia de células falciformes?',
+    opts:['Hidroxiurea','Ivacaftor (Kalydeco)','Lumacaftor/Ivacaftor (Orkambi)','Elexacaftor/Tezacaftor/Ivacaftor (Trikafta)'],
+    ans:0,
+    fb:'La hidroxiurea eleva los niveles de HbF, que no polimeriza con HbS y reduce las crisis vasooclusivas. Ivacaftor, Orkambi y Trikafta son moduladores de CFTR para fibrosis quística, no para HbS.'
+  },
+  {
+    skill:'clinica',
+    text:'La alta frecuencia del alelo HbS en poblaciones de África subsahariana se explica principalmente porque:',
+    opts:['Los heterocigotos HbA/HbS tienen resistencia parcial a Plasmodium falciparum (malaria)','Los homocigotos HbS/HbS tienen mayor fertilidad','El alelo HbS aumenta la producción de glóbulos blancos','La hemoglobina S transporta más oxígeno a gran altitud'],
+    ans:0,
+    fb:'El fenómeno se llama ventaja del heterocigoto (sobredominancia). Los portadores HbA/HbS (rasgo falciforme) tienen menor parasitemia por P. falciparum, lo que confiere una ventaja adaptativa en zonas endémicas de malaria.'
+  },
+  {
+    skill:'trat',
+    text:'La terapia génica aprobada por la FDA en diciembre de 2023 para anemia de células falciformes (exa-cel / Casgevy) se basa en:',
+    opts:['Edición CRISPR-Cas9 del gen BCL11A para reactivar la producción de HbF','Reemplazo directo del alelo HbS por HbA mediante recombinación homóloga','Administración de ARNm sintético que codifica hemoglobina normal','Silenciamiento del gen HBB con siRNA para evitar la producción de HbS'],
+    ans:0,
+    fb:'Casgevy (exa-cel, Vertex/CRISPR Therapeutics) edita el gen BCL11A en células hematopoyéticas del paciente para desreprimir la expresión de HbF, que sustituye funcionalmente a HbS. Es la primera terapia CRISPR aprobada para uso clínico.'
+  },
+];
+
+let current = 0;
+let scores = {};
+SKILLS.forEach(s => scores[s.id] = {c:0,t:0});
+let answered = [];
+let studentName = '';
+let started = false;
+
+function startQuiz() {
+  studentName = document.getElementById('studentName').value.trim();
+  if (!studentName) { alert('Escribe tu nombre antes de comenzar.'); return; }
+  started = true;
+  document.getElementById('startBtn').disabled = true;
+  document.getElementById('studentName').disabled = true;
+  document.querySelector('.progress-bar').style.display = 'block';
+  document.getElementById('quizArea').style.display = 'block';
+  renderQuestions();
+}
+
+function renderQuestions() {
+  const area = document.getElementById('quizArea');
+  area.innerHTML = '';
+  QUESTIONS.forEach((q, qi) => {
+    const letters = ['A','B','C','D'];
+    const div = document.createElement('div');
+    div.className = 'question';
+    div.id = `q${qi}`;
+    div.innerHTML = `
+      <div class="q-header">
+        <span class="q-num">${qi+1}</span>
+        <span class="q-text">${q.text}</span>
+      </div>
+      <div class="options" id="opts${qi}">
+        ${q.opts.map((o,oi)=>`
+          <div class="option" id="opt_${qi}_${oi}" onclick="choose(${qi},${oi})">
+            <span class="opt-letter">${letters[oi]}</span>
+            <span>${o}</span>
+          </div>`).join('')}
+      </div>
+      <div class="feedback" id="fb${qi}"></div>
+    `;
+    area.appendChild(div);
+  });
+  answered = new Array(QUESTIONS.length).fill(false);
+}
+
+function choose(qi, oi) {
+  if (answered[qi]) return;
+  answered[qi] = true;
+  const q = QUESTIONS[qi];
+  const correct = oi === q.ans;
+
+  // mark options
+  for (let i=0;i<q.opts.length;i++) {
+    const el = document.getElementById(`opt_${qi}_${i}`);
+    el.classList.add('disabled');
+    if (i === q.ans) el.classList.add('correct-ans');
+    else if (i === oi && !correct) el.classList.add('wrong-ans');
+  }
+  document.getElementById(`q${qi}`).classList.add(correct ? 'correct' : 'wrong');
+
+  // score
+  scores[q.skill].t++;
+  if (correct) scores[q.skill].c++;
+
+  // feedback
+  const fb = document.getElementById(`fb${qi}`);
+  fb.className = `feedback show ${correct ? 'ok' : 'fail'}`;
+  fb.innerHTML = (correct ? '✅ ' : '❌ ') + q.fb;
+
+  updateProgress();
+  if (answered.every(Boolean)) setTimeout(showResults, 800);
+}
+
+function updateProgress() {
+  const done = answered.filter(Boolean).length;
+  document.getElementById('progressFill').style.width = (done/QUESTIONS.length*100)+'%';
+}
+
+function showResults() {
+  const total = QUESTIONS.length;
+  const correct = Object.values(scores).reduce((s,v)=>s+v.c,0);
+  const pct = Math.round(correct/total*100);
+
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('scoreBig').textContent = `${pct}%`;
+  document.getElementById('scoreLabel').textContent = `${correct} / ${total} correctas`;
+
+  // skill grid
+  const grid = document.getElementById('skillGrid');
+  grid.innerHTML = SKILLS.map(s => {
+    const sc = scores[s.id];
+    const sp = sc.t ? Math.round(sc.c/sc.t*100) : 0;
+    return `<div class="skill-pill" style="border-left:3px solid ${s.color}">
+      <span>${s.label}</span>${sc.c}/${sc.t} · ${sp}%</div>`;
+  }).join('');
+
+  drawRadar(pct);
+  buildShareCode(pct, correct, total);
+
+  localStorage.setItem('hbb_bioinf_best', JSON.stringify({score:pct, date: new Date().toISOString().slice(0,10)}));
+  localStorage.setItem('hbb_bioinf_plays', (parseInt(localStorage.getItem('hbb_bioinf_plays')||'0')+1).toString());
+  if (typeof gtag !== 'undefined') gtag('event','quiz_complete',{game:'hbb_bioinf',score:pct});
+
+  document.getElementById('results').scrollIntoView({behavior:'smooth'});
+}
+
+function buildShareCode(pct, correct, total) {
+  const skillStr = SKILLS.map(s=>{
+    const sc=scores[s.id];
+    return `${s.id}:${sc.c}/${sc.t}`;
+  }).join(',');
+  const raw = `BL1|${studentName}|${skillStr}|hbb_bioinf|${pct}`;
+  const code = btoa(unescape(encodeURIComponent(raw)));
+  document.getElementById('shareCode').textContent = code;
+}
+
+function copyCode() {
+  navigator.clipboard.writeText(document.getElementById('shareCode').textContent)
+    .then(()=>alert('Código copiado. Compártelo con tu profesor.'))
+    .catch(()=>alert('Selecciona y copia el código manualmente.'));
+}
+
+function drawRadar(overallPct) {
+  const svg = document.getElementById('radarSvg');
+  svg.innerHTML = '';
+  const cx=150, cy=150, R=110, n=SKILLS.length;
+  const step = (2*Math.PI)/n;
+  const levels = 5;
+
+  // web
+  for (let l=1;l<=levels;l++) {
+    const r = R*l/levels;
+    let pts = '';
+    for (let i=0;i<n;i++) {
+      const a = -Math.PI/2 + i*step;
+      pts += `${cx+r*Math.cos(a)},${cy+r*Math.sin(a)} `;
+    }
+    const poly = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    poly.setAttribute('points', pts.trim());
+    poly.setAttribute('class','radar-web');
+    svg.appendChild(poly);
+  }
+
+  // axes + labels
+  SKILLS.forEach((s,i) => {
+    const a = -Math.PI/2 + i*step;
+    const x2 = cx+R*Math.cos(a), y2 = cy+R*Math.sin(a);
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',cx); line.setAttribute('y1',cy);
+    line.setAttribute('x2',x2); line.setAttribute('y2',y2);
+    line.setAttribute('class','radar-axis');
+    svg.appendChild(line);
+
+    const lx = cx+(R+18)*Math.cos(a), ly = cy+(R+18)*Math.sin(a);
+    const text = document.createElementNS('http://www.w3.org/2000/svg','text');
+    text.setAttribute('x',lx); text.setAttribute('y',ly+4);
+    text.setAttribute('class','radar-label');
+    text.textContent = s.label;
+    svg.appendChild(text);
+  });
+
+  // data
+  let pts = '';
+  SKILLS.forEach((s,i) => {
+    const sc = scores[s.id];
+    const val = sc.t ? sc.c/sc.t : 0;
+    const a = -Math.PI/2 + i*step;
+    pts += `${cx+R*val*Math.cos(a)},${cy+R*val*Math.sin(a)} `;
+  });
+  const area = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+  area.setAttribute('points', pts.trim());
+  area.setAttribute('class','radar-area');
+  svg.appendChild(area);
+
+  // center label
+  const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+  txt.setAttribute('x',cx); txt.setAttribute('y',cy+5);
+  txt.setAttribute('text-anchor','middle');
+  txt.setAttribute('fill','var(--accent3)');
+  txt.setAttribute('font-size','18');
+  txt.setAttribute('font-weight','700');
+  txt.textContent = overallPct+'%';
+  svg.appendChild(txt);
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X5BT5RP5WF"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag("js", new Date());
+    gtag("config", "G-X5BT5RP5WF");
+  </script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Flashcards · Funcionalización de Nanoteranósticos · Gallardo-Lab</title>
+<style>
+  :root {
+    --ink: #0b2545;
+    --accent: #2a6f97;
+    --accent2: #1a7a4a;
+    --gold: #b8860b;
+    --bg: #f0f4f8;
+    --card-bg: #ffffff;
+    --muted: #556070;
+    --border: #c8d3df;
+    --front-grad: linear-gradient(135deg, #0b2545 0%, #1a4a7a 100%);
+    --back-grad: linear-gradient(135deg, #1a3a2a 0%, #2a6f97 100%);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: var(--bg);
+    color: #222;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--ink);
+    color: #fff;
+    padding: 28px 20px 22px;
+    text-align: center;
+  }
+  header h1 { font-size: 22px; line-height: 1.3; margin-bottom: 6px; }
+  header p  { font-size: 13px; opacity: .8; max-width: 700px; margin: 0 auto; }
+  .header-meta {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    justify-content: center; margin-top: 12px;
+  }
+  .badge {
+    background: rgba(255,255,255,.13);
+    border: 1px solid rgba(255,255,255,.28);
+    color: #fff; font-size: 11px; font-weight: 700;
+    padding: 3px 10px; border-radius: 999px;
+  }
+
+  /* ── Controls ── */
+  .controls {
+    max-width: 1100px; margin: 18px auto 0;
+    padding: 0 16px;
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  }
+  .filter-btn {
+    border: 1px solid var(--border); background: #fff; color: var(--ink);
+    padding: 6px 14px; border-radius: 999px; cursor: pointer;
+    font-weight: 700; font-size: 12px; transition: all .15s;
+  }
+  .filter-btn:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .filter-btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .count-label {
+    margin-left: auto; font-size: 12px; color: var(--muted); font-weight: 700;
+  }
+  .progress-wrap {
+    max-width: 1100px; margin: 10px auto 0; padding: 0 16px;
+    display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--muted);
+  }
+  .progress-bar-outer {
+    flex: 1; height: 6px; background: var(--border); border-radius: 999px; overflow: hidden;
+  }
+  .progress-bar-inner {
+    height: 100%; background: var(--accent2); border-radius: 999px;
+    transition: width .4s ease;
+  }
+
+  /* ── Grid ── */
+  .grid {
+    max-width: 1100px; margin: 16px auto 40px;
+    padding: 0 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+
+  /* ── Flip card ── */
+  .card-wrap {
+    perspective: 1000px;
+    height: 220px;
+    cursor: pointer;
+  }
+  .card-inner {
+    position: relative; width: 100%; height: 100%;
+    transform-style: preserve-3d;
+    transition: transform .55s cubic-bezier(.4,0,.2,1);
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.10);
+  }
+  .card-wrap.flipped .card-inner { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute; width: 100%; height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 14px;
+    padding: 20px;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Front */
+  .card-front {
+    background: var(--front-grad);
+    color: #fff;
+  }
+  .card-front .topic-tag {
+    font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+    opacity: .7; margin-bottom: 8px;
+  }
+  .card-front .card-number {
+    position: absolute; top: 14px; right: 16px;
+    font-size: 11px; font-weight: 700; opacity: .45;
+  }
+  .card-front h3 {
+    font-size: 16px; line-height: 1.35; flex: 1;
+    display: flex; align-items: center;
+  }
+  .card-front .flip-hint {
+    font-size: 10px; opacity: .55; margin-top: 10px; text-align: right;
+  }
+  .card-front .card-icon {
+    font-size: 28px; margin-bottom: 8px; display: block;
+  }
+
+  /* Back */
+  .card-back {
+    background: var(--card-bg);
+    color: #222;
+    transform: rotateY(180deg);
+    border: 1.5px solid var(--border);
+  }
+  .card-back .back-title {
+    font-size: 11px; font-weight: 800; color: var(--accent);
+    letter-spacing: .5px; text-transform: uppercase; margin-bottom: 8px;
+  }
+  .card-back .back-body {
+    font-size: 13px; line-height: 1.6; flex: 1;
+    overflow-y: auto; color: #333;
+  }
+  .card-back .back-body b  { color: var(--ink); }
+  .card-back .back-body em { color: var(--accent2); font-style: normal; font-weight: 700; }
+  .card-back .ref-tag {
+    font-size: 10px; color: var(--muted); margin-top: 8px; border-top: 1px solid var(--border); padding-top: 6px;
+  }
+
+  /* Topic color accents */
+  .card-wrap[data-topic="quimica"] .card-front     { background: linear-gradient(135deg,#0b2545,#2a5298); }
+  .card-wrap[data-topic="her2"]    .card-front      { background: linear-gradient(135deg,#4a0a0a,#8b1a1a); }
+  .card-wrap[data-topic="myc"]     .card-front      { background: linear-gradient(135deg,#1a3a00,#2e6b00); }
+  .card-wrap[data-topic="acidos"]  .card-front      { background: linear-gradient(135deg,#0a2a4a,#1a5a8a); }
+  .card-wrap[data-topic="teranóstico"] .card-front  { background: linear-gradient(135deg,#3a1a5a,#6a2a9a); }
+  .card-wrap[data-topic="brecha"]  .card-front      { background: linear-gradient(135deg,#4a3000,#8a6000); }
+
+  /* Keyboard hint */
+  .keyboard-hint {
+    text-align: center; font-size: 11px; color: var(--muted);
+    margin-top: -6px; margin-bottom: 8px; padding: 0 16px;
+  }
+  kbd {
+    background: #e4e8ec; border: 1px solid #bcc5ce;
+    border-radius: 4px; padding: 1px 5px; font-size: 10px; font-family: monospace;
+  }
+
+  /* Done chip */
+  .card-wrap.done .card-inner::after {
+    content: '✓';
+    position: absolute; top: 8px; left: 10px;
+    background: var(--accent2); color: #fff;
+    border-radius: 999px; width: 20px; height: 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 900; z-index: 10;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center; padding: 20px; font-size: 12px; color: var(--muted);
+  }
+  footer a { color: var(--accent); }
+
+  @media (max-width: 480px) {
+    .card-wrap { height: 240px; }
+    header h1  { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Funcionalización de Plataformas Nanoteranósticas</h1>
+  <p>HER2+ y Cánceres Dirigidos por Myc · Aptámeros, Péptidos y Cargas de Ácido Nucleico</p>
+  <div class="header-meta">
+    <span class="badge">🎓 Nivel Posgrado</span>
+    <span class="badge">🃏 30 Tarjetas</span>
+    <span class="badge">Gallardo-Lab · UANL</span>
+    <span class="badge">v2 · 2026</span>
+  </div>
+</header>
+
+<div class="controls" id="controls">
+  <button class="filter-btn active" data-filter="all">Todas</button>
+  <button class="filter-btn" data-filter="quimica">Química de Conjugación</button>
+  <button class="filter-btn" data-filter="her2">HER2</button>
+  <button class="filter-btn" data-filter="myc">c-Myc/Max</button>
+  <button class="filter-btn" data-filter="acidos">Ácidos Nucleicos</button>
+  <button class="filter-btn" data-filter="teranóstico">Teranóstico</button>
+  <button class="filter-btn" data-filter="brecha">Brechas</button>
+  <span class="count-label" id="countLabel">30 / 30</span>
+</div>
+
+<div class="progress-wrap">
+  <span id="progressText">0 / 30 revisadas</span>
+  <div class="progress-bar-outer"><div class="progress-bar-inner" id="progressBar" style="width:0%"></div></div>
+  <button class="filter-btn" id="resetBtn" style="border-radius:8px;padding:4px 10px;font-size:11px;">↺ Reiniciar</button>
+</div>
+
+<p class="keyboard-hint">Clic para voltear · <kbd>→</kbd><kbd>←</kbd> navegar · <kbd>Space</kbd> voltear</p>
+
+<div class="grid" id="grid"></div>
+
+<footer>
+  <p>Gallardo-Lab · Facultad de Medicina, UANL · Basado en: <em>Functionalization Strategies for Nanotheranostic Platforms</em> (Gallardo-Blanco, 2026)</p>
+  <p style="margin-top:6px;"><a href="../index.html">← Gallardo BioTools</a></p>
+</footer>
+
+<script>
+const CARDS = [
+  // ── QUÍMICA DE CONJUGACIÓN ──
+  {
+    id:1, topic:"quimica", icon:"⚗️",
+    front:"¿Por qué el enlace Au–S es el estándar para funcionalizar AuNPs con aptámeros?",
+    back:`<b>Enlace Au–S (tiol-oro)</b> tiene una energía de enlace de <em>≈40 kcal/mol</em>, lo que lo hace covalente, orientado y estable bajo condiciones fisiológicas.<br><br>
+    Los aptámeros se modifican con <b>5'-tiol + espaciador C6</b>, permitiendo densidades de superficie ajustables y orientación controlada del aptámero hacia el receptor.<br><br>
+    La <b>pasivación con tiol-PEG (2–5 kDa)</b> ocupa sitios vacantes, reduciendo adsorción proteica inespecífica y extendiendo vida media circulatoria.`,
+    ref:"Principio general — Sección 2.1"
+  },
+  {
+    id:2, topic:"quimica", icon:"🔗",
+    front:"¿Cuándo usar EDC/NHS vs. click chemistry para conjugar aptámeros a polímeros?",
+    back:`<b>EDC/NHS</b>: forma amidas (-CO-NH-) entre carboxilos del polímero y aminas del aptámero/péptido. Sin espaciador, acuoso, pero baja eficiencia a pH alto y el éster NHS se hidroliza rápidamente.<br><br>
+    <b>Click chemistry (SPAAC/CuAAC)</b>: forma triazoles covalentes bio-ortogonales. Alta eficiencia, sin reacción cruzada con grupos biológicos. Requiere modificación previa con azida.<br><br>
+    <em>Regla práctica:</em> EDC/NHS para conjugaciones rápidas en PLGA/dextrano; click chemistry cuando se necesita control estequiométrico preciso.`,
+    ref:"Tabla 1 — Sección 2.3"
+  },
+  {
+    id:3, topic:"quimica", icon:"✂️",
+    front:"¿Cómo funciona el enlazador disulfuro SPDP y por qué es útil para liberación citoplasmática?",
+    back:`<b>SPDP</b> (N-succinimidyl 3-(2-pyridyldithio)propionate) crea un puente <b>disulfuro (S–S)</b> entre NP y carga.<br><br>
+    La concentración intracelular de <b>glutatión (GSH ≈ 5 mM)</b> en citoplasma es 100–1000× mayor que en plasma, lo que activa la escisión selectiva.<br><br>
+    Resultado: la carga (péptido, antimiR-LNA) se libera <em>solo dentro de la célula</em>, minimizando liberación prematura en circulación y efectos sistémicos.`,
+    ref:"Yoo et al. 2014; Sección 3.4.3"
+  },
+  {
+    id:4, topic:"quimica", icon:"🧪",
+    front:"¿Qué ventaja ofrece la estreptavidina-biotina para prototipado, y cuál es su limitación clínica?",
+    back:`<b>Ventaja:</b> K<sub>d</sub> ≈ 10<sup>−15</sup> M → la interacción no-covalente más fuerte conocida. Permite modularidad: intercambiar cargas biotiniladas sin resintetizar la NP.<br><br>
+    <b>Limitación clínica:</b> La estreptavidina es <em>inmunogénica</em> en humanos — genera anticuerpos anti-estreptavidina que pueden provocar respuestas alérgicas en administración repetida.<br><br>
+    <em>Uso recomendado:</em> prototipado y validación in vitro; sustituir por química covalente para estudios in vivo/traslacionales.`,
+    ref:"Tabla 1 — Sección 2.3"
+  },
+  {
+    id:5, topic:"quimica", icon:"🔬",
+    front:"¿Qué son los lípidos ionizables y por qué su pKa (~6.0–6.8) es crítico para la entrega de ARNm?",
+    back:`Los <b>lípidos ionizables</b> (ej. MC3, SM-102) son <em>neutros a pH fisiológico (7.4)</em> — reducen toxicidad y adsorción proteica durante la circulación.<br><br>
+    En el <b>endosoma (pH 5.0–5.5)</b> se protonan adquiriendo carga positiva, que desestabiliza la membrana endosomal por interacción con fosfolípidos aniónicos → <em>liberación citoplasmática del ARNm</em>.<br><br>
+    pKa óptimo ≈ 6.2–6.5: bajo este valor el lípido está neutro en plasma pero ionizado en endosoma. Si pKa > 7, hay toxicidad sistémica.`,
+    ref:"Sección 2.2 y 3.4.1"
+  },
+
+  // ── HER2 ──
+  {
+    id:6, topic:"her2", icon:"🎯",
+    front:"¿Por qué los aptámeros de ADN anti-HER2 tienen mayor capacidad de carga en AuNPs que los anticuerpos?",
+    back:`Tamaño molecular: <b>aptámero HA1 ≈ 8–15 kDa</b> vs. <b>trastuzumab ≈ 150 kDa</b>.<br><br>
+    Una AuNP de 20 nm puede cargar <em>60–150 aptámeros</em> pero solo <em>5–15 anticuerpos</em> con densidad funcional equivalente.<br><br>
+    Ventajas adicionales: síntesis química reproducible (sin variabilidad de lote), mayor estabilidad térmica, sin inmunogenicidad de la región Fc, y posibilidad de <b>co-ensamblaje</b> de múltiples especies de aptámeros en una sola NP para targeting combinatorial.`,
+    ref:"Ma et al. 2022; Sección 3.2.1"
+  },
+  {
+    id:7, topic:"her2", icon:"🔴",
+    front:"¿Qué modificaciones del esqueleto requieren los aptámeros de ARN anti-HER2 para sobrevivir en plasma?",
+    back:`Los aptámeros de ARN son susceptibles a <b>RNasa A</b> (t½ plasmático sin modificar: minutos).<br><br>
+    Modificaciones validadas:<br>
+    • <em>2'-fluoro (2'-F)</em> en pirimidinas → bloquea ataque nucleofílico del 2'-OH<br>
+    • <em>2'-O-metil (2'-OMe)</em> → protección adicional y reduce inmunogenicidad<br>
+    • <em>Fosforotioato (PS *)</em> en extremos → resistencia a exonucleasas<br><br>
+    Estas modificaciones mantienen la estructura terciaria del aptámero sin afectar la K<sub>d</sub> de unión a HER2 ECD.`,
+    ref:"Sección 3.1"
+  },
+  {
+    id:8, topic:"her2", icon:"🏗️",
+    front:"¿Cómo funciona un tetraedro de ADN + AuNP con aptámero HA1 para targeting HER2?",
+    back:`El <b>tetraedro de ADN</b> (DNA tetrahedron) actúa como scaffold rígido que presenta el aptámero HA1 en orientación óptima hacia el ECD de HER2.<br><br>
+    Resultado experimental (Ma et al. 2022, SKBR3 HER2++):<br>
+    • <em>>90% internalización</em> en 4h vs. ~30% con aptámero libre<br>
+    • <em>5× selectividad</em> sobre MCF7 (HER2-bajo)<br>
+    • Carga: maytansina (citotóxico) unida al vértice opuesto al aptámero<br><br>
+    La clave es la <b>rigidez del tetraedro</b>: evita el colapso del aptámero sobre la superficie de la AuNP.`,
+    ref:"Ma et al. 2022"
+  },
+  {
+    id:9, topic:"her2", icon:"💊",
+    front:"¿Qué demostró Khorshid et al. (2023) con AuNPs porosas + aptámero anti-HER2 + dasatinib?",
+    back:`Plataforma: <b>AuNPs porosas</b> (alta área superficial interna para carga de fármaco) funcionalizadas con aptámero anti-HER2 + dasatinib (inhibidor de tirosina cinasa).<br><br>
+    Resultado en BT-474 (HER2++):<br>
+    • IC<sub>50</sub> dasatinib libre: <em>6.95 µM</em><br>
+    • IC<sub>50</sub> AuNP-dasatinib: <em>2.57 µM</em> (reducción 2.7×)<br>
+    • Efecto de <em>radiosensibilización</em> adicional con RT (las AuNPs generan electrones secundarios bajo irradiación)<br><br>
+    Demuestra un efecto dual: targeting + amplificación de radioterapia.`,
+    ref:"Khorshid et al. 2023"
+  },
+  {
+    id:10, topic:"her2", icon:"🌡️",
+    front:"¿Cómo funciona el gating con aptámero HER2 sobre MSN para liberación pH-dependiente?",
+    back:`En <b>MSN (nanopartículas de sílice mesoporosa)</b>, la β-ciclodextrina (β-CD) actúa como tapón que sella los poros cargados con doxorrubicina.<br><br>
+    El aptámero anti-HER2 está unido al tapón β-CD. Al unirse a HER2 e internalizarse, el <b>pH endosomal (5.5)</b> protoniza grupos amino de la β-CD, liberando el tapón y expulsando el fármaco.<br><br>
+    Resultado (Shen et al. 2019): captación selectiva en HER2+ con <em>liberación mínima a pH 7.4</em> (≤5%) y liberación máxima a pH 5.5 (>80%). Señal de imagen por fluorescencia de dos fotones integrada.`,
+    ref:"Shen et al. 2019"
+  },
+  {
+    id:11, topic:"her2", icon:"🍊",
+    front:"¿Por qué los nanovectores de toronja (GNV) de Tang et al. (2020) son relevantes para la traslación?",
+    back:`Los <b>GNV (grapefruit-derived nanovectors)</b> son vesículas extraídas de toronja con composición lipídica natural → <em>biocompatibilidad superior</em> a LNP sintéticos y sin respuesta inmune innata.<br><br>
+    Con aptámero HA1 en superficie:<br>
+    • <em>3.2× mayor acumulación tumoral</em> in vivo en xenoinjerto HER2+ vs. GNV sin aptámero<br>
+    • Sin toxicidad hepática/renal detectable<br><br>
+    Relevancia traslacional: los nanovectores naturales evitan problemas de patente y toxicidad de lípidos ionizables sintéticos, pero presentan <em>variabilidad de lote</em> como limitación.`,
+    ref:"Tang et al. 2020"
+  },
+  {
+    id:12, topic:"her2", icon:"⚠️",
+    front:"¿Cuál es la brecha crítica de los nanoteranósticos HER2 en líneas resistentes a trastuzumab?",
+    back:`Casi todos los constructos de aptámeros HER2 han sido validados en <b>SKBR3 y BT-474</b> (sensibles a trastuzumab, alta densidad HER2).<br><br>
+    <b>HCC1954</b> es HER2++ pero <em>resistente a trastuzumab</em> (mutación PIK3CA H1047R + amplificación MYC) — un modelo más clínicamente relevante para la resistencia adquirida.<br><br>
+    <em>No existe</em> ningún estudio publicado que evalúe aptámeros anti-HER2 en AuNPs en HCC1954.<br><br>
+    Esta brecha es una <b>oportunidad directa</b> para el laboratorio Gallardo-Blanco, que mantiene esta línea.`,
+    ref:"Sección 5.1"
+  },
+
+  // ── c-MYC / MAX ──
+  {
+    id:13, topic:"myc", icon:"🧬",
+    front:"¿Por qué la inhibición de la PPI c-Myc/Max es farmacológicamente difícil y cómo la resuelven las NPs?",
+    back:`El complejo <b>c-Myc/Max</b> se une a secuencias E-box (CACGTG) para activar ~15% del genoma. La interfaz PPI es extensa (~3000 Å²) y carece de surco de unión profundo → los inhibidores pequeños tienen baja afinidad.<br><br>
+    Los <b>péptidos bHLH-LZ</b> (H1, pMax, Omomyc) mimetizan el dominio de unión pero no penetran membranas eficientemente solos.<br><br>
+    Las NPs (AuNP, HPMA) resuelven:<br>
+    • <em>Entrega intracelular</em>: captación 5–20× mayor que péptido libre<br>
+    • <em>Protección de degradación proteolítica</em><br>
+    • <em>Concentración nuclear</em> suficiente para competir con Myc endógeno`,
+    ref:"Sección 3.3.1"
+  },
+  {
+    id:14, topic:"myc", icon:"📐",
+    front:"¿Por qué el espaciador PEG es indispensable en la conjugación de péptidos bHLH-LZ a AuNPs?",
+    back:`Sin espaciador, el péptido queda <b>adosado a la superficie de AuNP</b>, con su dominio de unión a Max ocluido por la superficie metálica o por otros péptidos adyacentes.<br><br>
+    Impacto cuantificado:<br>
+    • Sin PEG: reducción del <em>50–80%</em> en capacidad inhibitoria del complejo Myc/Max<br>
+    • Con espaciador <em>PEG 1–2 kDa</em>: accesibilidad conformacional restaurada<br><br>
+    El PEG también reduce la adsorción de proteínas plasmáticas (opsonización), extendiendo circulación.`,
+    ref:"Sección 3.3.2"
+  },
+  {
+    id:15, topic:"myc", icon:"🏭",
+    front:"¿Cómo activa la catepsina B la liberación del péptido H1 en el sistema HPMA-GFLG?",
+    back:`El copolímero de <b>HPMA</b> lleva el péptido H1 unido mediante el tetrapéptido <b>GFLG</b> (Gly-Phe-Leu-Gly).<br><br>
+    La <b>catepsina B</b> (proteasa lisosomal activa a pH 4–6) escinde específicamente el enlace Leu-Gly del spacer GFLG.<br><br>
+    Ventaja terapéutica:<br>
+    • H1 se libera <em>solo en el compartimento ácido-lisosomal</em> → evita inhibición sistémica de Myc en tejidos normales<br>
+    • Guan et al. (2016): <em>60–70% reducción</em> del complejo c-Myc/Max sin toxicidad sistémica detectable`,
+    ref:"Guan et al. 2016; Sección 3.3.2"
+  },
+  {
+    id:16, topic:"myc", icon:"🧠",
+    front:"¿Qué logró Ljubimov et al. (2025) con HPMA-antisentido c-Myc + Angiopep-2 en GBM?",
+    back:`Sistema: <b>HPMA-copolímero</b> cargando oligonucleótido antisentido contra c-Myc + péptido <b>Angiopep-2</b> (ligando de LRP1, receptor en BHE) + anti-PD-1.<br><br>
+    Innovaciones combinadas:<br>
+    • <em>Cruce de barrera hematoencefálica</em> mediado por Angiopep-2 (transcitosis LRP1)<br>
+    • Silenciamiento de c-Myc en GBM<br>
+    • Sinergia con anti-PD-1 (checkpoint)<br><br>
+    Resultado: reducción de volumen tumoral y supervivencia extendida en modelos de GBM ortotópico. Demuestra la <em>modularidad</em> del HPMA para incorporar múltiples señales de direccionamiento.`,
+    ref:"Ljubimov et al. 2025"
+  },
+  {
+    id:17, topic:"myc", icon:"🔮",
+    front:"¿Por qué no existe aún una AuNP con péptido bHLH-LZ que demuestre imagen LSPR + disrupción Myc/Max?",
+    back:`Esta es la <b>brecha pMyc/pMax-AuNP</b> identificada en la literatura (Sección 5.2).<br><br>
+    Razones técnicas de la brecha:<br>
+    1. Las AuNPs con péptidos hidrofóbicos (como bHLH-LZ) tienden a agregar sin PEG optimizado<br>
+    2. Demostrar inhibición de PPI intracelular requiere ensayos de co-IP o FRET nuclear, que son técnicamente exigentes<br>
+    3. No existe carga de imagen integrada (LSPR cuantitativo intracelular no está estandarizado)<br><br>
+    <em>Oportunidad directa:</em> conjugar pMyc o pMax mediante Cys-terminal a AuNP-PEG-2k y validar en DU145 (Myc-alto).`,
+    ref:"Sección 5.2"
+  },
+  {
+    id:18, topic:"myc", icon:"🎯",
+    front:"¿Por qué la co-amplificación MYC+HER2 (40–50% de mama HER2+) justifica una estrategia convergente?",
+    back:`En el <b>40–50% de tumores HER2+</b> existe co-amplificación 8q24 (MYC) + 17q12 (HER2).<br><br>
+    Implicaciones:<br>
+    • <b>Myc es el principal mecanismo de resistencia</b> a terapias anti-HER2 (pertuzumab, lapatinib)<br>
+    • Una AuNP con <em>aptámero HER2 como ligando de entrada</em> + carga inhibitoria de Myc atacaría ambas dianas simultáneamente<br>
+    • Impediría la vía de escape más común tras el tratamiento<br><br>
+    La <em>estrategia convergente</em> propuesta: AuNP-PEG-aptHER2 / pMyc o antimiR-Myc. Aplicable en HCC1954 y ZR-75-30.`,
+    ref:"Sección 5.4"
+  },
+
+  // ── ÁCIDOS NUCLEICOS ──
+  {
+    id:19, topic:"acidos", icon:"💉",
+    front:"¿Cuál es el único chasis clínicamente validado para entrega de ARNm in vivo y cómo se adapta a oncología?",
+    back:`Las <b>LNP (lipid nanoparticles)</b> son el único sistema aprobado para entrega de ARNm in vivo (BNT162b2, mRNA-1273).<br><br>
+    Para cáncer, las LNP requieren:<br>
+    1. <b>Direccionamiento activo</b>: inserción post-formación de <em>DSPE-PEG2000-aptámero</em> en la membrana LNP ya formada → eficiencia de encapsulación ARNm >85% preservada<br>
+    2. <b>ARNm oncológico</b>: supresores tumorales (p53, PTEN), citocinas inmunoestimuladoras (IL-12, GM-CSF), o antígenos tumorales (neoantigens)<br><br>
+    Zhao et al. (2024): lípidos con enlace <em>azido-acetal</em> → liberación endosomal <em>10× más rápida</em> que MC3 estándar.`,
+    ref:"Sección 3.4.1"
+  },
+  {
+    id:20, topic:"acidos", icon:"🔇",
+    front:"¿Qué diferencia mecanística hay entre un miRNA mimic y un antimiR en el contexto de NPs?",
+    back:`<b>miRNA mimic:</b> ARN bicatenario con hebra guía idéntica al miRNA endógeno → se carga en RISC → silencia mRNAs diana (función <em>gain-of-function</em> de miRNA). Ej: miR-34a mimic (supresor tumoral) en LNP.<br><br>
+    <b>antimiR:</b> oligonucleótido de cadena sencilla complementario al miRNA oncogénico → secuestra el miRNA impidiendo que cargue RISC (función <em>loss-of-function</em>). Ej: anti-miR-21.<br><br>
+    Para NPs: los <em>antimiR-LNA</em> son más cortos (8–16 nt con LNA) → mejor encapsulación; los mimics necesitan preservar la estructura bicatenaria durante la conjugación.`,
+    ref:"Sección 3.4.2–3.4.3"
+  },
+  {
+    id:21, topic:"acidos", icon:"🔒",
+    front:"¿Cómo aumentan las modificaciones LNA la estabilidad de antimiRs y cuál es el mecanismo de acción?",
+    back:`El <b>LNA (Locked Nucleic Acid)</b> fija el ribosa en conformación 3'-endo mediante un puente metileno 2'-O,4'-C.<br><br>
+    Efecto: <em>+4–6°C de Tm por cada sustitución LNA</em> → aumento de afinidad por miRNA diana.<br><br>
+    Ventajas para terapia:<br>
+    • AntimiRs más cortos (8–12 nt vs. 22 nt RNA) con igual o mayor potencia<br>
+    • Resistencia a nucleasas (el esqueleto bloqueado es mal sustrato de RNasas)<br>
+    • Con enlazador SPDP-disulfuro en SPION: liberación intracelular GSH-dependiente (Yoo et al. 2014)<br><br>
+    Vandghanooni 2019: AS1411-aptámero + antimiR-214-LNA en PCL-PEG → reducción 3× en IC<sub>50</sub> cisplatino en células resistentes.`,
+    ref:"Sección 3.4.3; Vandghanooni 2019"
+  },
+  {
+    id:22, topic:"acidos", icon:"⚫",
+    front:"¿Qué ventaja ofrecen los carbon dots (Cdots) para entrega de antimiR-LNA frente a otros carriers?",
+    back:`Los <b>Carbon dots</b> (diámetro 2–5 nm, Ju et al. 2020):<br><br>
+    • <em>Biocompatibilidad alta</em>: derivados de fuentes de carbono, sin metales pesados<br>
+    • <em>Tamaño ultra-pequeño</em>: penetración nuclear facilitada sin señal NLS adicional<br>
+    • Fluorescencia intrínseca → imagen integrada sin marcadores adicionales<br>
+    • Carga antimiR-LNA por interacción electrostática<br><br>
+    Aplicación: supresión de miRNA viral de KSHV en células de sarcoma de Kaposi. El tamaño pequeño permite acceso a compartimentos inaccesibles para NPs convencionales (>50 nm).`,
+    ref:"Ju et al. 2020"
+  },
+  {
+    id:23, topic:"acidos", icon:"🛡️",
+    front:"¿Cómo activan los polímeros STING (Zhang et al. 2024) la inmunidad antitumoral junto con ARNm?",
+    back:`Los <b>polímeros PD</b> (STING-activating) co-formulados con ARNm y lípidos generan <em>PD-LNPs</em>.<br><br>
+    Mecanismo dual:<br>
+    1. <b>ARNm</b> codifica antígeno tumoral → presentación por MHC-I → activación de linfocitos T CD8+<br>
+    2. <b>Polímero PD</b> activa STING en células dendríticas → producción de IFN-β → amplificación de la respuesta innata<br><br>
+    Resultado: eficacia vacunal superior a LNP-ARNm solas. Demuestra que la <em>funcionalización del vehículo</em> (no solo la carga) puede ser inmunoestimulante. Relevante para vacunas de neoantígenos.`,
+    ref:"Zhang et al. 2024; Sección 3.4.5"
+  },
+  {
+    id:24, topic:"acidos", icon:"🧩",
+    front:"¿Cómo se insertan aptámeros de direccionamiento en LNPs ya formadas sin comprometer la encapsulación?",
+    back:`Técnica: <b>post-formación via DSPE-PEG2000-aptámero</b>.<br><br>
+    Proceso:<br>
+    1. Sintetizar LNP con ARNm → encapsulación >85%<br>
+    2. Incubar con <em>conjugado DSPE-PEG2000-aptámero</em> a 37°C por 30 min<br>
+    3. El segmento DSPE se intercala espontáneamente en la bicapa lipídica → aptámero queda en superficie<br><br>
+    Ventaja: evita la presencia del aptámero durante la formación de LNP (donde las condiciones ácidas/orgánicas pueden desnaturalizarlo). La eficiencia de inserción supera el <em>80%</em> con relación molar LNP:DSPE-PEG-apt = 1:10.`,
+    ref:"Sección 3.4.1"
+  },
+
+  // ── TERANÓSTICO ──
+  {
+    id:25, topic:"teranóstico", icon:"🔭",
+    front:"¿Qué modalidades de imagen puede proporcionar una AuNP funcionalizada y cuál es el mecanismo de cada una?",
+    back:`<b>1. LSPR (resonancia de plasmón superficial localizado):</b> el campo oscuro (DFM) detecta cambios de longitud de onda al unirse HER2 → imagen label-free a nivel de partícula individual.<br><br>
+    <b>2. Tomografía fotoacústica (PAT):</b> AuNPs absorben NIR (808 nm) → expansión térmica → onda ultrasónica detectada. Resolución espacial superior a fluorescencia.<br><br>
+    <b>3. Contraste CT de rayos X:</b> densidad electrónica del oro → señal CT. Útil para monitoreo in vivo en tumores profundos.<br><br>
+    <b>4. PTT (fototerapia):</b> las AuNRs convierten NIR en calor (>80% eficiencia) → hipertermia localizada >43°C.`,
+    ref:"Sección 4.1"
+  },
+  {
+    id:26, topic:"teranóstico", icon:"🧲",
+    front:"¿Cómo integran los SPIONs funcionalidad de imagen MRI a plataformas poliméricas?",
+    back:`Los <b>SPIONs</b> (nanopartículas de óxido de hierro superparamagnético) co-encapsulados en polímeros PLGA/HPMA proporcionan <b>contraste T2* en MRI</b>.<br><br>
+    Mecanismo: los SPIONs crean inhomogeneidades de campo magnético local que acortan T2/T2* de protones de agua adyacentes → hipointensidad en secuencias eco de gradiente.<br><br>
+    En combinación con antimiR-LNA vía SPDP (Yoo et al. 2014): la misma NP entrega la carga terapéutica Y proporciona señal de imagen para verificar la biodistribución.<br><br>
+    Limitación: el hierro puede catalizar radicales OH en ambientes oxidantes (reacción de Fenton).`,
+    ref:"Sección 4.1"
+  },
+  {
+    id:27, topic:"teranóstico", icon:"💡",
+    front:"¿Cuáles son los 3 tipos de liberación por estímulo en NPs teranósticas y qué plataforma representa cada uno?",
+    back:`<b>1. pH (ácido endosomal, pH 5.0–5.5):</b><br>
+    → MSN-β-CD-aptámero HER2 (Shen et al. 2019): el tapón se abre en endosoma<br>
+    → LNP-acetal degradable (Zhao et al. 2024)<br><br>
+    <b>2. Redox (GSH citoplasmático, ≈5 mM):</b><br>
+    → SPION-SPDP-antimiR-LNA (Yoo et al. 2014)<br>
+    → AuNP-disulfuro-pMyc (diseño propuesto)<br><br>
+    <b>3. Luz NIR (808 nm):</b><br>
+    → AuNRs para PTT: hipertermia localizada >43°C libera fármaco atrapado físicamente + mata células por calor<br><br>
+    La <em>combinación pH + redox</em> en una sola NP maximiza selectividad tumoral.`,
+    ref:"Sección 4.2"
+  },
+  {
+    id:28, topic:"teranóstico", icon:"📊",
+    front:"¿Cuáles son los 6 parámetros de caracterización mínimos para validar una NP teranóstica funcionalizada?",
+    back:`Según Sección 4.3, los <b>6 benchmarks</b> son:<br><br>
+    1. <em>Tamaño hidrodinámico</em> (DLS): 50–200 nm para EPR óptimo<br>
+    2. <em>PDI</em> (índice de polidispersidad): <0.2<br>
+    3. <em>Potencial Z</em>: |ζ| > 20 mV para estabilidad coloidal<br>
+    4. <em>Eficiencia de encapsulación</em>: >70% para carga farmacológica<br>
+    5. <em>Densidad de ligando</em> (aptámero/péptido por NP): cuantificación por UV-Vis o BCA<br>
+    6. <em>Funcionalidad del ligando post-conjugación</em>: ensayo de unión a receptor (SPR, flow cytometry)`,
+    ref:"Sección 4.3"
+  },
+
+  // ── BRECHAS ──
+  {
+    id:29, topic:"brecha", icon:"🚫",
+    front:"¿Por qué los modelos de xenoinjerto son insuficientes para validar nanoteranósticos y qué alternativas existen?",
+    back:`Los <b>xenoinjertos</b> (células humanas en ratón inmunodeficiente) <em>carecen de contexto inmune funcional</em>:<br>
+    • No hay linfocitos T ni B funcionales<br>
+    • No hay respuesta inflamatoria tumoral normal<br>
+    • Las NPs no enfrentan opsonización real ni fagocitosis por NK cells<br><br>
+    <b>Alternativas:</b><br>
+    • <em>Modelos singénicos</em> (ej. 4T1 en BALB/c): sistema inmune intacto<br>
+    • <em>PDX (patient-derived xenograft)</em> en ratones humanizados<br>
+    • <em>Organoides tumorales</em> de paciente para validación ex vivo<br><br>
+    Limitación adicional: ausencia de <em>modelado PK-PD</em> para constructos aptámero-NP.`,
+    ref:"Sección 5.4"
+  },
+  {
+    id:30, topic:"brecha", icon:"🔬",
+    front:"¿Cuál es el vacío teranóstico en ARNm/miRNA-LNP y qué estrategia lo resolvería?",
+    back:`Los ensayos clínicos de vacunas ARNm (NCT04480853, NCT03480152) <em>no integran capacidad de imagen en tiempo real</em>.<br><br>
+    No existe confirmación in vivo de si el ARNm llega al tumor o si se expresa allí.<br><br>
+    <b>Estrategia propuesta:</b><br>
+    • Co-encapsulación de <em>SPIONs en LNP-mRNA</em> → verificar biodistribución por MRI antes/durante la terapia<br>
+    • Uso de <em>ARNm reportero</em> (luciferasa) co-administrado para validar expresión tumoral por bioluminiscencia<br><br>
+    Esta integración convertiría los actuales LNP terapéuticos en plataformas <em>verdaderamente teranósticas</em>.`,
+    ref:"Sección 5.3"
+  }
+];
+
+// ── State ──
+let currentFilter = 'all';
+let flippedCards = new Set(JSON.parse(localStorage.getItem('nanoflash_flipped') || '[]'));
+let focusIndex = 0;
+
+function saveFlipped() {
+  localStorage.setItem('nanoflash_flipped', JSON.stringify([...flippedCards]));
+}
+
+function updateProgress() {
+  const visible = getVisible();
+  const done = visible.filter(c => flippedCards.has(c.id)).length;
+  document.getElementById('progressText').textContent = `${done} / ${visible.length} revisadas`;
+  document.getElementById('progressBar').style.width = visible.length ? `${(done/visible.length)*100}%` : '0%';
+}
+
+function getVisible() {
+  return currentFilter === 'all' ? CARDS : CARDS.filter(c => c.topic === currentFilter);
+}
+
+function renderCards() {
+  const grid = document.getElementById('grid');
+  const visible = getVisible();
+  document.getElementById('countLabel').textContent = `${visible.length} / ${CARDS.length}`;
+
+  grid.innerHTML = '';
+  visible.forEach((card, idx) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'card-wrap' + (flippedCards.has(card.id) ? ' done' : '');
+    wrap.dataset.topic = card.topic;
+    wrap.dataset.id = card.id;
+    wrap.dataset.idx = idx;
+    wrap.setAttribute('tabindex', '0');
+    wrap.setAttribute('role', 'button');
+    wrap.setAttribute('aria-label', `Tarjeta ${idx+1}: ${card.front}`);
+
+    wrap.innerHTML = `
+      <div class="card-inner">
+        <div class="card-face card-front">
+          <span class="card-icon">${card.icon}</span>
+          <span class="card-number">#${card.id}</span>
+          <div class="topic-tag">${topicLabel(card.topic)}</div>
+          <h3>${card.front}</h3>
+          <div class="flip-hint">clic para respuesta →</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="back-title">${topicLabel(card.topic)}</div>
+          <div class="back-body">${card.back}</div>
+          <div class="ref-tag">📄 ${card.ref}</div>
+        </div>
+      </div>`;
+
+    wrap.addEventListener('click', () => toggleCard(wrap, card.id));
+    wrap.addEventListener('keydown', e => {
+      if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleCard(wrap, card.id); }
+      if (e.key === 'ArrowRight') { e.preventDefault(); moveFocus(1); }
+      if (e.key === 'ArrowLeft')  { e.preventDefault(); moveFocus(-1); }
+    });
+    grid.appendChild(wrap);
+  });
+
+  updateProgress();
+}
+
+function toggleCard(wrap, id) {
+  const isFlipped = wrap.classList.toggle('flipped');
+  if (isFlipped) {
+    flippedCards.add(id);
+    wrap.classList.add('done');
+  }
+  saveFlipped();
+  updateProgress();
+}
+
+function moveFocus(dir) {
+  const cards = [...document.querySelectorAll('.card-wrap')];
+  focusIndex = Math.max(0, Math.min(cards.length - 1, focusIndex + dir));
+  cards[focusIndex]?.focus();
+}
+
+function topicLabel(t) {
+  return { quimica:'Química de Conjugación', her2:'Targeting HER2',
+           myc:'Eje c-Myc/Max', acidos:'Ácidos Nucleicos',
+           teranóstico:'Diseño Teranóstico', brecha:'Brechas de Investigación' }[t] || t;
+}
+
+// Filters
+document.getElementById('controls').addEventListener('click', e => {
+  const btn = e.target.closest('.filter-btn');
+  if (!btn || !btn.dataset.filter) return;
+  document.querySelectorAll('.filter-btn[data-filter]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter = btn.dataset.filter;
+  renderCards();
+});
+
+// Reset
+document.getElementById('resetBtn').addEventListener('click', () => {
+  flippedCards.clear();
+  localStorage.removeItem('nanoflash_flipped');
+  document.querySelectorAll('.card-wrap').forEach(w => {
+    w.classList.remove('flipped', 'done');
+  });
+  updateProgress();
+});
+
+// Init
+renderCards();
+</script>
+</body>
+</html>

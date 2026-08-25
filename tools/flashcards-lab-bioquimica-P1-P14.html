@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Google tag (gtag.js) — la librería se carga, pero el registro (config) se dispara
+     SOLO tras validar la matrícula (ver tryEnter), para contar únicamente uso real. -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-X5BT5RP5WF"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  // gtag('config',...) NO se llama aquí: se llama tras validar matrícula en tryEnter().
+</script>
+<title>Flashcards — Laboratorio de Bioquímica P1–P14 | UANL 2026</title>
+<style>
+  :root{
+    --bg:#0f172a; --surface:#1e293b; --surface2:#273449; --border:#334155;
+    --text:#f1f5f9; --muted:#94a3b8; --accent:#2563eb; --accent2:#0ea5e9;
+    --gold:#fbbf24; --green:#22c55e; --back:#0b2545;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,-apple-system,sans-serif;min-height:100vh;line-height:1.5;}
+  header{background:linear-gradient(135deg,#0b2545,#1e293b);padding:1.4rem 1.5rem;border-bottom:2px solid var(--accent2);}
+  header h1{font-size:1.25rem;color:#fff;}
+  header p{font-size:.82rem;color:var(--muted);margin-top:.25rem;}
+  .wrap{max-width:880px;margin:0 auto;padding:1.25rem 1rem 4rem;}
+  .controls{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:1rem 0 1.25rem;}
+  select,button{font-family:inherit;font-size:.9rem;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:.55rem .8rem;cursor:pointer;}
+  select{min-width:210px;}
+  button:hover{border-color:var(--accent2);}
+  .counter{font-size:.85rem;color:var(--muted);margin-left:auto;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;min-height:300px;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;
+    padding:2rem 1.6rem;cursor:pointer;position:relative;transition:border-color .2s;user-select:none;}
+  .card:hover{border-color:var(--accent2);}
+  .tag{position:absolute;top:.9rem;left:.9rem;font-size:.68rem;font-weight:700;letter-spacing:.03em;
+    background:var(--accent);color:#fff;padding:.22rem .55rem;border-radius:6px;text-transform:uppercase;}
+  .side{position:absolute;top:.9rem;right:.9rem;font-size:.66rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;}
+  .q{font-size:1.18rem;font-weight:600;}
+  .a{font-size:1.04rem;color:#e2e8f0;}
+  .a strong{color:var(--gold);}
+  .hint{margin-top:1.4rem;font-size:.74rem;color:var(--muted);}
+  .nav{display:flex;gap:.6rem;justify-content:center;align-items:center;margin-top:1.1rem;}
+  .nav button{min-width:120px;font-weight:600;}
+  .nav .primary{background:var(--accent);border-color:var(--accent);}
+  .progress{height:5px;background:var(--surface2);border-radius:3px;margin-top:1rem;overflow:hidden;}
+  .progress > div{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0;transition:width .25s;}
+  footer{text-align:center;font-size:.74rem;color:var(--muted);padding:1.5rem 1rem;border-top:1px solid var(--border);}
+  footer a{color:var(--accent2);text-decoration:none;}
+  @media(max-width:560px){.counter{width:100%;margin:.3rem 0 0;}.q{font-size:1.05rem;}select{min-width:160px;}}
+  /* gate de acceso */
+  #gate{position:fixed;inset:0;background:linear-gradient(135deg,#0b2545,#0f172a);z-index:50;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;padding:1.5rem;text-align:center;}
+  #gate .box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2.2rem 1.8rem;max-width:420px;width:100%;}
+  #gate h2{font-size:1.25rem;color:#fff;margin-bottom:.4rem;}
+  #gate p{font-size:.85rem;color:var(--muted);margin-bottom:1.4rem;}
+  #gate input{width:100%;font-size:1.1rem;text-align:center;letter-spacing:.08em;padding:.7rem;border-radius:9px;
+    border:1px solid var(--border);background:var(--surface2);color:var(--text);margin-bottom:.9rem;}
+  #gate input:focus{outline:none;border-color:var(--accent2);}
+  #gate button{width:100%;font-size:1rem;font-weight:700;padding:.75rem;border-radius:9px;border:none;
+    background:var(--accent);color:#fff;cursor:pointer;}
+  #gate button:hover{background:#1d4ed8;}
+  #gateMsg{font-size:.82rem;margin-top:.9rem;min-height:1.2em;}
+  #gateMsg.err{color:#f87171;}
+  .hidden{display:none!important;}
+</style>
+</head>
+<body>
+
+<!-- Pantalla de acceso (gate) -->
+<div id="gate">
+  <div class="box">
+    <h2>🔒 Acceso de estudiantes</h2>
+    <p>Material exclusivo del grupo A021 · Lab. de Bioquímica y Biología Molecular.<br>
+    Ingresa tu <strong>matrícula</strong> tal como aparece en la lista del grupo.</p>
+    <input id="matInput" type="text" inputmode="numeric" placeholder="Matrícula" autocomplete="off" maxlength="9">
+    <button id="gateBtn">Entrar</button>
+    <div id="gateMsg"></div>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+<header>
+  <h1>Flashcards · Laboratorio de Bioquímica y Biología Molecular</h1>
+  <p>Prácticas 1–14 · Repaso de puntos esenciales · Licenciatura · Facultad de Medicina, UANL · 2026</p>
+</header>
+
+<div class="wrap">
+  <div class="controls">
+    <select id="practiceSel" aria-label="Filtrar por práctica"></select>
+    <button id="shuffleBtn">🔀 Mezclar</button>
+    <span class="counter" id="counter"></span>
+  </div>
+
+  <div class="card" id="card">
+    <span class="tag" id="cardTag">P1</span>
+    <span class="side" id="cardSide">Pregunta</span>
+    <div class="q" id="cardText">Cargando…</div>
+    <div class="hint" id="cardHint">Haz clic en la tarjeta para ver la respuesta</div>
+  </div>
+
+  <div class="progress"><div id="progressBar"></div></div>
+
+  <div class="nav">
+    <button id="prevBtn">‹ Anterior</button>
+    <button class="primary" id="flipBtn">Voltear</button>
+    <button id="nextBtn">Siguiente ›</button>
+  </div>
+</div>
+
+<footer>
+  Gallardo BioTools · Material docente de repaso · Facultad de Medicina, UANL ·
+  <a href="https://gallardo-lab.github.io/gallardo-biotools/" target="_blank">Portal BioTools</a> ·
+  <a href="https://gallardo-lab.github.io/" target="_blank">PI Biosketch</a>
+  <br><span style="font-size:.68rem">Contenido derivado del manual de laboratorio. Las tarjetas son ayuda de estudio; consulta siempre el manual oficial.</span>
+</footer>
+</div><!-- /#app -->
+
+<script>
+/* ===== Gate de acceso por matrícula (verificación por hash SHA-256 + salt) =====
+   No contiene matrículas en claro: solo hashes truncados. La matrícula escrita
+   por el alumno se transforma con el mismo salt y se compara. Es un filtro de
+   acceso del lado del cliente (no es seguridad fuerte): adecuado para material
+   de repaso, no para evaluaciones con peso. */
+const SALT="GallardoBioTools-LabBioq-A021-2026";
+const ALLOWED=new Set(["05e9078ec48359ac","0b95d91d0d3b7ea6","12153e1f1050e274","24dde746519590ab","25d978ee738c68fd","28ff4a94090df533","4aacd85597eafb1b","52200c9521dd98a2","5bf2afb806841bfa","5c4254f69ccae835","70850e3c4a9dd156","739775f5c92cb3a8","8321db3bfb4d8d8c","85e006f704cf53a2","8808b43b8b58f186","904283b4b1fe45cc","a38d9c7d2fb90c7a","b0ec6a16d6ac1dd1","b2f94449b7417f68","b5a61fdb0444554b","b94a4600f3fec442","c2fd9a74ea23659e","d3a64aa75098d547","d5f9e1271fb1859d","db03631c0a5dd912","ff439120aa117021"]);
+
+async function sha256hex(str){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function tryEnter(){
+  const raw=document.getElementById('matInput').value.trim();
+  const msg=document.getElementById('gateMsg');
+  if(!/^\d{5,9}$/.test(raw)){msg.className='err';msg.textContent='Ingresa una matrícula válida (solo números).';return;}
+  const h=(await sha256hex(SALT+raw)).slice(0,16);
+  if(ALLOWED.has(h)){
+    try{
+      gtag('config','G-X5BT5RP5WF');                       // registra la visita SOLO al validar
+      gtag('event','acceso_flashcards',{grupo:'A021'});      // evento de acceso del grupo
+    }catch(e){}
+    document.getElementById('gate').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    if(typeof render==='function')render();
+  }else{
+    msg.className='err';msg.textContent='Matrícula no encontrada en el grupo A021. Verifica con tu profesor.';
+  }
+}
+document.getElementById('gateBtn').addEventListener('click',tryEnter);
+document.getElementById('matInput').addEventListener('keydown',e=>{if(e.key==='Enter')tryEnter();});
+document.getElementById('matInput').focus();
+</script>
+
+<script>
+const CARDS = [
+/* ---- P1: Introducción a la bioquímica ---- */
+{p:"P1",t:"Introducción a la bioquímica",q:"¿Cómo se clasifican las biomoléculas y qué grupos incluye cada clase?",a:"En <strong>inorgánicas</strong> (agua, gases y sales minerales) y <strong>orgánicas</strong> (su elemento principal es el carbono): aminoácidos, carbohidratos, lípidos y nucleótidos, entre otros."},
+{p:"P1",t:"Introducción a la bioquímica",q:"¿Cuáles son las 4 principales macromoléculas del cuerpo humano?",a:"<strong>Proteínas, lípidos, carbohidratos complejos y ácidos nucleicos.</strong> Resultan de la unión de biomoléculas más simples y son responsables de la estructura y función de los organismos."},
+{p:"P1",t:"Introducción a la bioquímica",q:"¿Qué elemento es la base de las biomoléculas orgánicas?",a:"El <strong>carbono</strong>. Su capacidad de formar enlaces covalentes y cadenas permite la diversidad de moléculas orgánicas."},
+{p:"P1",t:"Introducción a la bioquímica",q:"¿Cuál es la función principal de los carbohidratos en los seres vivos?",a:"Principalmente <strong>fuente de energía</strong> (ej. glucosa); también cumplen funciones estructurales y de almacenamiento (glucógeno)."},
+{p:"P1",t:"Introducción a la bioquímica",q:"¿Cuál es la función principal de los ácidos nucleicos?",a:"<strong>Almacenar y transmitir la información genética</strong> (ADN) y participar en la síntesis de proteínas (ARN)."},
+{p:"P1",t:"Introducción a la bioquímica",q:"Da un ejemplo de grupo funcional y la función orgánica que define.",a:"<strong>R–OH = hidroxilo → alcohol</strong> (ej. CH₃-CH₂-OH, etanol). Otros: R–NH₂ (amino → amina), R–COOH (carboxilo → ácido)."},
+{p:"P1",t:"Introducción a la bioquímica",q:"¿Qué diferencia a un enlace covalente de uno no covalente?",a:"El <strong>covalente</strong> comparte electrones entre átomos (fuerte); los <strong>no covalentes</strong> (puentes de hidrógeno, iónicas, van der Waals, hidrofóbicas) son interacciones débiles pero clave en la estructura de biomoléculas."},
+{p:"P1",t:"Introducción a la bioquímica",q:"¿Cuál es la función principal de las proteínas?",a:"Son funcionalmente diversas: <strong>enzimas, transporte</strong> (hemoglobina), <strong>estructura</strong> (colágeno), <strong>defensa</strong> (anticuerpos) y regulación (algunas hormonas)."},
+
+/* ---- P2: Seguridad y pipetas ---- */
+{p:"P2",t:"Seguridad en el laboratorio y uso de pipetas",q:"¿Cómo se define la seguridad en el laboratorio?",a:"Situación carente de riesgo o con riesgo limitado, resultado de cumplir un <strong>conjunto de normas y prácticas</strong>. Incluye conocer el riesgo, prevenirlo y saber actuar ante un accidente."},
+{p:"P2",t:"Seguridad en el laboratorio y uso de pipetas",q:"¿A quién protege la seguridad en el laboratorio?",a:"Al <strong>propio estudiante, a sus compañeros y a la comunidad</strong> en general. La seguridad es responsabilidad compartida."},
+{p:"P2",t:"Seguridad en el laboratorio y uso de pipetas",q:"Menciona reglas básicas de vestimenta en el laboratorio.",a:"Usar <strong>bata abrochada</strong>, zapato cerrado y de tacón bajo; prohibido shorts/falda y piel expuesta; <strong>pelo recogido</strong>; sin pulseras colgantes ni mangas anchas."},
+{p:"P2",t:"Seguridad en el laboratorio y uso de pipetas",q:"¿Qué conductas están prohibidas dentro del laboratorio?",a:"<strong>Fumar, comer o beber</strong>, y guardar alimentos o bebidas en refrigeradores/congeladores del laboratorio."},
+{p:"P2",t:"Seguridad en el laboratorio y uso de pipetas",q:"¿Cuál es la regla fundamental al pipetear líquidos?",a:"<strong>Nunca pipetear con la boca.</strong> Se usa siempre pipeta (con perilla/propipeta), sobre todo con muestras biológicas o reactivos irritantes o venenosos."},
+{p:"P2",t:"Seguridad en el laboratorio y uso de pipetas",q:"¿Cómo se manejan los objetos punzocortantes?",a:"Como <strong>potencialmente infecciosos</strong>: con cuidado extraordinario. Las agujas no se reencapuchan ni se doblan; su destino final es la <strong>incineración</strong> (contenedor rígido)."},
+{p:"P2",t:"Seguridad en el laboratorio y uso de pipetas",q:"¿Con qué se descontaminan las superficies de trabajo?",a:"Con un desinfectante como el <strong>hipoclorito de sodio</strong>, ante cualquier salpicadura de material potencialmente infeccioso y al finalizar la actividad."},
+{p:"P2",t:"Seguridad en el laboratorio y uso de pipetas",q:"¿Por qué se usan guantes y qué precaución hay que tener con ellos?",a:"Para impedir el contacto de la piel con muestras biológicas. Precaución: <strong>no tocar picaportes ni mobiliario con los guantes manchados</strong> para no diseminar contaminación."},
+
+/* ---- P3: pH y buffers ---- */
+{p:"P3",t:"pH y soluciones amortiguadoras",q:"¿Cómo se calcula el pH y qué mide?",a:"<strong>pH = –log[H⁺]</strong>. Mide la concentración de iones hidrógeno; determina el equilibrio iónico y la acidez/alcalinidad del medio."},
+{p:"P3",t:"pH y soluciones amortiguadoras",q:"¿Qué rango abarca la escala de pH y qué representan sus extremos?",a:"De <strong>0 a 14</strong>. Valores bajos (0–6) = ácidos; 7 = neutro; altos (8–14) = bases/álcalis. En neutro [H⁺]=[OH⁻]."},
+{p:"P3",t:"pH y soluciones amortiguadoras",q:"¿Cuál es el pH normal de la sangre arterial y por qué importa?",a:"<strong>pH ≈ 7.4</strong> (venosa ~7.3 por el CO₂). Pequeños cambios afectan la eficiencia enzimática, la división celular y el crecimiento; pulmones y riñón lo mantienen."},
+{p:"P3",t:"pH y soluciones amortiguadoras",q:"¿Qué diferencia a un ácido/base fuerte de uno débil?",a:"El <strong>fuerte</strong> disocia (separa sus iones) rápida y completamente (ej. HCl); el <strong>débil</strong> se resiste a disociarse (ej. CH₃COOH, ácido acético) y por eso forma parte de los amortiguadores."},
+{p:"P3",t:"pH y soluciones amortiguadoras",q:"¿Qué es una solución amortiguadora (buffer) y para qué sirve?",a:"Solución (tampón) que <strong>mantiene el pH casi invariable</strong> al añadir ácidos o bases. Lo logra con un par ácido débil/sal conjugada que consumen los OH⁻ y los H⁺ añadidos."},
+{p:"P3",t:"pH y soluciones amortiguadoras",q:"Según Brønsted-Lowry, ¿qué es un ácido y qué es una base?",a:"Ácido = <strong>donador de protones (H⁺)</strong>; base = <strong>aceptor de iones H⁺</strong> (representado por OH⁻). Ambos suelen ser solubles en agua."},
+{p:"P3",t:"pH y soluciones amortiguadoras",q:"¿Por qué el pH es crítico para los anfolitos como los aminoácidos?",a:"Porque sus propiedades (carga neta) <strong>dependen del pH del medio</strong>: pueden comportarse como ácido o como base según el entorno (punto isoeléctrico)."},
+{p:"P3",t:"pH y soluciones amortiguadoras",q:"¿Qué sistemas fisiológicos regulan el pH sanguíneo?",a:"Principalmente <strong>pulmones</strong> (eliminan CO₂) y <strong>riñón</strong> (excretan H⁺/reabsorben bicarbonato), apoyados por amortiguadores como el bicarbonato."},
+
+/* ---- P4: Proteínas (Biuret) ---- */
+{p:"P4",t:"Proteínas totales (método de Biuret)",q:"¿Qué son las proteínas totales del suero?",a:"La <strong>suma de las proteínas globulares del suero</strong>, principalmente <strong>albúmina</strong> y <strong>globulinas</strong>. Reflejan el estado proteico y de varios órganos."},
+{p:"P4",t:"Proteínas totales (método de Biuret)",q:"¿Cuál es la proteína de mayor concentración en el suero y qué hace?",a:"La <strong>albúmina</strong>: transporta moléculas pequeñas y <strong>mantiene la presión osmótica</strong> de la sangre (evita que el líquido se filtre a los tejidos)."},
+{p:"P4",t:"Proteínas totales (método de Biuret)",q:"¿Cuál es la diferencia entre suero y plasma?",a:"El <strong>suero carece de factores de coagulación</strong> (como el fibrinógeno); el plasma sí los contiene. El suero es el líquido amarillo que queda tras formarse el coágulo."},
+{p:"P4",t:"Proteínas totales (método de Biuret)",q:"¿En qué se fundamenta el método de Biuret?",a:"En la reacción de los <strong>enlaces peptídicos</strong> con iones cobre (Cu²⁺) en medio alcalino, formando un <strong>complejo de color violeta</strong> cuya intensidad es proporcional a la concentración de proteína."},
+{p:"P4",t:"Proteínas totales (método de Biuret)",q:"¿Qué utilidad clínica tiene cuantificar albúmina?",a:"Detecta alteraciones en tejidos; por ejemplo, la <strong>albúmina baja en daño hepatocelular</strong> (el hígado la sintetiza). Siempre se interpreta junto con la clínica y otros parámetros."},
+{p:"P4",t:"Proteínas totales (método de Biuret)",q:"¿Qué factores pueden interferir en la medición de proteínas totales?",a:"Ciertos medicamentos (corticosteroides, isoniazida, sulfonamidas, salicilatos, etc.) y dificultades en la toma de muestra por variación del calibre de venas entre pacientes."},
+{p:"P4",t:"Proteínas totales (método de Biuret)",q:"Menciona ejemplos de la diversidad funcional de las proteínas.",a:"<strong>Enzimas</strong>, hormonas, <strong>hemoglobina</strong> (transporta O₂), LDL (transporta colesterol), fibrinógeno (coagulación), <strong>colágeno</strong> (estructura) e inmunoglobulinas (anticuerpos)."},
+{p:"P4",t:"Proteínas totales (método de Biuret)",q:"¿Por qué se cuantifican proteínas séricas en la clínica?",a:"Porque sus <strong>anormalidades ayudan a detectar alteraciones en tejidos/órganos</strong> (hígado, riñón, estado nutricional, inflamación), como apoyo diagnóstico."},
+
+/* ---- P5: LDH ---- */
+{p:"P5",t:"LDH y diagnóstico clínico",q:"¿Qué son las enzimas y de qué naturaleza química son?",a:"<strong>Catalizadores biológicos</strong> que aceleran las reacciones bioquímicas sin alterar la naturaleza de sustratos y productos. La mayoría son <strong>proteínas</strong> (algunas son ARN: ribozimas)."},
+{p:"P5",t:"LDH y diagnóstico clínico",q:"¿Qué reacción cataliza la lactato deshidrogenasa (LDH)?",a:"La interconversión reversible <strong>piruvato ⇄ lactato</strong> (con NADH/NAD⁺), reacción clave en la glucólisis anaerobia."},
+{p:"P5",t:"LDH y diagnóstico clínico",q:"¿Por qué la LDH es útil en el diagnóstico clínico?",a:"Es una enzima <strong>intracelular ubicua</strong>; su elevación en sangre indica <strong>daño/lisis celular</strong> (corazón, hígado, músculo, eritrocitos, tumores). Marcador inespecífico de lesión tisular."},
+{p:"P5",t:"LDH y diagnóstico clínico",q:"¿Qué es una isoenzima y por qué importa en la LDH?",a:"Formas distintas de una enzima que catalizan la misma reacción. La LDH tiene <strong>5 isoenzimas (LDH-1 a LDH-5)</strong> con distribución tisular distinta, lo que ayuda a localizar el origen del daño."},
+{p:"P5",t:"LDH y diagnóstico clínico",q:"¿Qué factores modifican la actividad de una enzima?",a:"<strong>Temperatura, pH, concentración de sustrato y de enzima</strong>, y presencia de cofactores o inhibidores. Por eso los ensayos enzimáticos se hacen en condiciones controladas."},
+{p:"P5",t:"LDH y diagnóstico clínico",q:"¿Qué diferencia a una enzima simple de una conjugada?",a:"La <strong>simple</strong> está formada solo por cadenas polipeptídicas; la <strong>conjugada</strong> requiere un componente no proteico (cofactor/coenzima) para ser activa."},
+{p:"P5",t:"LDH y diagnóstico clínico",q:"¿Cómo se mide la 'actividad' enzimática y no solo la cantidad?",a:"Siguiendo la <strong>velocidad de la reacción</strong> que cataliza (ej. cambio de absorbancia del NADH por unidad de tiempo), no pesando la proteína. Refleja la enzima funcional."},
+
+/* ---- P6: Azúcares ---- */
+{p:"P6",t:"Identificación de azúcares",q:"¿Cómo se clasifican los carbohidratos según el número de unidades?",a:"<strong>Monosacáridos</strong> (1), <strong>disacáridos</strong> (2), <strong>oligosacáridos</strong> (3–12) y <strong>polisacáridos</strong> (miles), unidos por enlaces glucosídicos."},
+{p:"P6",t:"Identificación de azúcares",q:"¿Qué diferencia a una aldosa de una cetosa?",a:"La <strong>aldosa</strong> contiene un grupo <strong>aldehído</strong>; la <strong>cetosa</strong> contiene un grupo <strong>cetona</strong>. Ej.: glucosa (aldosa) vs. fructosa (cetosa)."},
+{p:"P6",t:"Identificación de azúcares",q:"¿Qué detecta el reactivo de Benedict?",a:"<strong>Azúcares reductores</strong> (grupo carbonilo libre, como glucosa). Positivo: viraje a verde-amarillo-rojo ladrillo por reducción del Cu²⁺."},
+{p:"P6",t:"Identificación de azúcares",q:"¿Para qué se usa el reactivo de Lugol (yodo)?",a:"Para identificar <strong>almidón (polisacárido)</strong>: da color <strong>azul-violeta intenso</strong> por la formación del complejo yodo-amilosa."},
+{p:"P6",t:"Identificación de azúcares",q:"¿Qué distingue la prueba de Barfoed?",a:"Diferencia <strong>monosacáridos de disacáridos reductores</strong>: los monosacáridos reaccionan más rápido (en medio ácido) formando precipitado de Cu₂O antes."},
+{p:"P6",t:"Identificación de azúcares",q:"¿Qué identifica la prueba de Seliwanoff?",a:"<strong>Cetosas</strong> (como la fructosa): da color rojo-cereza más rápido que las aldosas, por deshidratación a furfural en medio ácido."},
+{p:"P6",t:"Identificación de azúcares",q:"¿Qué detecta la prueba de Bial?",a:"<strong>Pentosas</strong> (azúcares de 5 carbonos, como xilosa): forma un color <strong>verde-azulado</strong> con orcinol."},
+{p:"P6",t:"Identificación de azúcares",q:"¿Por qué los monosacáridos naturales pertenecen a la serie D?",a:"Por la <strong>configuración del carbono asimétrico más alejado del grupo carbonilo</strong> (igual que el D-gliceraldehído). La mayoría de azúcares biológicos son de la serie D."},
+
+/* ---- P7: Glucosa ---- */
+{p:"P7",t:"Glucosa por glucosa oxidasa",q:"¿En qué se fundamenta el método de la glucosa oxidasa (GOD)?",a:"La enzima <strong>glucosa oxidasa</strong> oxida la glucosa produciendo <strong>peróxido de hidrógeno (H₂O₂)</strong>; una segunda enzima (peroxidasa) usa el H₂O₂ para generar un <strong>colorante medible</strong> proporcional a la glucosa."},
+{p:"P7",t:"Glucosa por glucosa oxidasa",q:"¿Por qué es un método enzimático específico para glucosa?",a:"Porque la <strong>glucosa oxidasa actúa específicamente sobre la β-D-glucosa</strong>, evitando interferencia de otros azúcares; es más específico que los métodos químicos reductores."},
+{p:"P7",t:"Glucosa por glucosa oxidasa",q:"¿Cuál es la utilidad clínica de medir glucosa sanguínea?",a:"Diagnóstico y seguimiento de <strong>diabetes mellitus</strong> e hipoglucemias; es uno de los parámetros bioquímicos más solicitados."},
+{p:"P7",t:"Glucosa por glucosa oxidasa",q:"¿Qué tipo de reacción acopla este ensayo (sistema GOD-POD)?",a:"Una <strong>reacción enzimática acoplada</strong>: glucosa oxidasa genera H₂O₂ y la <strong>peroxidasa (POD)</strong> lo usa para oxidar un cromógeno y producir color (reacción de Trinder)."},
+{p:"P7",t:"Glucosa por glucosa oxidasa",q:"¿Qué principio físico permite cuantificar el resultado?",a:"La <strong>espectrofotometría</strong>: la intensidad de color (absorbancia) es proporcional a la concentración de glucosa (ley de Lambert-Beer)."},
+{p:"P7",t:"Glucosa por glucosa oxidasa",q:"¿Por qué importa el manejo correcto de la muestra para glucemia?",a:"La glucosa se consume por <strong>glucólisis de los eritrocitos</strong> si la muestra se procesa tarde; se usan conservadores (fluoruro) o separación rápida para evitar valores falsamente bajos."},
+
+/* ---- P8: Colesterol ---- */
+{p:"P8",t:"Colesterol sérico",q:"¿Qué es el colesterol y qué papel cumple?",a:"El <strong>principal esterol</strong> del organismo y precursor de los demás esteroides. Forma parte de <strong>membranas celulares, lipoproteínas, ácidos biliares y hormonas esteroideas</strong>."},
+{p:"P8",t:"Colesterol sérico",q:"¿Cuáles son las dos fuentes de colesterol del organismo?",a:"La <strong>externa (dieta)</strong> —huevos, lácteos, carnes— y la <strong>endógena</strong>, sintetizada por el propio organismo (el hígado produce ~10% del total)."},
+{p:"P8",t:"Colesterol sérico",q:"¿Por qué el colesterol necesita lipoproteínas para circular?",a:"Porque es un <strong>lípido insoluble en agua</strong>; las lipoproteínas (LDL, HDL, etc.) son complejos que lo transportan junto con triglicéridos y fosfolípidos por la sangre."},
+{p:"P8",t:"Colesterol sérico",q:"¿Qué diferencia al LDL del HDL ('malo' vs 'bueno')?",a:"<strong>LDL</strong> lleva colesterol del hígado a los tejidos; su exceso forma <strong>ateromas</strong>. <strong>HDL</strong> recoge colesterol de los tejidos y lo lleva al hígado (protector)."},
+{p:"P8",t:"Colesterol sérico",q:"¿Qué consecuencia patológica principal tiene el colesterol elevado?",a:"La <strong>aterosclerosis</strong> de arterias vitales: enfermedad coronaria, cerebrovascular y vascular periférica; un ateroma desprendido puede causar <strong>infarto agudo de miocardio</strong> o cerebral."},
+{p:"P8",t:"Colesterol sérico",q:"¿Por qué el colesterol total solo tiene valor limitado?",a:"Porque <strong>debe medirse junto con las fracciones LDL y HDL</strong> (perfil de lípidos) para estimar bien el riesgo de ateroma y de coronariopatía."},
+{p:"P8",t:"Colesterol sérico",q:"¿Puede una persona sin consumir colesterol tener niveles altos?",a:"Sí: como el organismo lo <strong>sintetiza endógenamente</strong>, desórdenes genético-metabólicos pueden elevarlo aun con dieta baja en colesterol."},
+
+/* ---- P9: EGO ---- */
+{p:"P9",t:"Examen general de orina",q:"¿Qué evalúa el examen general de orina (EGO)?",a:"Las <strong>propiedades físicas y químicas</strong> de la orina (y el sedimento), como estudio paraclínico de tamizaje de la función renal y metabólica."},
+{p:"P9",t:"Examen general de orina",q:"¿Qué propiedades físicas se valoran en el EGO?",a:"<strong>Color, aspecto/turbidez, olor y densidad</strong> (peso específico). Reflejan concentración e indicios de patología."},
+{p:"P9",t:"Examen general de orina",q:"¿Qué parámetros químicos típicos incluye la tira reactiva?",a:"<strong>pH, glucosa, proteínas, cuerpos cetónicos, bilirrubina, urobilinógeno, nitritos, sangre y leucocitos</strong> (esterasa)."},
+{p:"P9",t:"Examen general de orina",q:"¿Qué significado tiene la glucosuria (glucosa en orina)?",a:"Sugiere que la glucemia superó el <strong>umbral renal</strong> (~180 mg/dL); orienta hacia <strong>diabetes mellitus</strong> mal controlada, entre otras causas."},
+{p:"P9",t:"Examen general de orina",q:"¿Qué puede indicar la presencia de proteínas en orina (proteinuria)?",a:"Posible <strong>daño glomerular/renal</strong>; normalmente la orina contiene proteína mínima. Requiere correlación clínica y confirmación."},
+{p:"P9",t:"Examen general de orina",q:"¿Qué se observa en el examen microscópico del sedimento?",a:"<strong>Células (epiteliales, leucocitos, eritrocitos), cilindros, cristales y microorganismos</strong>, que orientan a infección, inflamación o litiasis."},
+
+/* ---- P10: Integración del metabolismo ---- */
+{p:"P10",t:"Integración del metabolismo",q:"¿Qué es la homeostasis y por qué es crítica?",a:"La capacidad de la célula u organismo para <strong>mantener y regular sus condiciones metabólicas</strong>. Si se rompe, hay daño, descompensación e incluso muerte celular u orgánica."},
+{p:"P10",t:"Integración del metabolismo",q:"¿Por qué el médico debe entender la integración metabólica?",a:"Para <strong>identificar los cambios adaptativos en las patologías</strong> (alimentación vs. ayuno) y así establecer un diagnóstico acertado y un tratamiento adecuado."},
+{p:"P10",t:"Integración del metabolismo",q:"¿Cuál es el propósito ético de los estudios paraclínicos?",a:"<strong>Apoyar o descartar un diagnóstico presuntivo</strong> basado en historia clínica y exploración, NO buscar alteraciones a ciegas (costoso y lleva a diagnósticos errados)."},
+{p:"P10",t:"Integración del metabolismo",q:"¿Qué es la biometría hemática (hemograma)?",a:"Prueba de laboratorio que <strong>analiza las células sanguíneas</strong> (serie roja, blanca y plaquetas); herramienta paraclínica básica."},
+{p:"P10",t:"Integración del metabolismo",q:"¿Por qué los resultados de laboratorio deben correlacionarse con la clínica?",a:"Porque cada organismo tiene <strong>variaciones individuales</strong> en los parámetros; sin correlación clínica se llega a diagnósticos inespecíficos o errados y se eleva el costo."},
+{p:"P10",t:"Integración del metabolismo",q:"¿Cómo se relacionan alimentación y ayuno en el metabolismo?",a:"La alimentación aporta biomoléculas para obtener energía e intermediarios; el ayuno induce <strong>cambios adaptativos</strong>. Las reacciones metabólicas se adaptan a cada estado nutricional."},
+
+/* ---- P11: Extracción de ADN ---- */
+{p:"P11",t:"Extracción de ADN genómico",q:"¿Por qué puede obtenerse ADN de casi cualquier muestra biológica?",a:"Porque el ADN está presente en <strong>toda célula nucleada</strong>: sangre, mucosa bucal, tejido, hueso, cabello con raíz, líquidos biológicos, cultivos celulares, etc."},
+{p:"P11",t:"Extracción de ADN genómico",q:"¿Qué criterios guían la elección de la técnica de extracción?",a:"<strong>Tipo y cantidad de muestra, rendimiento e integridad del ADN, peligrosidad de los reactivos y costo.</strong>"},
+{p:"P11",t:"Extracción de ADN genómico",q:"¿Cuál es el primer paso en la técnica de extracción TSNT?",a:"La <strong>lisis celular</strong> por acción desnaturalizante de detergentes <strong>SDS y Tritón X-100</strong>, que rompen las membranas y liberan el contenido celular."},
+{p:"P11",t:"Extracción de ADN genómico",q:"¿Para qué se usan fenol y Sevag en la extracción?",a:"Para <strong>extraer/desnaturalizar las proteínas</strong>: al centrifugar forman una placa sólida en la interfase entre la fase acuosa (con el ADN) y la orgánica."},
+{p:"P11",t:"Extracción de ADN genómico",q:"¿En qué fase queda el ADN tras la centrifugación con fenol?",a:"En la <strong>fase acuosa superior</strong>; las proteínas quedan en la interfase y los lípidos/restos en la fase orgánica inferior."},
+{p:"P11",t:"Extracción de ADN genómico",q:"¿Qué importancia tiene la integridad del ADN extraído?",a:"Un ADN <strong>íntegro (no degradado)</strong> es necesario para técnicas posteriores (PCR, electroforesis); la degradación durante la extracción compromete los resultados."},
+{p:"P11",t:"Extracción de ADN genómico",q:"¿Qué función tiene el ADN en la célula?",a:"Contiene <strong>toda la información que la célula necesita para vivir y propagarse</strong>; es la molécula que almacena la información genética."},
+
+/* ---- P12: PCR ---- */
+{p:"P12",t:"PCR (reacción en cadena de la polimerasa)",q:"¿Qué es la PCR y quién la desarrolló?",a:"Técnica que <strong>amplifica (copia) un segmento específico de ADN in vitro</strong>. Desarrollada por <strong>Kary Mullis</strong> y colaboradores a principios de los años 80."},
+{p:"P12",t:"PCR (reacción en cadena de la polimerasa)",q:"¿Qué proceso biológico simula la PCR?",a:"La <strong>replicación del ADN</strong> que ocurre durante la división celular, pero realizada in vitro en un tubo con todos los componentes necesarios."},
+{p:"P12",t:"PCR (reacción en cadena de la polimerasa)",q:"¿Cuáles son los componentes esenciales de una reacción de PCR?",a:"<strong>ADN molde, par de iniciadores (primers), Mg²⁺, buffer, dNTPs, ADN polimerasa y agua ultrapura.</strong> Omitir cualquiera afecta el resultado."},
+{p:"P12",t:"PCR (reacción en cadena de la polimerasa)",q:"¿Cuáles son las 3 etapas de cada ciclo de PCR?",a:"<strong>Desnaturalización</strong> (~95 °C, separa las hebras), <strong>alineamiento/annealing</strong> (los primers se unen) y <strong>extensión</strong> (la polimerasa sintetiza la copia). Se repite en muchos ciclos."},
+{p:"P12",t:"PCR (reacción en cadena de la polimerasa)",q:"¿Para qué sirven los iniciadores (primers)?",a:"Son secuencias cortas que <strong>delimitan la región a amplificar</strong> y dan a la polimerasa el extremo 3'-OH desde donde sintetizar; definen la especificidad."},
+{p:"P12",t:"PCR (reacción en cadena de la polimerasa)",q:"¿Qué es la RT-PCR y para qué se usa?",a:"PCR precedida de una <strong>retrotranscripción</strong> (ARN → ADNc). Útil para analizar <strong>expresión génica</strong> y detectar agentes virales de genoma ARN."},
+{p:"P12",t:"PCR (reacción en cadena de la polimerasa)",q:"Menciona aplicaciones de la PCR.",a:"<strong>Diagnóstico de enfermedades genéticas e infecciosas</strong>, detección de cáncer y anomalías prenatales, ciencia forense e investigación. El primer uso médico fue diagnosticar la anemia de células falciformes."},
+{p:"P12",t:"PCR (reacción en cadena de la polimerasa)",q:"¿Qué diferencia a la PCR punto final de la qPCR?",a:"La <strong>punto final</strong> detecta el producto al terminar (gel). La <strong>qPCR / tiempo real</strong> mide la amplificación a medida que ocurre, permitiendo cuantificar el ADN/ARN inicial."},
+
+/* ---- P13: Electroforesis ---- */
+{p:"P13",t:"Electroforesis de ADN en gel de agarosa",q:"¿En qué se basa la electroforesis en gel para separar ADN?",a:"En separar las moléculas según su <strong>peso molecular/tamaño</strong> al migrar por una matriz (agarosa) bajo un <strong>campo eléctrico</strong>."},
+{p:"P13",t:"Electroforesis de ADN en gel de agarosa",q:"¿Hacia qué polo migra el ADN y por qué?",a:"Hacia el <strong>ánodo (polo positivo)</strong>, porque el ADN tiene <strong>carga neta negativa</strong> debida a sus grupos fosfato."},
+{p:"P13",t:"Electroforesis de ADN en gel de agarosa",q:"¿Por qué se corre la electroforesis a pH alcalino (~8)?",a:"Para asegurar la <strong>ionización completa de los grupos fosfato</strong>, de modo que la carga del ADN dependa solo de ellos y la migración sea consistente."},
+{p:"P13",t:"Electroforesis de ADN en gel de agarosa",q:"¿Qué es la agarosa y cómo se comporta con la temperatura?",a:"Un <strong>polisacárido derivado del agar</strong>. Se disuelve en líquido caliente, gelifica al bajar a ~40 °C y no se redisuelve hasta ~100 °C."},
+{p:"P13",t:"Electroforesis de ADN en gel de agarosa",q:"¿Cómo afecta la concentración de agarosa al tamaño de poro?",a:"A <strong>mayor concentración (m/v), menor tamaño de poro</strong> → mejor separación de fragmentos pequeños. Menor concentración separa mejor fragmentos grandes."},
+{p:"P13",t:"Electroforesis de ADN en gel de agarosa",q:"¿Cómo se visualiza el ADN en el gel y qué precaución hay?",a:"Con <strong>colorantes intercalantes que fluorescen bajo luz UV</strong>. Antes se usaba bromuro de etidio (mutagénico/carcinogénico); hoy se prefieren más seguros como <strong>GelRed</strong>."},
+{p:"P13",t:"Electroforesis de ADN en gel de agarosa",q:"¿Para qué sirve la electroforesis además de separar?",a:"Para <strong>identificar y purificar fragmentos</strong> de ADN y <strong>verificar la integridad</strong> de una muestra (si está íntegra o degradada tras la extracción)."},
+
+/* ---- P14: Bioinformática ---- */
+{p:"P14",t:"Bioinformática médica",q:"¿Cómo se define la bioinformática?",a:"La <strong>tecnología que usa la computadora para almacenar, obtener, manipular y distribuir información de macromoléculas biológicas</strong> (ADN, ARN, proteínas)."},
+{p:"P14",t:"Bioinformática médica",q:"¿Por qué surgió la bioinformática como disciplina?",a:"Por la <strong>enorme cantidad de información biológica</strong> generada por la secuenciación y los microarreglos, que demandó herramientas computacionales eficientes para analizarla."},
+{p:"P14",t:"Bioinformática médica",q:"¿En qué se diferencia la bioinformática de la biología computacional?",a:"La <strong>bioinformática</strong> se limita al análisis de secuencias, estructura y función de genes y genomas. La <strong>biología computacional</strong> abarca toda área biológica que use computación (ej. dinámica de poblaciones, filogenia)."},
+{p:"P14",t:"Bioinformática médica",q:"¿En qué dos grandes ramas se divide el campo?",a:"(1) <strong>Desarrollo de herramientas y bases de datos</strong> y (2) <strong>aplicación de esas herramientas</strong> para generar conocimiento y entender los sistemas vivos."},
+{p:"P14",t:"Bioinformática médica",q:"¿Qué incluye el análisis de secuencias?",a:"<strong>Alineamientos, búsqueda en bases de datos, descubrimiento de motivos y promotores, reconstrucción de filogenia y ensamblado/comparación de genomas.</strong>"},
+{p:"P14",t:"Bioinformática médica",q:"¿De qué disciplinas se nutre la bioinformática?",a:"De <strong>matemáticas, estadística, ciencias de la computación, tecnología de la información y biología molecular</strong>: es interdisciplinaria."},
+{p:"P14",t:"Bioinformática médica",q:"¿Cuál es el fin último de la bioinformática?",a:"<strong>Entender mejor el comportamiento y las funciones de la célula a nivel molecular</strong>, apoyando el diagnóstico y la investigación biomédica."}
+];
+
+let order=[...CARDS.keys()], idx=0, flipped=false;
+
+const sel=document.getElementById('practiceSel');
+const card=document.getElementById('card');
+const cardText=document.getElementById('cardText');
+const cardTag=document.getElementById('cardTag');
+const cardSide=document.getElementById('cardSide');
+const cardHint=document.getElementById('cardHint');
+const counter=document.getElementById('counter');
+const progressBar=document.getElementById('progressBar');
+
+// poblar filtro
+const practices=[...new Map(CARDS.map(c=>[c.p,c.t])).entries()];
+sel.innerHTML='<option value="ALL">Todas las prácticas ('+CARDS.length+' tarjetas)</option>'+
+  practices.map(([p,t])=>`<option value="${p}">${p} · ${t}</option>`).join('');
+
+function applyFilter(){
+  const v=sel.value;
+  order=CARDS.map((c,i)=>i).filter(i=>v==='ALL'||CARDS[i].p===v);
+  idx=0;flipped=false;render();
+}
+function render(){
+  if(order.length===0)return;
+  const c=CARDS[order[idx]];
+  cardTag.textContent=c.p;
+  if(flipped){cardSide.textContent='Respuesta';cardText.innerHTML=c.a;cardHint.textContent='Clic para volver a la pregunta';}
+  else{cardSide.textContent='Pregunta';cardText.innerHTML=c.q;cardHint.textContent='Haz clic en la tarjeta para ver la respuesta';}
+  counter.textContent=`Tarjeta ${idx+1} de ${order.length}`;
+  progressBar.style.width=((idx+1)/order.length*100)+'%';
+}
+function flip(){flipped=!flipped;render();}
+function next(){if(idx<order.length-1){idx++;}else{idx=0;}flipped=false;render();}
+function prev(){if(idx>0){idx--;}else{idx=order.length-1;}flipped=false;render();}
+function shuffle(){for(let i=order.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[order[i],order[j]]=[order[j],order[i]];}idx=0;flipped=false;render();}
+
+card.addEventListener('click',flip);
+document.getElementById('flipBtn').addEventListener('click',e=>{e.stopPropagation();flip();});
+document.getElementById('nextBtn').addEventListener('click',next);
+document.getElementById('prevBtn').addEventListener('click',prev);
+document.getElementById('shuffleBtn').addEventListener('click',shuffle);
+sel.addEventListener('change',applyFilter);
+document.addEventListener('keydown',e=>{
+  if(e.key===' '){e.preventDefault();flip();}
+  else if(e.key==='ArrowRight')next();
+  else if(e.key==='ArrowLeft')prev();
+});
+render();
+</script>
+</body>
+</html>

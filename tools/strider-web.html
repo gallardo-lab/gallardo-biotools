@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X5BT5RP5WF"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-X5BT5RP5WF');
+  </script>
+<meta name="author" content="Hugo Leonid Gallardo Blanco">
+<title>StriderWeb — Análisis de secuencias | Gallardo BioTools</title>
+<style>
+:root{
+  --accent:#2a6f97; --accent2:#1b4965; --bg:#f5f7fa; --border:#c8d3df;
+  --card:#ffffff; --ink:#0b2545; --muted:#556070;
+  --good:#2e7d32; --warn:#c77700; --bad:#c62828;
+  --mono:'SF Mono',Menlo,Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.45}
+header{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;padding:14px 20px}
+header h1{margin:0;font-size:19px;letter-spacing:.3px}
+header p{margin:3px 0 0;font-size:12px;opacity:.9}
+.wrap{max-width:1180px;margin:0 auto;padding:0 16px 60px}
+nav{display:flex;flex-wrap:wrap;gap:4px;background:var(--accent2);padding:0 16px}
+nav button{background:transparent;border:none;color:#cfe3f0;padding:11px 15px;cursor:pointer;font-size:13px;border-bottom:3px solid transparent}
+nav button:hover{color:#fff}
+nav button.active{color:#fff;border-bottom-color:#9ad1f0;font-weight:bold}
+.tab{display:none;padding-top:18px}
+.tab.active{display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:14px}
+.card h3{margin:0 0 10px;font-size:15px;color:var(--accent2)}
+label{display:block;font-size:12px;color:var(--muted);margin:8px 0 3px}
+textarea,input,select{width:100%;font-family:var(--mono);font-size:13px;padding:7px 8px;border:1px solid var(--border);border-radius:5px;background:#fff;color:var(--ink)}
+textarea{resize:vertical;line-height:1.5}
+.seqbox{min-height:120px}
+.row{display:flex;gap:12px;flex-wrap:wrap}
+.row>div{flex:1;min-width:120px}
+.inline{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+.inline>div{flex:0 0 auto}
+.inline input,.inline select{width:auto}
+button.act{background:var(--accent);color:#fff;border:none;border-radius:5px;padding:8px 14px;font-size:13px;cursor:pointer;margin:4px 4px 0 0}
+button.act:hover{background:var(--accent2)}
+button.ghost{background:#eef3f8;color:var(--accent2);border:1px solid var(--border)}
+button.ghost:hover{background:#dde8f1}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:8px}
+.stat{background:#eef3f8;border:1px solid var(--border);border-radius:6px;padding:8px 10px}
+.stat .v{font-size:18px;font-weight:bold;color:var(--accent2)}
+.stat .l{font-size:11px;color:var(--muted)}
+.out{font-family:var(--mono);font-size:12.5px;white-space:pre;overflow-x:auto;background:#0b2545;color:#d7e8f5;padding:12px;border-radius:6px;line-height:1.6}
+.out .stop{color:#ff7b7b;font-weight:bold}
+.out .start{color:#8effa0;font-weight:bold}
+.out .num{color:#7fa8c9}
+table{border-collapse:collapse;width:100%;font-size:12.5px;margin-top:8px}
+th,td{border:1px solid var(--border);padding:5px 7px;text-align:left}
+th{background:#eef3f8;color:var(--accent2);position:sticky;top:0}
+td.mono,th.mono{font-family:var(--mono)}
+.tablescroll{max-height:380px;overflow:auto;border:1px solid var(--border);border-radius:6px}
+canvas{background:#fff;border:1px solid var(--border);border-radius:6px;max-width:100%}
+.hint{font-size:11.5px;color:var(--muted);margin-top:6px}
+.pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;background:#eef3f8;color:var(--accent2);border:1px solid var(--border);margin:2px}
+.amber{color:var(--warn)} .green{color:var(--good)} .red{color:var(--bad)}
+.deg{background:#fff3cd;color:#7a5b00;border-radius:2px;padding:0 1px}
+footer{font-size:11px;color:var(--muted);text-align:center;padding:18px;border-top:1px solid var(--border);margin-top:20px}
+.flex2{display:flex;gap:14px;flex-wrap:wrap}.flex2>div{flex:1;min-width:280px}
+.tag{font-family:var(--mono);font-size:11px}
+</style>
+</head>
+<body>
+<header>
+  <h1>StriderWeb · Análisis de secuencias de ácidos nucleicos</h1>
+  <p data-ihtml="subtitle">Herramienta tipo DNA Strider, 100% en el navegador, sin servidor — Gallardo BioTools (UANL)
+     · <a href="instructivo_strider-web.html" style="color:#9ad1f0">Guía de uso ↗</a></p>
+</header>
+<nav>
+  <button data-tab="seq" class="active">Secuencia</button>
+  <button data-tab="trans">Traducción / ORFs</button>
+  <button data-tab="restr">Restricción</button>
+  <button data-tab="dot">Dot plot</button>
+  <button data-tab="codon">Uso de codones</button>
+  <button data-tab="io">Archivos</button>
+  <button id="langBtn" onclick="toggleLang()" style="margin-left:auto;border:1px solid #9ad1f0;border-radius:5px;align-self:center">EN</button>
+</nav>
+<div class="wrap">
+
+<!-- ===================== SECUENCIA ===================== -->
+<div id="seq" class="tab active">
+  <div class="card">
+    <h3>Secuencia de trabajo</h3>
+    <textarea id="mainSeq" class="seqbox" placeholder="Pega DNA, RNA o proteína. Se aceptan códigos IUPAC. Encabezados FASTA y números se ignoran automáticamente."></textarea>
+    <div style="margin-top:8px">
+      <button class="act" onclick="analyzeMain()">Analizar</button>
+      <button class="act ghost" onclick="transform('rc')">Reverso-complemento</button>
+      <button class="act ghost" onclick="transform('comp')">Complemento</button>
+      <button class="act ghost" onclick="transform('rev')">Reverso</button>
+      <button class="act ghost" onclick="transform('dna2rna')">DNA→RNA</button>
+      <button class="act ghost" onclick="transform('rna2dna')">RNA→DNA</button>
+      <button class="act ghost" onclick="transform('upper')">Mayúsculas</button>
+      <button class="act ghost" onclick="loadDemo()">Demo</button>
+    </div>
+    <div class="hint"><span data-ihtml="detType">Tipo detectado:</span> <span id="seqType" class="pill">—</span></div>
+  </div>
+  <div class="card">
+    <h3>Estadísticas</h3>
+    <div id="stats" class="stats"><div class="hint" data-ihtml="pressAnalyze">Pulsa <b>Analizar</b>.</div></div>
+    <div id="compTable"></div>
+  </div>
+</div>
+
+<!-- ===================== TRADUCCIÓN ===================== -->
+<div id="trans" class="tab">
+  <div class="card">
+    <h3>Traducción de seis marcos</h3>
+    <div class="inline">
+      <div><label>Código genético</label><select id="genCode">
+        <option value="1">1 — Estándar</option>
+        <option value="2">2 — Mitocondrial vertebrados</option>
+        <option value="3">3 — Mitocondrial levadura</option>
+        <option value="5">5 — Mitocondrial invertebrados</option>
+        <option value="11">11 — Bacteriano/plastidio</option>
+      </select></div>
+      <div><label>&nbsp;</label><button class="act" onclick="runTranslate()">Traducir 6 marcos</button></div>
+      <div><label>&nbsp;</label><button class="act ghost" onclick="useMain('transSeq')">Traer secuencia de trabajo</button></div>
+    </div>
+    <label>Secuencia (usa la pestaña Secuencia o pega aquí)</label>
+    <textarea id="transSeq" class="seqbox" placeholder="Secuencia de DNA/RNA"></textarea>
+    <div id="sixFrame" class="out" style="margin-top:10px;display:none"></div>
+  </div>
+  <div class="card">
+    <h3>Buscador de ORFs</h3>
+    <div class="inline">
+      <div><label>Long. mínima (aa)</label><input id="orfMin" type="number" value="30" min="1"></div>
+      <div><label>Codón de inicio</label><select id="orfStart">
+        <option value="atg">Solo ATG</option>
+        <option value="alt">ATG/GTG/TTG</option>
+        <option value="any">Cualquier marco (Met→Stop)</option>
+      </select></div>
+      <div><label>Hebras</label><select id="orfStrand">
+        <option value="both">Ambas</option><option value="fwd">Directa (+)</option><option value="rev">Reversa (−)</option>
+      </select></div>
+      <div><label>&nbsp;</label><button class="act" onclick="runORF()">Buscar ORFs</button></div>
+    </div>
+    <div id="orfOut"></div>
+  </div>
+</div>
+
+<!-- ===================== RESTRICCIÓN ===================== -->
+<div id="restr" class="tab">
+  <div class="card">
+    <h3>Mapa de restricción</h3>
+    <div class="inline">
+      <div><label>Topología</label><select id="topo"><option value="lin">Lineal</option><option value="circ">Circular</option></select></div>
+      <div><label>Mostrar</label><select id="cutFilter">
+        <option value="all">Todas las que cortan</option>
+        <option value="1">Solo de corte único</option>
+        <option value="le2">≤ 2 cortes</option>
+        <option value="non">No cortan (ausentes)</option>
+      </select></div>
+      <div><label>Set de enzimas</label><select id="enzSet">
+        <option value="neb">NEB comercial (269)</option>
+        <option value="common">Curado básico (~70)</option>
+        <option value="imported">Importadas (REBASE)</option>
+      </select></div>
+      <div><label>Isoesquizómeros</label><select id="isoMode">
+        <option value="all">Listar todos</option>
+        <option value="collapse">Colapsar por sitio</option>
+      </select></div>
+      <div><label>&nbsp;</label><button class="act" onclick="runRestr()">Analizar</button></div>
+      <div><label>&nbsp;</label><button class="act ghost" onclick="useMain('restrSeq')">Traer secuencia de trabajo</button></div>
+    </div>
+    <label>Secuencia de DNA</label>
+    <textarea id="restrSeq" class="seqbox"></textarea>
+  </div>
+  <details class="card">
+    <summary style="cursor:pointer;font-weight:bold;font-size:15px;color:var(--accent2)">Importar / actualizar enzimas desde REBASE (avanzado)</summary>
+    <p class="hint" data-ihtml="rebaseP1">El set <b>NEB comercial (269 enzimas)</b> ya viene embebido y activo por defecto. Esta sección es opcional: solo si quieres el catálogo completo de REBASE (todos los proveedores) o una versión más reciente.</p>
+    <p class="hint" style="margin-top:0" data-ihtml="rebaseP2">
+      Para tener <b>todas las endonucleasas comercialmente disponibles</b> con sitios y cortes
+      verificados (incl. Tipo IIS), importa un archivo oficial de REBASE. No se fabrican datos:
+      la herramienta solo lee el archivo que tú descargas.
+    </p>
+    <ol class="hint" style="margin-top:0" data-ihtml="rebaseOl">
+      <li>Descarga de REBASE (rebase.neb.com → "REBASE files"): el archivo
+        <b>withrefm</b> (<span class="tag">link_withrefm</span>, contiene el campo comercial
+        <span class="tag">&lt;7&gt;</span>) o el compacto <b>bionet</b> (<span class="tag">link_bionet</span>).</li>
+      <li>También sirve el <span class="tag">Restriction_Dictionary.py</span> de Biopython
+        (REBASE EMBOSS embebido).</li>
+    </ol>
+    <div class="inline">
+      <div><label>Archivo REBASE</label><input type="file" id="rebaseFile" accept=".txt,.py,.dat,.enz,.bionet,.ref,.405,.404" onchange="loadRebase(event)"></div>
+      <div><label>Filtro</label><select id="commOnly">
+        <option value="1">Solo comerciales (campo &lt;7&gt; / suppl)</option>
+        <option value="0">Todas las del archivo</option>
+      </select></div>
+      <div><label>&nbsp;</label><button class="act ghost" onclick="clearRebase()">Borrar set importado</button></div>
+    </div>
+    <div id="rebaseStatus" class="hint"></div>
+  </details>
+  <div class="card" id="restrMapCard" style="display:none">
+    <h3>Mapa</h3>
+    <canvas id="restrCanvas" width="1120" height="180"></canvas>
+    <div id="restrFrag" class="hint"></div>
+  </div>
+  <div class="card" id="restrTableCard" style="display:none">
+    <h3>Sitios</h3>
+    <div id="restrTable" class="tablescroll"></div>
+  </div>
+  <div class="card" id="digestCard" style="display:none">
+    <h3>Digestión y gel virtual</h3>
+    <p class="hint" style="margin-top:0">Elige 1 o 2 enzimas (solo aparecen las que cortan la secuencia analizada). Para enzimas de doble corte se usan ambos cortes.</p>
+    <div class="inline">
+      <div><label>Enzima 1</label><select id="digEnz1"></select></div>
+      <div><label>Enzima 2 (opcional)</label><select id="digEnz2"><option value="">— ninguna —</option></select></div>
+      <div><label>&nbsp;</label><button class="act" onclick="runDigest()">Simular digestión</button></div>
+    </div>
+    <div id="digestOut"></div>
+    <canvas id="gelCanvas" width="520" height="430" style="display:none;margin-top:10px"></canvas>
+  </div>
+</div>
+
+<!-- ===================== DOT PLOT ===================== -->
+<div id="dot" class="tab">
+  <div class="card">
+    <h3>Dot plot (matriz de identidad)</h3>
+    <div class="flex2">
+      <div><label>Secuencia A (eje X)</label><textarea id="dotA" class="seqbox"></textarea></div>
+      <div><label>Secuencia B (eje Y) — vacío = comparar A consigo misma</label><textarea id="dotB" class="seqbox"></textarea></div>
+    </div>
+    <div class="inline" style="margin-top:8px">
+      <div><label>Ventana (nt)</label><input id="dotWin" type="number" value="10" min="1" max="50"></div>
+      <div><label>Mínimo de coincidencias en ventana</label><input id="dotThr" type="number" value="9" min="1" max="50"></div>
+      <div><label>Comparar</label><select id="dotMode"><option value="fwd">Directa</option><option value="both">Directa + reversa-complemento</option></select></div>
+      <div><label>&nbsp;</label><button class="act" onclick="runDot()">Generar</button></div>
+    </div>
+    <div class="hint">La diagonal indica regiones idénticas; líneas perpendiculares = repeticiones invertidas (si activas reversa-complemento). Secuencias muy largas (&gt;3000 nt) pueden tardar.</div>
+    <div id="dotStatus" class="hint"></div>
+  </div>
+  <div class="card" id="dotCard" style="display:none">
+    <canvas id="dotCanvas" width="600" height="600"></canvas>
+  </div>
+</div>
+
+<!-- ===================== CODONES ===================== -->
+<div id="codon" class="tab">
+  <div class="card">
+    <h3>Uso de codones</h3>
+    <div class="inline">
+      <div><label>Código genético</label><select id="codonCode">
+        <option value="1">1 — Estándar</option><option value="2">2 — Mito vertebrados</option><option value="11">11 — Bacteriano</option>
+      </select></div>
+      <div><label>Marco</label><select id="codonFrame"><option value="0">+1</option><option value="1">+2</option><option value="2">+3</option></select></div>
+      <div><label>&nbsp;</label><button class="act" onclick="runCodon()">Calcular</button></div>
+      <div><label>&nbsp;</label><button class="act ghost" onclick="useMain('codonSeq')">Traer secuencia de trabajo</button></div>
+    </div>
+    <label>Secuencia codificante (CDS)</label>
+    <textarea id="codonSeq" class="seqbox"></textarea>
+    <div id="codonOut"></div>
+  </div>
+</div>
+
+<!-- ===================== ARCHIVOS ===================== -->
+<div id="io" class="tab">
+  <div class="card">
+    <h3>Importar archivo (FASTA / GenBank / texto)</h3>
+    <input type="file" id="fileIn" accept=".fasta,.fa,.fna,.txt,.gb,.gbk,.genbank,.seq" onchange="loadFile(event)">
+    <div class="hint">Se detecta el formato automáticamente. En FASTA multi-registro se listan todos; elige cuál cargar.</div>
+    <div id="recList"></div>
+  </div>
+  <div class="card">
+    <h3>Exportar</h3>
+    <div class="inline">
+      <div><label>Nombre / encabezado</label><input id="expName" value="mi_secuencia"></div>
+      <div><label>&nbsp;</label><button class="act" onclick="exportFasta()">Descargar FASTA</button></div>
+      <div><label>&nbsp;</label><button class="act ghost" onclick="exportTxt()">Descargar texto plano</button></div>
+    </div>
+    <div class="hint">Exporta la secuencia de trabajo actual (pestaña Secuencia).</div>
+  </div>
+</div>
+
+<footer data-ihtml="footer">
+StriderWeb · sin envío de datos a ningún servidor — todo el cómputo ocurre en tu navegador.<br>
+Tm: SantaLucia 1998 (nearest-neighbor) + corrección de sales Owczarzy 2004. Enzimas: sitios canónicos tipo REBASE (subset curado).<br>
+<b>Cómo citar:</b> Gallardo-Blanco HL. <i>StriderWeb</i>, en Gallardo BioTools (v1.0.0). UANL, 2026. DOI:10.5281/zenodo.20725635 · parte de Gallardo BioTools DOI:10.5281/zenodo.20723201 · https://gallardo-lab.github.io/gallardo-biotools/ · ORCID 0000-0002-7816-4967
+</footer>
+</div>
+
+<script>
+/* ============================================================
+   NÚCLEO: utilidades de secuencia
+   ============================================================ */
+const IUPAC_DNA = "ACGTURYSWKMBDHVN";
+const COMP = {A:'T',T:'A',U:'A',G:'C',C:'G',R:'Y',Y:'R',S:'S',W:'W',K:'M',M:'K',
+  B:'V',V:'B',D:'H',H:'D',N:'N',a:'t',t:'a',u:'a',g:'c',c:'g',
+  r:'y',y:'r',s:'s',w:'w',k:'m',m:'k',b:'v',v:'b',d:'h',h:'d',n:'n'};
+const IUPAC_SET = {A:'A',C:'C',G:'G',T:'T',U:'T',R:'AG',Y:'CT',S:'GC',W:'AT',
+  K:'GT',M:'AC',B:'CGT',D:'AGT',H:'ACT',V:'ACG',N:'ACGT'};
+const DEG_LABEL = {R:'A/G',Y:'C/T',S:'G/C',W:'A/T',K:'G/T',M:'A/C',
+  B:'C/G/T',D:'A/G/T',H:'A/C/T',V:'A/C/G',N:'A/C/G/T'};
+
+function cleanSeq(raw, keepProt){
+  if(!raw) return '';
+  // quita líneas de encabezado FASTA y numeración
+  let s = raw.split('\n').filter(l=>!l.trim().startsWith('>')).join('');
+  s = s.toUpperCase().replace(/[0-9\s]/g,'');
+  if(keepProt) return s.replace(/[^A-Z\*]/g,'');
+  return s.replace(/[^ACGTURYSWKMBDHVN]/g,'');
+}
+function revComp(s){
+  let o=''; for(let i=s.length-1;i>=0;i--) o += (COMP[s[i]]||'N'); return o;
+}
+function complement(s){ let o=''; for(const c of s) o+=(COMP[c]||'N'); return o; }
+function reverse(s){ return s.split('').reverse().join(''); }
+
+function detectType(s){
+  if(!s) return '—';
+  const clean = s.toUpperCase().replace(/[0-9\s>].*$/gm,'').replace(/[^A-Z]/g,'');
+  if(!clean) return '—';
+  const acgtun = (clean.match(/[ACGTUN]/g)||[]).length;
+  const frac = acgtun/clean.length;
+  if(frac>0.85){
+    const hasU = clean.includes('U'), hasT = clean.includes('T');
+    if(hasU && !hasT) return 'RNA';
+    return 'DNA';
+  }
+  return 'Proteína';
+}
+
+function gcContent(s){
+  let gc=0,at=0;
+  for(const c of s){ if(c==='G'||c==='C'||c==='S')gc++; else if(c==='A'||c==='T'||c==='U'||c==='W')at++; }
+  const tot=gc+at; return tot? gc/tot*100 : 0;
+}
+function baseCounts(s){
+  const c={A:0,C:0,G:0,T:0,U:0,N:0,other:0};
+  for(const ch of s){ if(c[ch]!==undefined)c[ch]++; else c.other++; }
+  return c;
+}
+// Peso molecular ssDNA/RNA (anhidro aprox.)
+function molWeight(s,isRNA){
+  const wD={A:313.21,T:304.2,C:289.18,G:329.21};
+  const wR={A:329.21,U:306.17,C:305.18,G:345.21};
+  let w=0,n=0;
+  for(const c of s){
+    if(isRNA){ if(wR[c]!==undefined){w+=wR[c];n++;} }
+    else { let cc=c==='U'?'T':c; if(wD[cc]!==undefined){w+=wD[cc];n++;} }
+  }
+  if(!n) return 0;
+  return isRNA? w+159.0 : w-61.96;
+}
+
+/* ---------- Tm SantaLucia 1998 + Owczarzy 2004 ---------- */
+const NN_H={AA:-7.9,AT:-7.2,AC:-7.8,AG:-7.8,TA:-7.2,TT:-7.9,TC:-8.2,TG:-8.5,
+ CA:-8.5,CT:-7.8,CC:-8.0,CG:-10.6,GA:-8.2,GT:-7.8,GC:-9.8,GG:-8.0};
+const NN_S={AA:-22.2,AT:-20.4,AC:-21.0,AG:-21.0,TA:-21.3,TT:-22.2,TC:-22.2,TG:-22.7,
+ CA:-22.7,CT:-21.0,CC:-19.9,CG:-27.2,GA:-22.2,GT:-21.0,GC:-24.4,GG:-19.9};
+function tmSantaLucia(seq,opt){
+  opt=opt||{}; const Na=(opt.Na??50)/1000, Mg=(opt.Mg??1.5)/1000,
+    dNTP=(opt.dNTP??0.6)/1000, oligo=(opt.oligo??250)*1e-9;
+  const s=seq.toUpperCase().replace(/U/g,'T');
+  if(!/^[ACGT]+$/.test(s)||s.length<2) return null;
+  let dH=0,dS=0;
+  for(let i=0;i<s.length-1;i++){const d=s[i]+s[i+1];dH+=NN_H[d];dS+=NN_S[d];}
+  const init=(b)=> (b==='G'||b==='C')?{h:0.1,s:-2.8}:{h:2.3,s:4.1};
+  const i5=init(s[0]),i3=init(s[s.length-1]);
+  dH+=i5.h+i3.h; dS+=i5.s+i3.s;
+  const selfComp = s===revComp(s);
+  if(selfComp) dS+=1.4;
+  const R=1.987;
+  const CT = selfComp? oligo : oligo/4;
+  let tm1M=(dH*1000)/(dS+R*Math.log(CT))-273.15;
+  const fGC=((s.match(/[GC]/g)||[]).length)/s.length;
+  const mgFree=Math.max(0,Mg-dNTP);
+  let invTm;
+  if(mgFree<=0 || Na>=0.5){
+    const lnNa=Math.log(Na>0?Na:1e-9);
+    invTm=1/(tm1M+273.15)+(4.29*fGC-3.95)*1e-5*lnNa+9.40e-6*lnNa*lnNa;
+  } else {
+    const a=3.92e-5,b=-9.11e-6,c=6.26e-5,d=1.42e-5,e=-4.82e-4,f=5.25e-4,g=8.31e-5;
+    const lnMg=Math.log(mgFree),N=s.length;
+    invTm=1/(tm1M+273.15)+a+b*lnMg+fGC*(c+d*lnMg)+1/(2*(N-1))*(e+f*lnMg+g*lnMg*lnMg);
+  }
+  return 1/invTm-273.15;
+}
+// Tm Wallace (regla rápida) para oligos cortos
+function tmWallace(s){
+  const u=s.toUpperCase().replace(/U/g,'T');
+  const at=(u.match(/[AT]/g)||[]).length, gc=(u.match(/[GC]/g)||[]).length;
+  if(u.length<14) return 2*at+4*gc;
+  return 64.9+41*(gc-16.4)/(at+gc);
+}
+
+/* ---------- Código genético ---------- */
+const STD = {
+ TTT:'F',TTC:'F',TTA:'L',TTG:'L',CTT:'L',CTC:'L',CTA:'L',CTG:'L',
+ ATT:'I',ATC:'I',ATA:'I',ATG:'M',GTT:'V',GTC:'V',GTA:'V',GTG:'V',
+ TCT:'S',TCC:'S',TCA:'S',TCG:'S',CCT:'P',CCC:'P',CCA:'P',CCG:'P',
+ ACT:'T',ACC:'T',ACA:'T',ACG:'T',GCT:'A',GCC:'A',GCA:'A',GCG:'A',
+ TAT:'Y',TAC:'Y',TAA:'*',TAG:'*',CAT:'H',CAC:'H',CAA:'Q',CAG:'Q',
+ AAT:'N',AAC:'N',AAA:'K',AAG:'K',GAT:'D',GAC:'D',GAA:'E',GAG:'E',
+ TGT:'C',TGC:'C',TGA:'*',TGG:'W',CGT:'R',CGC:'R',CGA:'R',CGG:'R',
+ AGT:'S',AGC:'S',AGA:'R',AGG:'R',GGT:'G',GGC:'G',GGA:'G',GGG:'G'};
+// diferencias por transl_table
+const CODE_DIFF = {
+ 1:{}, 2:{AGA:'*',AGG:'*',ATA:'M',TGA:'W'},
+ 3:{ATA:'M',CTT:'T',CTC:'T',CTA:'T',CTG:'T',TGA:'W'},
+ 5:{AGA:'S',AGG:'S',ATA:'M',TGA:'W'},
+ 11:{}
+};
+function geneticCode(id){const m=Object.assign({},STD,CODE_DIFF[id]||{});return m;}
+function translate(seq,codeId){
+  const code=geneticCode(codeId);
+  const s=seq.toUpperCase().replace(/U/g,'T'); let p='';
+  for(let i=0;i+3<=s.length;i+=3){const c=s.substr(i,3);p+=(code[c]!==undefined?code[c]:'X');}
+  return p;
+}
+
+/* ============================================================
+   ESTADO COMPARTIDO
+   ============================================================ */
+let WORK=''; // secuencia de trabajo limpia
+
+/* ---------- Tabs ---------- */
+document.querySelectorAll('nav button[data-tab]').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('nav button[data-tab]').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById(b.dataset.tab).classList.add('active');
+  };
+});
+
+/* ============================================================
+   TAB 1 — SECUENCIA
+   ============================================================ */
+function analyzeMain(){
+  const raw=document.getElementById('mainSeq').value;
+  const type=detectType(raw);
+  document.getElementById('seqType').textContent = LANG==='en' ? ({DNA:'DNA',RNA:'RNA','Proteína':'Protein','—':'—'}[type]||type) : type;
+  if(type==='Proteína'){
+    const p=cleanSeq(raw,true); WORK=p;
+    renderProtStats(p); return;
+  }
+  const isRNA=type==='RNA';
+  const s=cleanSeq(raw,false); WORK=s;
+  document.getElementById('mainSeq').value=s;
+  renderNucStats(s,isRNA);
+}
+function renderNucStats(s,isRNA){
+  const gc=gcContent(s).toFixed(1);
+  const c=baseCounts(s);
+  const deg=(s.match(/[RYSWKMBDHVN]/g)||[]).length;
+  const tmNN=tmSantaLucia(s);
+  const mw=molWeight(s,isRNA);
+  let tmStr = s.length<=60 ? (tmNN!==null? tmNN.toFixed(1)+' °C':t('(degenerada)','(degenerate)')) : '—';
+  document.getElementById('stats').innerHTML=`
+    <div class="stat"><div class="v">${s.length}</div><div class="l">${t('Longitud (nt)','Length (nt)')}</div></div>
+    <div class="stat"><div class="v">${gc}%</div><div class="l">${t('Contenido GC','GC content')}</div></div>
+    <div class="stat"><div class="v">${tmStr}</div><div class="l">Tm (≤60 nt, NN)</div></div>
+    <div class="stat"><div class="v">${mw? (mw/1000).toFixed(2)+' kDa':'—'}</div><div class="l">MW ${isRNA?'ssRNA':'ssDNA'}</div></div>
+    <div class="stat"><div class="v">${deg}</div><div class="l">${t('Bases degeneradas','Degenerate bases')}</div></div>`;
+  const u=isRNA?'U':'T';
+  document.getElementById('compTable').innerHTML=`
+    <table><tr><th>Base</th><th>A</th><th>C</th><th>G</th><th>${u}</th><th>N/deg</th></tr>
+    <tr><td>${t('Conteo','Count')}</td><td>${c.A}</td><td>${c.C}</td><td>${c.G}</td><td>${isRNA?c.U:c.T}</td><td>${c.N+c.other}</td></tr>
+    <tr><td>%</td><td>${pct(c.A,s.length)}</td><td>${pct(c.C,s.length)}</td><td>${pct(c.G,s.length)}</td><td>${pct(isRNA?c.U:c.T,s.length)}</td><td>${pct(c.N+c.other,s.length)}</td></tr>
+    </table>`;
+}
+function pct(n,t){return t? (n/t*100).toFixed(1):'0.0';}
+function renderProtStats(p){
+  document.getElementById('stats').innerHTML=`
+    <div class="stat"><div class="v">${p.length}</div><div class="l">${t('Longitud (aa)','Length (aa)')}</div></div>
+    <div class="stat"><div class="v">${(p.match(/\*/g)||[]).length}</div><div class="l">${t('Codones stop (*)','Stop codons (*)')}</div></div>`;
+  // composición aa
+  const counts={}; for(const a of p) counts[a]=(counts[a]||0)+1;
+  let rows=Object.keys(counts).sort().map(a=>`<tr><td class="mono">${a}</td><td>${counts[a]}</td><td>${pct(counts[a],p.length)}</td></tr>`).join('');
+  document.getElementById('compTable').innerHTML=`<div class="tablescroll"><table><tr><th>aa</th><th>${t('Conteo','Count')}</th><th>%</th></tr>${rows}</table></div>`;
+}
+function transform(op){
+  let s=cleanSeq(document.getElementById('mainSeq').value,false);
+  if(op==='rc')s=revComp(s);
+  else if(op==='comp')s=complement(s);
+  else if(op==='rev')s=reverse(s);
+  else if(op==='dna2rna')s=s.replace(/T/g,'U');
+  else if(op==='rna2dna')s=s.replace(/U/g,'T');
+  else if(op==='upper')s=s.toUpperCase();
+  document.getElementById('mainSeq').value=s;
+  analyzeMain();
+}
+function loadDemo(){
+  document.getElementById('mainSeq').value=
+   'ATGGCCATTGTAATGGGCCGCTGAAAGGGTGCCCGATAGGAATTCGCCCTTAAGCTTGGATCCACGTGTGACTGACTGAGCTAGCTAGCTAGGGATCCAAAGCTTTTTGGTACCGGGCCCCCCCTCGAGGTCGACGGTATCGATAAGCTTGATATCGAATTCCTGCAGCCCGGGGGATCCACTAGTTCTAGAGCGGCCGCCACCGCGGTGGAGCTCCAGCTTTTGTTCCCTTTAGTGAGGGTTAATTGCGCGCTTGGCGTAATCATGGTCATAGCTGTTTCCTG';
+  analyzeMain();
+}
+function useMain(targetId){
+  if(!WORK){analyzeMain();}
+  const v = WORK || cleanSeq(document.getElementById('mainSeq').value,false);
+  document.getElementById(targetId).value=v;
+}
+
+/* ============================================================
+   TAB 2 — TRADUCCIÓN / ORFs
+   ============================================================ */
+function getSeqFor(id){
+  let s=cleanSeq(document.getElementById(id).value,false);
+  return s;
+}
+function runTranslate(){
+  const s=getSeqFor('transSeq');
+  const code=document.getElementById('genCode').value;
+  if(!s){alert(t('Pega una secuencia.','Paste a sequence.'));return;}
+  const rc=revComp(s);
+  let html='';
+  for(let f=0;f<3;f++){
+    html+=frameBlock('+'+(f+1), s.substr(f), code);
+  }
+  for(let f=0;f<3;f++){
+    html+=frameBlock('−'+(f+1), rc.substr(f), code);
+  }
+  const el=document.getElementById('sixFrame'); el.style.display='block'; el.innerHTML=html;
+}
+function frameBlock(label,seq,code){
+  const prot=translate(seq,code);
+  let colored='';
+  for(const a of prot){
+    if(a==='*')colored+='<span class="stop">*</span>';
+    else if(a==='M')colored+='<span class="start">M</span>';
+    else colored+=a;
+  }
+  return `<div class="num">${t('Marco','Frame')} ${label}  (${prot.length} aa)</div>${colored}\n\n`;
+}
+function runORF(){
+  const s=getSeqFor('transSeq')||getSeqFor('mainSeq');
+  if(!s){alert(t('Pega una secuencia en la pestaña Traducción.','Paste a sequence in the Translation tab.'));return;}
+  const minAA=parseInt(document.getElementById('orfMin').value)||1;
+  const startMode=document.getElementById('orfStart').value;
+  const strandMode=document.getElementById('orfStrand').value;
+  const code=document.getElementById('genCode').value;
+  let orfs=[];
+  const strands=[];
+  if(strandMode!=='rev')strands.push({sign:'+',seq:s});
+  if(strandMode!=='fwd')strands.push({sign:'−',seq:revComp(s)});
+  const starts = startMode==='alt'?['ATG','GTG','TTG']:(startMode==='atg'?['ATG']:null);
+  const codeMap=geneticCode(code);
+  for(const st of strands){
+    const seq=st.seq.replace(/U/g,'T'); const L=seq.length;
+    for(let f=0;f<3;f++){
+      let i=f;
+      while(i+3<=L){
+        const cod=seq.substr(i,3);
+        let isStart = starts? starts.includes(cod) : (codeMap[cod]==='M');
+        if(isStart){
+          // extiende hasta stop
+          let j=i;
+          while(j+3<=L && codeMap[seq.substr(j,3)]!=='*') j+=3;
+          const hasStop=(j+3<=L);
+          const aaLen=Math.floor((j-i)/3);
+          if(aaLen>=minAA){
+            const ntStart=i, ntEnd=hasStop? j+3 : j;
+            // posición en coordenadas de la secuencia original (1-based)
+            let gStart,gEnd;
+            if(st.sign==='+'){gStart=ntStart+1;gEnd=ntEnd;}
+            else{gStart=L-ntEnd+1;gEnd=L-ntStart;}
+            orfs.push({strand:st.sign,frame:(st.sign==='+'?'+':'−')+(f+1),
+              start:gStart,end:gEnd,len:aaLen,startCodon:cod,stop:hasStop,
+              prot:translate(seq.substr(i,(hasStop?j+3:j)-i),code)});
+          }
+          i=j+3; // salta a tras el stop
+        } else i+=3;
+      }
+    }
+  }
+  orfs.sort((a,b)=>b.len-a.len);
+  if(!orfs.length){document.getElementById('orfOut').innerHTML=`<div class="hint">${t('No se encontraron ORFs con esos criterios.','No ORFs found with these criteria.')}</div>`;return;}
+  let rows=orfs.map((o,k)=>`<tr><td>${k+1}</td><td class="mono">${o.frame}</td><td>${o.start}</td><td>${o.end}</td>
+    <td>${o.len}</td><td class="mono">${o.startCodon}</td><td>${o.stop?t('sí','yes'):t('no (borde)','no (edge)')}</td>
+    <td><button class="act ghost" style="padding:2px 8px" onclick="showProt(${k})">${t('ver','view')}</button></td></tr>`).join('');
+  window._orfs=orfs;
+  document.getElementById('orfOut').innerHTML=
+    `<div class="hint">${orfs.length} ${t('ORF(s). Posiciones 1-based en la secuencia ingresada.','ORF(s). 1-based positions in the entered sequence.')}</div>
+     <div class="tablescroll"><table><tr><th>#</th><th>${t('Marco','Frame')}</th><th>${t('Inicio','Start')}</th><th>${t('Fin','End')}</th><th>aa</th><th>${t('Codón ini','Start codon')}</th><th>${t('Stop','Stop')}</th><th></th></tr>${rows}</table></div>
+     <div id="orfProt" class="out" style="display:none;margin-top:10px"></div>`;
+}
+function showProt(k){
+  const o=window._orfs[k];
+  const el=document.getElementById('orfProt');
+  el.style.display='block';
+  el.textContent=`ORF #${k+1}  ${o.frame}  ${o.start}-${o.end}  (${o.len} aa)\n\n`+o.prot.replace(/\*/g,'*');
+}
+
+/* ============================================================
+   TAB 3 — RESTRICCIÓN
+   ============================================================ */
+/* NEB Enzymes — set comercial embebido, derivado de la hoja del usuario (NEB enzymes.xlsx). 269 enzimas.
+   Notación: [nombre, sitio, offset_corte_hebra_superior, romo]. Verificado contra cortes canónicos. */
+const NEB_ENZYMES=[
+["AatII","GACGTC",5,false,"std"],
+["Acc65I","GGTACC",1,false,"std"],
+["AccI","GTMKAC",2,false,"std"],
+["AciI","CCGC",1,false,"std"],
+["AclI","AACGTT",2,false,"std"],
+["AcuI","CTGAAG",22,false,"iis"],
+["AfeI","AGCGCT",3,true,"blunt"],
+["AflII","CTTAAG",1,false,"std"],
+["AflIII","ACRYGT",1,false,"std"],
+["AgeI","ACCGGT",1,false,"std"],
+["AgeI-HF®","ACCGGT",1,false,"std"],
+["AhdI","GACNNNNNGTC",6,false,"std"],
+["AleI-v2","CACNNNNGTG",5,true,"blunt"],
+["AluI","AGCT",2,true,"blunt"],
+["AlwI","GGATC",9,false,"iis"],
+["AlwNI","CAGNNNCTG",6,false,"std"],
+["ApaI","GGGCCC",5,false,"std"],
+["ApaLI","GTGCAC",1,false,"std"],
+["ApeKI","GCWGC",1,false,"std"],
+["ApoI-HF®","RAATTY",1,false,"std"],
+["AscI","GGCGCGCC",2,false,"std"],
+["AseI","ATTAAT",2,false,"std"],
+["AsiSI","GCGATCGC",5,false,"std"],
+["AvaI","CYCGRG",1,false,"std"],
+["AvaII","GGWCC",1,false,"std"],
+["AvrII","CCTAGG",1,false,"std"],
+["BaeGI","GKGCMC",5,false,"std"],
+["BaeI","ACNNNNGTAYC",-10,false,"bidir",23],
+["BamHI","GGATCC",1,false,"std"],
+["BamHI-HF®","GGATCC",1,false,"std"],
+["BanI","GGYRCC",1,false,"std"],
+["BanII","GRGCYC",5,false,"std"],
+["BbsI","GAAGAC",8,false,"iis"],
+["BbsI-HF®","GAAGAC",8,false,"iis"],
+["BbvCI","CCTCAGC",2,false,"std"],
+["BbvI","GCAGC",13,false,"iis"],
+["BccI","CCATC",9,false,"iis"],
+["BceAI","ACGGC",17,false,"iis"],
+["BcgI","CGANNNNNNTGC",-10,false,"bidir",24],
+["BciVI","GTATCC",12,false,"iis"],
+["BclI","TGATCA",1,false,"std"],
+["BclI-HF®","TGATCA",1,false,"std"],
+["BcoDI","GTCTC",6,false,"iis"],
+["BfaI","CTAG",1,false,"std"],
+["BfuAI","ACCTGC",10,false,"iis"],
+["BglI","GCCNNNNNGGC",7,false,"std"],
+["BglII","AGATCT",1,false,"std"],
+["BlpI","GCTNAGC",2,false,"std"],
+["BmgBI","CACGTC",3,true,"blunt"],
+["BmrI","ACTGGG",11,false,"iis"],
+["BmtI-HF","GCTAGC",5,false,"std"],
+["BpmI","CTGGAG",22,false,"iis"],
+["Bpu10I","CCTNAGC",2,false,"std"],
+["BpuEI","CTTGAG",22,false,"iis"],
+["BsaAI","YACGTR",3,true,"blunt"],
+["BsaBI","GATNNNNATC",5,true,"blunt"],
+["BsaHI","GRCGYC",2,false,"std"],
+["BsaI-HF®v2","GGTCTC",7,false,"iis"],
+["BsaJI","CCNNGG",1,false,"std"],
+["BsaWI","WCCGGW",1,false,"std"],
+["BsaXI","ACNNNNNCTCC",-9,false,"bidir",21],
+["BseRI","GAGGAG",16,false,"iis"],
+["BseYI","CCCAGC",1,false,"std"],
+["BsgI","GTGCAG",22,false,"iis"],
+["BsiEI","CGRYCG",4,false,"std"],
+["BsiHKAI","GWGCWC",5,false,"std"],
+["BsiWI","CGTACG",1,false,"std"],
+["BsiWI-HF®","CGTACG",1,false,"std"],
+["BslI","CCNNNNNNNGG",7,false,"std"],
+["BsmAI","GTCTC",6,false,"iis"],
+["BsmBI-v2","CGTCTC",7,false,"iis"],
+["BsmFI","GGGAC",15,false,"iis"],
+["BsmI","GAATGC",7,false,"iis"],
+["BsoBI","CYCGRG",1,false,"std"],
+["Bsp1286I","GDGCHC",5,false,"std"],
+["BspCNI","CTCAG",14,false,"iis"],
+["BspDI","ATCGAT",2,false,"std"],
+["BspEI","TCCGGA",1,false,"std"],
+["BspHI","TCATGA",1,false,"std"],
+["BspMI","ACCTGC",10,false,"iis"],
+["BspQI","GCTCTTC",8,false,"iis"],
+["BspQI-HF®","GCTCTTC",8,false,"iis"],
+["BsrBI","CCGCTC",3,true,"blunt"],
+["BsrDI","GCAATG",8,false,"iis"],
+["BsrFI-v2","RCCGGY",1,false,"std"],
+["BsrGI-HF®","TGTACA",1,false,"std"],
+["BsrI","ACTGG",6,false,"iis"],
+["BssHII","GCGCGC",1,false,"std"],
+["BssSI-v2","CACGAG",1,false,"std"],
+["BstAPI","GCANNNNNTGC",7,false,"std"],
+["BstBI","TTCGAA",2,false,"std"],
+["BstEII-HF","GGTNACC",1,false,"std"],
+["BstNI","CCWGG",2,false,"std"],
+["BstUI","CGCG",2,true,"blunt"],
+["BstXI","CCANNNNNNTGG",8,false,"std"],
+["BstYI","RGATCY",1,false,"std"],
+["BstZ17I-HF®","GTATAC",3,true,"blunt"],
+["Bsu36I","CCTNAGG",2,false,"std"],
+["BtgI","CCRYGG",1,false,"std"],
+["BtgZI","GCGATG",16,false,"iis"],
+["BtsCI","GGATG",7,false,"iis"],
+["BtsI-v2","GCAGTG",8,false,"iis"],
+["BtsIMutI","CAGTG",7,false,"iis"],
+["Cac8I","GCNNGC",3,true,"blunt"],
+["ClaI","ATCGAT",2,false,"std"],
+["CspCI","CAANNNNNGTGG",-11,false,"bidir",24],
+["CviKI-1","RGCY",2,true,"blunt"],
+["CviQI","GTAC",1,false,"std"],
+["DdeI","CTNAG",1,false,"std"],
+["DpnI","GATC",2,true,"blunt"],
+["DpnII","GATC",0,false,"std"],
+["DraI","TTTAAA",3,true,"blunt"],
+["DraIII-HF","CACNNNGTG",6,false,"std"],
+["DrdI","GACNNNNNNGTC",7,false,"std"],
+["EaeI","YGGCCR",1,false,"std"],
+["EagI-HF","CGGCCG",1,false,"std"],
+["EarI","CTCTTC",7,false,"iis"],
+["EciI","GGCGGA",17,false,"iis"],
+["Eco53kI","GAGCTC",3,true,"blunt"],
+["EcoNI","CCTNNNNNAGG",5,false,"std"],
+["EcoO109I","RGGNCCY",2,false,"std"],
+["EcoP15I","CAGCAG",31,false,"iis"],
+["EcoRI","GAATTC",1,false,"std"],
+["EcoRI-HF®","GAATTC",1,false,"std"],
+["EcoRV","GATATC",3,true,"blunt"],
+["EcoRV-HF","GATATC",3,true,"blunt"],
+["Esp3I","CGTCTC",7,false,"iis"],
+["FatI","CATG",0,false,"std"],
+["FauI","CCCGC",9,false,"iis"],
+["Fnu4HI","GCNGC",2,false,"std"],
+["FokI","GGATG",14,false,"iis"],
+["FseI","GGCCGGCC",6,false,"std"],
+["FspI","TGCGCA",3,true,"blunt"],
+["HaeII","RGCGCY",5,false,"std"],
+["HaeIII","GGCC",2,true,"blunt"],
+["HgaI","GACGC",10,false,"iis"],
+["HhaI","GCGC",3,false,"std"],
+["HinP1I","GCGC",1,false,"std"],
+["HincII","GTYRAC",3,true,"blunt"],
+["HindIII","AAGCTT",1,false,"std"],
+["HindIII-HF®","AAGCTT",1,false,"std"],
+["HinfI","GANTC",1,false,"std"],
+["HpaI","GTTAAC",3,true,"blunt"],
+["HpaII","CCGG",1,false,"std"],
+["HphI","GGTGA",13,false,"iis"],
+["Hpy166II","GTNNAC",3,true,"blunt"],
+["Hpy188I","TCNGA",3,false,"std"],
+["Hpy188III","TCNNGA",2,false,"std"],
+["Hpy99I","CGWCG",5,false,"std"],
+["HpyAV","CCTTC",11,false,"iis"],
+["HpyCH4III","ACNGT",3,false,"std"],
+["HpyCH4IV","ACGT",1,false,"std"],
+["HpyCH4V","TGCA",2,true,"blunt"],
+["I-CeuI","TAACTATAACGGTCCTAAGGTAGCGAA",18,false,"std"],
+["I-SceI","TAGGGATAACAGGGTAAT",9,false,"std"],
+["KasI","GGCGCC",1,false,"std"],
+["KpnI","GGTACC",5,false,"std"],
+["KpnI-HF®","GGTACC",5,false,"std"],
+["MboI","GATC",0,false,"std"],
+["MboII","GAAGA",13,false,"iis"],
+["MfeI","CAATTG",1,false,"std"],
+["MfeI-HF","CAATTG",1,false,"std"],
+["MluCI","AATT",0,false,"std"],
+["MluI-HF®","ACGCGT",1,false,"std"],
+["MlyI","GAGTC",10,true,"iis"],
+["MmeI","TCCRAC",26,false,"iis"],
+["MnlI","CCTC",11,false,"iis"],
+["MscI","TGGCCA",3,true,"blunt"],
+["MseI","TTAA",1,false,"std"],
+["MslI","CAYNNNNRTG",5,true,"blunt"],
+["MspA1I","CMGCKG",3,true,"blunt"],
+["MspI","CCGG",1,false,"std"],
+["MspJI","CNNR",13,false,"iis"],
+["MwoI","GCNNNNNNNGC",7,false,"std"],
+["NaeI","GCCGGC",3,true,"blunt"],
+["NarI","GGCGCC",2,false,"std"],
+["Nb.BbvCI","CCTCAGC",5,false,"nickB"],
+["Nb.BsmI","GAATGC",5,false,"nickB"],
+["Nb.BsrDI","GCAATG",6,false,"nickB"],
+["Nb.BssSI","CACGAG",5,false,"nickB"],
+["Nb.BtsI","GCAGTG",6,false,"nickB"],
+["NciI","CCSGG",2,false,"std"],
+["NcoI","CCATGG",1,false,"std"],
+["NcoI-HF®","CCATGG",1,false,"std"],
+["NdeI","CATATG",2,false,"std"],
+["NgoMIV","GCCGGC",1,false,"std"],
+["NheI-HF®","GCTAGC",1,false,"std"],
+["NlaIII","CATG",4,false,"std"],
+["NlaIV","GGNNCC",3,true,"blunt"],
+["NmeAIII","GCCGAG",27,false,"iis"],
+["NotI","GCGGCCGC",2,false,"std"],
+["NotI-HF®","GCGGCCGC",2,false,"std"],
+["NruI-HF®","TCGCGA",3,true,"blunt"],
+["NsiI","ATGCAT",5,false,"std"],
+["NsiI-HF®","ATGCAT",5,false,"std"],
+["NspI","RCATGY",5,false,"std"],
+["Nt.AlwI","GGATC",9,false,"nickT"],
+["Nt.BbvCI","CCTCAGC",2,false,"nickT"],
+["Nt.BsmAI","GTCTC",6,false,"nickT"],
+["Nt.BspQI","GCTCTTC",8,false,"nickT"],
+["Nt.BstNBI","GAGTC",9,false,"nickT"],
+["Nt.CviPII","CCD",0,false,"nickT"],
+["PI-PspI","TGGCAAACAGCTATTATGGGTATTATGGGT",17,false,"std"],
+["PI-SceI","ATCTATGTCGGGTGCGGAGAAAGAGGTAATGAAATGG",15,false,"std"],
+["PacI","TTAATTAA",5,false,"std"],
+["PaeR7I","CTCGAG",1,false,"std"],
+["PaqCI®","CACCTGC",11,false,"iis"],
+["PciI","ACATGT",1,false,"std"],
+["PflFI","GACNNNGTC",4,false,"std"],
+["PflMI","CCANNNNNTGG",7,false,"std"],
+["PleI","GAGTC",9,false,"iis"],
+["PluTI","GGCGCC",5,false,"std"],
+["PmeI","GTTTAAAC",4,true,"blunt"],
+["PmlI","CACGTG",3,true,"blunt"],
+["PpuMI","RGGWCCY",2,false,"std"],
+["PshAI","GACNNNNGTC",5,true,"blunt"],
+["PsiI-v2","TTATAA",3,true,"blunt"],
+["PspGI","CCWGG",0,false,"std"],
+["PspOMI","GGGCCC",1,false,"std"],
+["PspXI","VCTCGAGB",2,false,"std"],
+["PstI","CTGCAG",5,false,"std"],
+["PstI-HF®","CTGCAG",5,false,"std"],
+["PvuI-HF","CGATCG",4,false,"std"],
+["PvuII","CAGCTG",3,true,"blunt"],
+["PvuII-HF","CAGCTG",3,true,"blunt"],
+["RsaI","GTAC",2,true,"blunt"],
+["RsrII","CGGWCCG",2,false,"std"],
+["SacI-HF","GAGCTC",5,false,"std"],
+["SacII","CCGCGG",4,false,"std"],
+["SalI","GTCGAC",1,false,"std"],
+["SalI-HF®","GTCGAC",1,false,"std"],
+["SapI","GCTCTTC",8,false,"iis"],
+["Sau3AI","GATC",0,false,"std"],
+["Sau96I","GGNCC",1,false,"std"],
+["SbfI-HF","CCTGCAGG",6,false,"std"],
+["ScaI-HF®","AGTACT",3,true,"blunt"],
+["ScrFI","CCNGG",2,false,"std"],
+["SexAI","ACCWGGT",1,false,"std"],
+["SfaNI","GCATC",10,false,"iis"],
+["SfcI","CTRYAG",1,false,"std"],
+["SfiI","GGCCNNNNNGGCC",8,false,"std"],
+["SfoI","GGCGCC",3,true,"blunt"],
+["SgrAI","CRCCGGYG",2,false,"std"],
+["SmaI","CCCGGG",3,true,"blunt"],
+["SmlI","CTYRAG",1,false,"std"],
+["SnaBI","TACGTA",3,true,"blunt"],
+["SpeI-HF®","ACTAGT",1,false,"std"],
+["SphI","GCATGC",5,false,"std"],
+["SphI-HF®","GCATGC",5,false,"std"],
+["SrfI","GCCCGGGC",4,true,"blunt"],
+["SspI-HF","AATATT",3,true,"blunt"],
+["StuI","AGGCCT",3,true,"blunt"],
+["StyD4I","CCNGG",0,false,"std"],
+["StyI-HF","CCWWGG",1,false,"std"],
+["SwaI","ATTTAAAT",4,true,"blunt"],
+["TaqI-v2","TCGA",1,false,"std"],
+["TfiI","GAWTC",1,false,"std"],
+["TseI","GCWGC",1,false,"std"],
+["Tsp45I","GTSAC",0,false,"std"],
+["TspMI","CCCGGG",1,false,"std"],
+["TspRI","CASTG",7,false,"iis"],
+["Tth111I","GACNNNGTC",4,false,"std"],
+["WarmStart® Nt.BstNBI","GAGTC",9,false,"nickT"],
+["XbaI","TCTAGA",1,false,"std"],
+["XcmI","CCANNNNNNNNNTGG",8,false,"std"],
+["XhoI","CTCGAG",1,false,"std"],
+["XmaI","CCCGGG",1,false,"std"],
+["XmnI","GAANNNNTTC",5,true,"blunt"],
+["ZraI","GACGTC",3,true,"blunt"]
+];
+
+// name: [site, cutTop, blunt?]  cutTop = posición de corte en hebra superior (0-based, antes de esa base)
+const ENZYMES = [
+ ['AatII','GACGTC',5,false],['Acc65I','GGTACC',1,false],['AccI','GTMKAC',2,false],
+ ['AflII','CTTAAG',1,false],['AflIII','ACRYGT',1,false],['AgeI','ACCGGT',1,false],
+ ['ApaI','GGGCCC',5,false],['ApaLI','GTGCAC',1,false],['AscI','GGCGCGCC',2,false],
+ ['AseI','ATTAAT',2,false],['AvaI','CYCGRG',1,false],['AvrII','CCTAGG',1,false],
+ ['BamHI','GGATCC',1,false],['BclI','TGATCA',1,false],['BglII','AGATCT',1,false],
+ ['BmtI','GCTAGC',5,false],['BsiWI','CGTACG',1,false],['BspEI','TCCGGA',1,false],
+ ['BspHI','TCATGA',1,false],['BsrGI','TGTACA',1,false],['BssHII','GCGCGC',1,false],
+ ['BstBI','TTCGAA',2,false],['BstZ17I','GTATAC',3,true],['ClaI','ATCGAT',2,false],
+ ['DraI','TTTAAA',3,true],['EagI','CGGCCG',1,false],['EcoRI','GAATTC',1,false],
+ ['EcoRV','GATATC',3,true],['FseI','GGCCGGCC',6,false],['HaeIII','GGCC',2,true],
+ ['HindIII','AAGCTT',1,false],['HincII','GTYRAC',3,true],['HpaI','GTTAAC',3,true],
+ ['KasI','GGCGCC',1,false],['KpnI','GGTACC',5,false],['MfeI','CAATTG',1,false],
+ ['MluI','ACGCGT',1,false],['MscI','TGGCCA',3,true],['NaeI','GCCGGC',3,true],
+ ['NarI','GGCGCC',2,false],['NcoI','CCATGG',1,false],['NdeI','CATATG',2,false],
+ ['NgoMIV','GCCGGC',1,false],['NheI','GCTAGC',1,false],['NotI','GCGGCCGC',2,false],
+ ['NruI','TCGCGA',3,true],['NsiI','ATGCAT',5,false],['PacI','TTAATTAA',5,false],
+ ['PciI','ACATGT',1,false],['PmeI','GTTTAAAC',4,true],['PmlI','CACGTG',3,true],
+ ['PstI','CTGCAG',5,false],['PvuI','CGATCG',4,false],['PvuII','CAGCTG',3,true],
+ ['SacI','GAGCTC',5,false],['SacII','CCGCGG',4,false],['SalI','GTCGAC',1,false],
+ ['SbfI','CCTGCAGG',6,false],['ScaI','AGTACT',3,true],['SmaI','CCCGGG',3,true],
+ ['SnaBI','TACGTA',3,true],['SpeI','ACTAGT',1,false],['SphI','GCATGC',5,false],
+ ['SspI','AATATT',3,true],['StuI','AGGCCT',3,true],['SwaI','ATTTAAAT',4,true],
+ ['XbaI','TCTAGA',1,false],['XhoI','CTCGAG',1,false],['XmaI','CCCGGG',1,false]
+];
+// Etiqueta/versión del set embebido por defecto (catálogo comercial NEB, de la hoja del usuario)
+const EMBEDDED_LABEL='NEB comercial · 269 enzimas · fuente: NEB enzymes.xlsx · cargada 2026-06-16';
+
+// Enzimas importadas desde REBASE (se persisten en localStorage)
+let IMPORTED_ENZYMES = [];
+function loadImportedCache(){
+  try{
+    const j=localStorage.getItem('striderweb_rebase');
+    if(j){ const o=JSON.parse(j); IMPORTED_ENZYMES=o.enz||[]; updateRebaseStatus(o.meta); }
+    else updateRebaseStatus(null);
+  }catch(e){}
+}
+function updateRebaseStatus(meta){
+  const el=document.getElementById('rebaseStatus'); if(!el)return;
+  if(IMPORTED_ENZYMES.length){
+    let extra='';
+    if(meta){
+      if(meta.version) extra+=` · <b>${meta.version}</b>`;
+      else extra+=` · versión no declarada en el archivo`;
+      if(meta.fmt) extra+=` · formato ${meta.fmt}`;
+      if(meta.date) extra+=` · ${t('importado','imported')} ${meta.date}`;
+    }
+    // aviso de obsolescencia: compara el año (de la versión o de la importación) con el año actual
+    let warn=''; const nowY=new Date().getFullYear();
+    let y=null;
+    if(meta){ const mv=(meta.version||'').match(/(20\d{2})/); if(mv)y=+mv[1];
+      if(!y&&meta.date){const md=meta.date.match(/(20\d{2})/);if(md)y=+md[1];} }
+    if(y && nowY-y>=1) warn=`<br><span class="amber">${t('⚠ El set importado parece de '+y+' (REBASE publica varias versiones al año). Para datos vigentes, vuelve a descargar ','⚠ The imported set looks from '+y+' (REBASE issues several versions per year). For current data, re-download ')}<span class="tag">link_withrefm</span>${t(' e impórtalo.',' and import it.')}</span>`;
+    el.innerHTML=`<span class="green">✓ ${t('Set importado','Imported set')}: <b>${IMPORTED_ENZYMES.length}</b> ${t('enzimas','enzymes')}`+
+      (meta&&meta.comm?` (${meta.comm} ${t('comerciales','commercial')})`:'')+`${extra}.</span> ${t('Selecciona \'Importadas (REBASE)\' en Set de enzimas.','Select \'Imported (REBASE)\' in Enzyme set.')}`+warn;
+  } else {
+    el.innerHTML=`${t('Sin set importado — el análisis usa el','No imported set — analysis uses')} <b>${EMBEDDED_LABEL}</b>. `+
+      `<span class="amber">${t('Catálogo NEB embebido: vigente a la fecha de carga, puede quedar desactualizado con el tiempo.','Embedded NEB catalog: current as of load date, may become outdated over time.')}</span> `+
+      `${t('Para el catálogo completo de REBASE (todos los proveedores, ~miles), importa un archivo REBASE arriba.','For the full REBASE catalog (all suppliers, ~thousands), import a REBASE file above.')}`;
+  }
+}
+
+/* ---- Parser REBASE ----
+   Soporta: withrefm (campos <1> nombre, <3> reconocimiento, <7> proveedores),
+            bionet / texto simple (Nombre<espacios>RECONOCIMIENTO),
+            Biopython Restriction_Dictionary.py (rest_dict[...] con site/fst5/ovhg/suppl).
+   Devuelve enzimas como [name, site, cutOffset, blunt, commercial].
+   cutOffset = bases en hebra superior antes del corte, medido desde el inicio del sitio
+               (puede ser >len o negativo en Tipo IIS). */
+function parseRecognition(rec){
+  if(!rec) return null;
+  rec=rec.trim().replace(/\s+/g,'');
+  if(!rec||rec==='?'||/\?/.test(rec)) return null;
+  // prefijo (P/Q) corriente arriba: se ignora para el offset principal (se usa el sufijo)
+  let lead=null;
+  let mLead=rec.match(/^\((\-?\d+)\/(\-?\d+)\)/);
+  if(mLead){ lead={p:+mLead[1],q:+mLead[2]}; rec=rec.slice(mLead[0].length); }
+  // forma Tipo IIS:  SITE(N/M)
+  let m=rec.match(/^([A-Za-z]+)\((\-?\d+)\/(\-?\d+)\)$/);
+  if(m){
+    const site=m[1].toUpperCase().replace(/U/g,'T');
+    if(!/^[ACGTRYSWKMBDHVN]+$/.test(site))return null;
+    const N=+m[2],M=+m[3];
+    return {site, offset:site.length+N, blunt:(N===M)};
+  }
+  // forma con ^ dentro del sitio
+  if(rec.includes('^')){
+    const idx=rec.indexOf('^');
+    const site=rec.replace('^','').toUpperCase().replace(/U/g,'T');
+    if(!/^[ACGTRYSWKMBDHVN]+$/.test(site))return null;
+    const off=idx; // bases antes del ^
+    return {site, offset:off, blunt:(site.length-2*off===0)};
+  }
+  // si solo es el prefijo (corta corriente arriba)
+  if(lead){
+    const site=rec.toUpperCase().replace(/U/g,'T');
+    if(!/^[ACGTRYSWKMBDHVN]+$/.test(site))return null;
+    return {site, offset:-lead.p, blunt:(lead.p===lead.q)};
+  }
+  // sitio sin corte conocido: lo registramos con corte al inicio (solo para búsqueda de sitio)
+  const site=rec.toUpperCase().replace(/U/g,'T');
+  if(!/^[ACGTRYSWKMBDHVN]+$/.test(site))return null;
+  return {site, offset:0, blunt:false, noCut:true};
+}
+function parseRebaseVersion(text){
+  const head=text.slice(0,6000);
+  // Biopython: "Used REBASE emboss files version 404 (2024)."
+  let m=head.match(/version\s+(\d+)\s*\((\d{4})\)/i);
+  if(m) return 'REBASE '+m[1]+' ('+m[2]+')';
+  // withrefm / bionet headers: "REBASE version 412" + posible fecha
+  m=head.match(/REBASE\s+version[:\s]+(\d+)/i);
+  if(m){ const d=head.match(/\b(20\d{2})\b/); return 'REBASE '+m[1]+(d?' ('+d[1]+')':''); }
+  // a veces solo aparece un año
+  m=head.match(/\b(20\d{2})\b/);
+  if(m && /rebase/i.test(head)) return 'REBASE ('+m[1]+')';
+  return '';
+}
+function parseRebaseFile(text){
+  const enz=[]; let fmt='desconocido', comm=0;
+  const version=parseRebaseVersion(text);
+  if(/rest_dict\s*\[/.test(text)){
+    // Biopython Restriction_Dictionary.py
+    fmt='biopython';
+    const re=/rest_dict\[(['"])(.+?)\1\]\s*=\s*\{([\s\S]*?)\n\}/g; let b;
+    while((b=re.exec(text))!==null){
+      const name=b[2], body=b[3];
+      const site=(body.match(/["']site["']\s*:\s*["']([A-Za-z]+)["']/)||[])[1];
+      if(!site)continue;
+      const fst5=(body.match(/["']fst5["']\s*:\s*(-?\d+)/)||[])[1];
+      const ovhg=(body.match(/["']ovhg["']\s*:\s*(-?\d+)/)||[])[1];
+      const suppl=(body.match(/["']suppl["']\s*:\s*\(([^)]*)\)/)||[])[1]||'';
+      const isComm=/['"]/.test(suppl);
+      let offset = fst5!==undefined? +fst5 : 0;
+      let blunt = ovhg!==undefined? (+ovhg===0) : false;
+      if(isComm)comm++;
+      enz.push([name, site.toUpperCase().replace(/U/g,'T'), offset, blunt, isComm]);
+    }
+  } else if(/^<1>/m.test(text)||/\n<1>/.test(text)){
+    // REBASE withrefm
+    fmt='withrefm';
+    let cur={};
+    const flush=()=>{
+      if(cur.name&&cur.rec){
+        const pr=parseRecognition(cur.rec);
+        if(pr){ const isComm=!!(cur.suppl&&cur.suppl.trim()); if(isComm)comm++;
+          enz.push([cur.name, pr.site, pr.offset, pr.blunt, isComm]); }
+      }
+      cur={};
+    };
+    text.split('\n').forEach(line=>{
+      let m;
+      if((m=line.match(/^<1>(.*)/))){ if(cur.name)flush(); cur.name=m[1].trim(); }
+      else if((m=line.match(/^<3>(.*)/))){ cur.rec=m[1].trim(); }
+      else if((m=line.match(/^<7>(.*)/))){ cur.suppl=m[1].trim(); }
+    });
+    flush();
+  } else {
+    // bionet / texto simple:  Nombre   RECONOCIMIENTO
+    fmt='bionet/simple';
+    text.split('\n').forEach(line=>{
+      line=line.replace(/\r/,'');
+      if(!line.trim()||line.trim().startsWith('#')||line.trim().startsWith('//'))return;
+      const m=line.match(/^(\S+)\s+(\S.*)$/);
+      if(!m)return;
+      const pr=parseRecognition(m[2].trim());
+      if(pr) enz.push([m[1].trim(), pr.site, pr.offset, pr.blunt, true]);
+    });
+    comm=enz.length; // bionet no trae flag comercial
+  }
+  return {enz, fmt, comm, version};
+}
+function loadRebase(ev){
+  const f=ev.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    let res;
+    try{ res=parseRebaseFile(r.result); }catch(e){ alert(t('Error al parsear: ','Parse error: ')+e.message); return; }
+    if(!res.enz.length){ alert(t('No se reconocieron enzimas en el archivo. ¿Es withrefm, bionet o Restriction_Dictionary.py?','No enzymes recognized in the file. Is it withrefm, bionet or Restriction_Dictionary.py?')); return; }
+    const commOnly=document.getElementById('commOnly').value==='1';
+    let list=res.enz;
+    if(commOnly && res.fmt!=='bionet/simple'){
+      const c=list.filter(e=>e[4]);
+      if(c.length) list=c; // si el formato no trae flag, no filtra
+    }
+    IMPORTED_ENZYMES=list.map(e=>[e[0],e[1],e[2],e[3]]);
+    const meta={fmt:res.fmt, comm:res.comm, n:IMPORTED_ENZYMES.length,
+      version:res.version||'', date:new Date().toISOString().slice(0,10)};
+    try{ localStorage.setItem('striderweb_rebase', JSON.stringify({enz:IMPORTED_ENZYMES,meta})); }catch(e){}
+    updateRebaseStatus(meta);
+    document.getElementById('enzSet').value='imported';
+    alert(t('Importadas ','Imported ')+IMPORTED_ENZYMES.length+t(' enzimas (formato ',' enzymes (format ')+res.fmt+
+      (res.version?', '+res.version:'')+').');
+  };
+  r.readAsText(f);
+}
+function clearRebase(){
+  IMPORTED_ENZYMES=[];
+  try{ localStorage.removeItem('striderweb_rebase'); }catch(e){}
+  updateRebaseStatus(null);
+}
+
+function iupacRegex(site){
+  return new RegExp(site.split('').map(b=>{
+    const set=IUPAC_SET[b]||b; return set.length>1?'['+set+']':set;
+  }).join(''),'g');
+}
+function findSites(seq,enz,circular){
+  // busca en hebra directa; sitios no palindrómicos también en revcomp
+  const name=enz[0], site=enz[1], cut=enz[2], blunt=enz[3], type=enz[4]||'std', cut2=enz[5];
+  const L=seq.length;
+  let target = circular? seq+seq.substring(0,site.length-1) : seq;
+  const hits=[];
+  const pushCut=(pos,off,strand)=>{
+    let c = strand==='+' ? pos+off : pos+site.length-off;
+    if(circular){ c=((c%L)+L)%L; if(c===0)c=L; }
+    hits.push({pos:pos, cut:c, strand, type});
+  };
+  const re=iupacRegex(site); let m;
+  while((m=re.exec(target))!==null){
+    const pos=m.index;
+    if(pos<L){ pushCut(pos,cut,'+'); if(type==='bidir'&&cut2!==undefined) pushCut(pos,cut2,'+'); }
+    re.lastIndex=m.index+1;
+  }
+  // hebra complementaria si el sitio NO es palindrómico
+  const rcSite=revComp(site);
+  if(rcSite!==site){
+    const re2=iupacRegex(rcSite); let m2;
+    while((m2=re2.exec(target))!==null){
+      const pos=m2.index;
+      if(pos<L){ pushCut(pos,cut,'−'); if(type==='bidir'&&cut2!==undefined) pushCut(pos,cut2,'−'); }
+      re2.lastIndex=m2.index+1;
+    }
+  }
+  return hits;
+}
+// metadatos de tipo para UI
+const TYPE_INFO={
+  std:{label:'—',end:'cohesivo'}, blunt:{label:'—',end:'romo'},
+  iis:{label:'IIS',end:'cohesivo'}, bidir:{label:'doble corte (IIB)',end:'2 cortes'},
+  nickT:{label:'nickasa (hebra +)',end:'mella 1 hebra'},
+  nickB:{label:'nickasa (hebra −)',end:'mella 1 hebra'}
+};
+const TYPE_COLOR={std:'#2a6f97',blunt:'#2a6f97',iis:'#0a9396',bidir:'#7b2ff0',nickT:'#c77700',nickB:'#c77700'};
+function runRestr(){
+  const seq=getSeqFor('restrSeq');
+  if(!seq){alert(t('Pega una secuencia de DNA.','Paste a DNA sequence.'));return;}
+  const circular=document.getElementById('topo').value==='circ';
+  const filter=document.getElementById('cutFilter').value;
+  const set=document.getElementById('enzSet').value;
+  const isoMode=document.getElementById('isoMode').value;
+  let list;
+  if(set==='imported'){
+    if(!IMPORTED_ENZYMES.length){alert(t('No hay set importado. Usa \'Importar set completo (REBASE)\' o elige un set embebido.','No imported set. Use \'Import full set (REBASE)\' or choose an embedded set.'));return;}
+    list=IMPORTED_ENZYMES.slice();
+  } else if(set==='common'){ list=ENZYMES.slice(); }
+  else { list=NEB_ENZYMES.slice(); }
+  if(isoMode==='collapse'){
+    const seen={}; const out=[];
+    list.forEach(e=>{const k=e[1]+'|'+e[2]; if(!seen[k]){seen[k]=1;out.push(e);} });
+    list=out;
+  }
+  const results=[];
+  for(const e of list){
+    const hits=findSites(seq,e,circular);
+    results.push({name:e[0],site:e[1],blunt:e[3],type:e[4]||'std',hits});
+  }
+  // construir tabla de cortes globales — para doble-cutters cada sitio = 2 cortes
+  let allCuts=[];
+  let filtered=results.filter(r=>{
+    const sites = r.type==='bidir'? r.hits.length/2 : r.hits.length;
+    if(filter==='non')return sites===0;
+    if(filter==='1')return sites===1;
+    if(filter==='le2')return sites>=1&&sites<=2;
+    return sites>=1;
+  });
+  // tabla
+  let rows=filtered.map(r=>{
+    const ti=TYPE_INFO[r.type]||TYPE_INFO.std;
+    const sites = r.type==='bidir'? r.hits.length/2 : r.hits.length;
+    const recPos=[...new Set(r.hits.map(h=>h.pos+1))].sort((a,b)=>a-b);
+    const positions=r.hits.map(h=>h.cut).sort((a,b)=>a-b);
+    r.hits.forEach(h=>allCuts.push({enz:r.name,pos:h.cut,type:h.type}));
+    const end = r.blunt? t('romo','blunt') : t(ti.end, END_EN[ti.end]||ti.end);
+    const badge = ti.label==='—'? '' : `<span class="pill" style="border-color:${TYPE_COLOR[r.type]};color:${TYPE_COLOR[r.type]}">${t(ti.label, TYPE_LABEL_EN[ti.label]||ti.label)}</span>`;
+    return `<tr><td class="mono">${r.name}</td><td class="mono">${r.site}</td>
+      <td>${badge||`<span class="hint">${t('estándar','standard')}</span>`}</td>
+      <td>${end}</td><td>${sites}</td>
+      <td class="mono">${recPos.join(', ')||'—'}</td>
+      <td class="mono">${positions.join(', ')||'—'}</td></tr>`;
+  }).join('');
+  document.getElementById('restrTableCard').style.display='block';
+  const srcLabel = set==='imported'? IMPORTED_ENZYMES.length+' '+t('importadas (REBASE)','imported (REBASE)')
+    : (set==='neb'? list.length+t(' NEB comercial',' NEB commercial') : list.length+t(' curado básico',' basic curated'));
+  document.getElementById('restrTable').innerHTML=
+    `<div class="hint" style="padding:6px 8px">${t('Set analizado','Set analyzed')}: ${srcLabel}${isoMode==='collapse'?t(' (isoesquizómeros colapsados)',' (isoschizomers collapsed)'):''}.
+     <b>${t('Tipo','Type')}:</b> ${t('IIS = corte fuera del sitio · doble corte (IIB) = corta a ambos lados (2 cortes/sitio) · nickasa = mella una sola hebra.','IIS = cut outside the site · double cut (IIB) = cuts on both sides (2 cuts/site) · nickase = nicks a single strand.')}</div>
+     <table><tr><th>${t('Enzima','Enzyme')}</th><th>${t('Sitio','Site')}</th><th>${t('Tipo','Type')}</th><th>${t('Extremo','End')}</th><th>${t('Sitios','Sites')}</th><th>${t('Pos. reconocimiento','Recognition pos.')}</th><th>${t('Pos. de corte','Cut pos.')}</th></tr>${rows||`<tr><td colspan=7>${t('Sin resultados','No results')}</td></tr>`}</table>`;
+  // datos para digestión: enzimas que cortan -> posiciones de corte (en rango)
+  const cutMap={};
+  filtered.forEach(r=>{
+    const ps=r.hits.map(h=>h.cut).filter(p=>p>=1&&p<=seq.length).sort((a,b)=>a-b);
+    if(ps.length) cutMap[r.name]=ps;
+  });
+  window._dig={len:seq.length, circ:circular, map:cutMap};
+  populateDigest();
+  // mapa: usar cortes únicos de enzimas que cortan (excluye 'non')
+  if(filter==='non'){document.getElementById('restrMapCard').style.display='none';return;}
+  drawRestrMap(seq.length,allCuts.filter(c=>c.pos>=1&&c.pos<=seq.length),circular);
+}
+function populateDigest(){
+  const d=window._dig; const names=Object.keys(d.map).sort();
+  const s1=document.getElementById('digEnz1'), s2=document.getElementById('digEnz2');
+  if(!names.length){ document.getElementById('digestCard').style.display='none'; return; }
+  document.getElementById('digestCard').style.display='block';
+  const opts=names.map(n=>`<option value="${n.replace(/"/g,'&quot;')}">${n} (${d.map[n].length})</option>`).join('');
+  s1.innerHTML=opts;
+  s2.innerHTML=`<option value="">— ninguna —</option>`+opts;
+  document.getElementById('digestOut').innerHTML='';
+  document.getElementById('gelCanvas').style.display='none';
+}
+function digestFragments(cuts,len,circ){
+  cuts=[...new Set(cuts)].filter(c=>c>=1&&c<=len).sort((a,b)=>a-b);
+  let frags=[];
+  if(!cuts.length){ frags=[len]; }
+  else if(circ){
+    for(let i=0;i<cuts.length;i++){ const a=cuts[i],b=cuts[(i+1)%cuts.length]; frags.push(((b-a+len)%len)||len); }
+  } else {
+    let prev=0; cuts.forEach(p=>{frags.push(p-prev);prev=p;}); frags.push(len-prev);
+  }
+  return frags.filter(f=>f>0).sort((a,b)=>b-a);
+}
+function runDigest(){
+  const d=window._dig; if(!d){alert(t('Primero analiza una secuencia.','Analyze a sequence first.'));return;}
+  const e1=document.getElementById('digEnz1').value;
+  const e2=document.getElementById('digEnz2').value;
+  if(!e1){alert(t('Elige al menos una enzima.','Choose at least one enzyme.'));return;}
+  let cuts=[...(d.map[e1]||[])];
+  const enzs=[e1];
+  if(e2 && e2!==e1){ cuts=cuts.concat(d.map[e2]||[]); enzs.push(e2); }
+  cuts=[...new Set(cuts)].sort((a,b)=>a-b);
+  const frags=digestFragments(cuts,d.len,d.circ);
+  const nCuts=cuts.length, nFrag=frags.length, sum=frags.reduce((a,b)=>a+b,0);
+  let rows=frags.map((f,i)=>`<tr><td>${i+1}</td><td class="mono">${f}</td></tr>`).join('');
+  document.getElementById('digestOut').innerHTML=
+    `<div class="hint" style="margin-top:8px"><b>${t('Digestión','Digestion')}:</b> ${enzs.join(' + ')} · ${d.circ?t('circular','circular'):t('lineal','linear')} · ${nCuts} ${t('corte(s)','cut(s)')} → <b>${nFrag} ${t('fragmento(s)','fragment(s)')}</b> (Σ=${sum} nt).</div>
+     <div class="flex2"><div><div class="tablescroll" style="max-height:240px"><table><tr><th>#</th><th>${t('Tamaño (nt)','Size (nt)')}</th></tr>${rows}</table></div></div></div>`;
+  drawGel(frags);
+}
+function drawGel(frags){
+  const cv=document.getElementById('gelCanvas'); cv.style.display='block';
+  const ctx=cv.getContext('2d'); const W=cv.width,H=cv.height;
+  ctx.fillStyle='#11161c'; ctx.fillRect(0,0,W,H);
+  const top=30, bot=H-20, gh=bot-top;
+  const ladder=[10000,8000,6000,5000,4000,3000,2000,1500,1000,750,500,250,100];
+  const maxL=12000, minL=50, lg=v=>Math.log10(Math.max(minL,Math.min(maxL,v)));
+  const y=v=> top + (lg(maxL)-lg(v))/(lg(maxL)-lg(minL))*gh;
+  // carriles
+  const ladX=70, lanW=120, sampX=260;
+  ctx.fillStyle='#cdd8e3'; ctx.font='11px Arial';
+  ctx.fillText(t('Ladder','Ladder'), ladX-2, 18); ctx.fillText(t('Muestra','Sample'), sampX-2, 18);
+  // pozos
+  ctx.fillStyle='#0a0d11'; ctx.fillRect(ladX-6,top-8,lanW-30,6); ctx.fillRect(sampX-6,top-8,lanW-30,6);
+  // ladder bands
+  ladder.forEach(s=>{
+    const yy=y(s);
+    ctx.fillStyle='rgba(180,210,235,0.85)'; ctx.fillRect(ladX,yy-1.5,lanW-34,3);
+    ctx.fillStyle='#8aa0b4'; ctx.font='9px Arial'; ctx.textAlign='right';
+    ctx.fillText(s>=1000?(s/1000)+'k':s, ladX-8, yy+3); ctx.textAlign='left';
+  });
+  // sample bands (intensidad ~ a tamaño/masa, simple)
+  frags.forEach(f=>{
+    const yy=y(f);
+    ctx.fillStyle='rgba(120,255,160,0.9)'; ctx.fillRect(sampX,yy-1.6,lanW-34,3.2);
+    ctx.fillStyle='#9fb3c4'; ctx.font='9px Arial';
+    ctx.fillText(f+'', sampX+lanW-28, yy+3);
+  });
+  ctx.fillStyle='#66788a'; ctx.font='9px Arial';
+  ctx.fillText(t('escala log · gel simulado (no migración real de un % de agarosa específico)','log scale · simulated gel (not real migration for a specific % agarose)'), 12, H-6);
+}
+function drawRestrMap(L,cuts,circular){
+  document.getElementById('restrMapCard').style.display='block';
+  const cv=document.getElementById('restrCanvas'),ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  const m=60,W=cv.width-2*m,y=110;
+  ctx.strokeStyle='#1b4965';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(m,y);ctx.lineTo(m+W,y);ctx.stroke();
+  ctx.fillStyle='#556070';ctx.font='11px Arial';
+  ctx.fillText('1',m-4,y+22);ctx.fillText(L+' nt'+(circular?t(' (circular)',' (circular)'):''),m+W-30,y+22);
+  // agrupa enzimas de corte único primero
+  const cnt={};cuts.forEach(c=>cnt[c.enz]=(cnt[c.enz]||0)+1);
+  const uniq=cuts.filter(c=>cnt[c.enz]===1);
+  const draw=uniq.length?uniq:cuts.slice(0,40);
+  draw.sort((a,b)=>a.pos-b.pos);
+  let lastX=-100,row=0;
+  draw.forEach(c=>{
+    const x=m+(c.pos/L)*W;
+    const col=(TYPE_COLOR[c.type]||'#2a6f97');
+    ctx.strokeStyle=col;ctx.lineWidth=(c.type==='bidir')?2:1;
+    ctx.beginPath();
+    if(c.type==='nickT'){ ctx.moveTo(x,y-12);ctx.lineTo(x,y); }       // media marca arriba
+    else if(c.type==='nickB'){ ctx.moveTo(x,y);ctx.lineTo(x,y+12); }  // media marca abajo
+    else { ctx.moveTo(x,y-12);ctx.lineTo(x,y+12); }
+    ctx.stroke();
+    if(x-lastX<46){row=(row+1)%3;}else row=0; lastX=x;
+    ctx.save();ctx.translate(x,y-16-row*13);ctx.rotate(-Math.PI/6);
+    ctx.fillStyle=col;ctx.font='10px Arial';
+    ctx.fillText(c.enz,0,0);ctx.restore();
+  });
+  // leyenda
+  ctx.font='10px Arial';
+  const leg=[['#2a6f97',t('estándar/romo','standard/blunt')],['#0a9396','IIS'],['#7b2ff0',t('doble corte (IIB)','double cut (IIB)')],['#c77700',t('nickasa (media marca)','nickase (half mark)')]];
+  let lx=m;
+  leg.forEach(([col,txt])=>{
+    ctx.fillStyle=col;ctx.fillRect(lx,y+34,10,10);
+    ctx.fillStyle='#556070';ctx.fillText(txt,lx+14,y+43);
+    lx+=ctx.measureText(txt).width+34;
+  });
+  // fragmentos
+  const allPos=[...new Set(cuts.map(c=>c.pos))].sort((a,b)=>a-b);
+  let frags=[];
+  if(allPos.length){
+    if(circular){
+      for(let i=0;i<allPos.length;i++){
+        const a=allPos[i],b=allPos[(i+1)%allPos.length];
+        frags.push(((b-a+L)%L)||L);
+      }
+    } else {
+      let prev=0;allPos.forEach(p=>{frags.push(p-prev);prev=p;});frags.push(L-prev);
+    }
+    frags=frags.filter(f=>f>0).sort((a,b)=>b-a);
+    document.getElementById('restrFrag').innerHTML=
+      `<b>${t('Fragmentos','Fragments')}</b> (${frags.length}): `+frags.map(f=>f+' nt').join(' · ');
+  } else {
+    document.getElementById('restrFrag').textContent=t('Sin cortes que mapear con el filtro actual.','No cuts to map with the current filter.');
+  }
+}
+
+/* ============================================================
+   TAB 4 — DOT PLOT (web worker inline)
+   ============================================================ */
+const DOT_WORKER_SRC=`
+self.onmessage=function(e){
+  const {a,b,win,thr,mode}=e.data;
+  const A=a,B=b,la=A.length,lb=B.length;
+  function rc(s){const M={A:'T',T:'A',G:'C',C:'G',U:'A',N:'N'};let o='';for(let i=s.length-1;i>=0;i--)o+=(M[s[i]]||'N');return o;}
+  const Brc = mode==='both'? rc(B):null;
+  const pts=[]; const half=Math.floor(win/2);
+  for(let i=0;i+win<=la;i++){
+    for(let j=0;j+win<=lb;j++){
+      let mF=0; for(let k=0;k<win;k++) if(A[i+k]===B[j+k]) mF++;
+      if(mF>=thr) pts.push([i+half,j+half,1]);
+      if(Brc){
+        let mR=0; for(let k=0;k<win;k++) if(A[i+k]===Brc[j+k]) mR++;
+        if(mR>=thr) pts.push([i+half, lb-(j+half), 2]);
+      }
+    }
+    if(i%50===0) self.postMessage({progress:i/la});
+  }
+  self.postMessage({done:true,pts,la,lb});
+};`;
+let dotWorker=null;
+function runDot(){
+  let a=cleanSeq(document.getElementById('dotA').value,false);
+  let b=cleanSeq(document.getElementById('dotB').value,false);
+  if(!a){alert(t('Falta la secuencia A.','Sequence A is missing.'));return;}
+  if(!b)b=a;
+  const win=parseInt(document.getElementById('dotWin').value)||10;
+  const thr=Math.min(parseInt(document.getElementById('dotThr').value)||win,win);
+  const mode=document.getElementById('dotMode').value;
+  if(a.length>6000||b.length>6000){
+    if(!confirm('Secuencias largas ('+a.length+'×'+b.length+'). El cálculo puede tardar varios segundos. ¿Continuar?'))return;
+  }
+  const st=document.getElementById('dotStatus');st.textContent=t('Calculando…','Computing…');
+  if(dotWorker)dotWorker.terminate();
+  const blob=new Blob([DOT_WORKER_SRC],{type:'text/javascript'});
+  dotWorker=new Worker(URL.createObjectURL(blob));
+  dotWorker.onmessage=ev=>{
+    if(ev.data.progress!==undefined){st.textContent=t('Calculando… ','Computing… ')+Math.round(ev.data.progress*100)+'%';return;}
+    if(ev.data.done){st.textContent=ev.data.pts.length+t(' puntos. A=',' points. A=')+ev.data.la+' nt, B='+ev.data.lb+' nt.';drawDot(ev.data);dotWorker.terminate();dotWorker=null;}
+  };
+  dotWorker.postMessage({a,b,win,thr,mode});
+}
+function drawDot(d){
+  document.getElementById('dotCard').style.display='block';
+  const cv=document.getElementById('dotCanvas'),ctx=cv.getContext('2d');
+  const S=560,pad=40;cv.width=S+pad+10;cv.height=S+pad+10;
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);
+  // ejes
+  ctx.strokeStyle='#c8d3df';ctx.strokeRect(pad,5,S,S);
+  ctx.fillStyle='#556070';ctx.font='11px Arial';
+  ctx.fillText('A (X) →',pad+S-50,S+22);
+  ctx.save();ctx.translate(14,pad+40);ctx.rotate(-Math.PI/2);ctx.fillText('← B (Y)',0,0);ctx.restore();
+  const sx=S/d.la, sy=S/d.lb;
+  d.pts.forEach(p=>{
+    ctx.fillStyle=p[2]===2?'#c62828':'#2a6f97';
+    ctx.fillRect(pad+p[0]*sx, 5+p[1]*sy, Math.max(1,sx), Math.max(1,sy));
+  });
+  ctx.fillStyle='#556070';ctx.font='10px Arial';
+  ctx.fillText('azul = directa'+(d.pts.some(p=>p[2]===2)?'   rojo = reversa-complemento':''),pad,S+22);
+}
+
+/* ============================================================
+   TAB 5 — USO DE CODONES
+   ============================================================ */
+function runCodon(){
+  let s=cleanSeq(document.getElementById('codonSeq').value,false).replace(/U/g,'T');
+  if(!s){alert(t('Pega una CDS.','Paste a CDS.'));return;}
+  const frame=parseInt(document.getElementById('codonFrame').value);
+  const code=document.getElementById('codonCode').value;
+  const codeMap=geneticCode(code);
+  s=s.substr(frame);
+  const counts={}; let total=0;
+  for(let i=0;i+3<=s.length;i+=3){const c=s.substr(i,3); if(/^[ACGT]{3}$/.test(c)){counts[c]=(counts[c]||0)+1;total++;}}
+  if(!total){document.getElementById('codonOut').innerHTML=`<div class="hint">${t('No hay codones válidos.','No valid codons.')}</div>`;return;}
+  // agrupa por aa
+  const byAA={};
+  Object.keys(codeMap).forEach(cod=>{const aa=codeMap[cod];(byAA[aa]=byAA[aa]||[]).push(cod);});
+  const order=Object.keys(byAA).sort();
+  let rows='';
+  order.forEach(aa=>{
+    const cods=byAA[aa];
+    const aaTotal=cods.reduce((s2,c)=>s2+(counts[c]||0),0);
+    cods.forEach((c,idx)=>{
+      const n=counts[c]||0;
+      const frac=aaTotal? (n/aaTotal).toFixed(2):'0.00';
+      const per1000=(n/total*1000).toFixed(1);
+      rows+=`<tr><td class="mono">${idx===0?(aa==='*'?'Stop':aa):''}</td><td class="mono">${c}</td>
+        <td>${n}</td><td>${per1000}</td><td>${frac}</td></tr>`;
+    });
+  });
+  document.getElementById('codonOut').innerHTML=
+    `<div class="hint">${total} ${t('codones analizados','codons analyzed')} (${t('marco','frame')} +${frame+1}).</div>
+     <div class="tablescroll"><table><tr><th>aa</th><th>${t('Codón','Codon')}</th><th>${t('Conteo','Count')}</th><th>/1000</th><th>${t('Fracción','Fraction')}</th></tr>${rows}</table></div>
+     <button class="act" style="margin-top:8px" onclick="exportCodonCSV()">Exportar CSV</button>`;
+  window._codonData={counts,total,codeMap};
+}
+function exportCodonCSV(){
+  const {counts,total,codeMap}=window._codonData;
+  let csv='﻿Codon,AminoAcid,Count,Per1000\n';
+  Object.keys(counts).sort().forEach(c=>{
+    csv+=`${c},${codeMap[c]},${counts[c]},${(counts[c]/total*1000).toFixed(2)}\n`;
+  });
+  download(csv,'uso_codones.csv','text/csv');
+}
+
+/* ============================================================
+   TAB 6 — ARCHIVOS (FASTA / GenBank)
+   ============================================================ */
+function loadFile(ev){
+  const f=ev.target.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{ parseFile(r.result, f.name); };
+  r.readAsText(f);
+}
+function parseFile(txt,name){
+  let recs=[];
+  if(/^LOCUS\s/m.test(txt)){
+    // GenBank
+    const blocks=txt.split(/\n\/\/\s*\n?/);
+    blocks.forEach(b=>{
+      if(!/LOCUS/.test(b))return;
+      const loc=(b.match(/^LOCUS\s+(\S+)/m)||[])[1]||'genbank';
+      const def=(b.match(/^DEFINITION\s+([\s\S]*?)\n\S/m)||[])[1]||'';
+      const oi=b.indexOf('ORIGIN');
+      let seq='';
+      if(oi>=0){ seq=b.substring(oi+6).replace(/[^acgtnACGTN]/g,'').toUpperCase(); }
+      recs.push({name:loc,desc:def.replace(/\s+/g,' ').trim(),seq});
+    });
+  } else if(txt.trim().startsWith('>')){
+    // FASTA
+    const parts=txt.split(/^>/m).filter(x=>x.trim());
+    parts.forEach(p=>{
+      const nl=p.indexOf('\n');
+      const hdr=p.substring(0,nl).trim();
+      const seq=cleanSeq(p.substring(nl),false);
+      recs.push({name:hdr.split(/\s/)[0]||'seq',desc:hdr,seq});
+    });
+  } else {
+    recs.push({name:name||'seq',desc:'',seq:cleanSeq(txt,false)});
+  }
+  if(!recs.length){alert(t('No se reconocieron secuencias.','No sequences recognized.'));return;}
+  let html=`<div class="hint">${recs.length} ${t('registro(s) detectado(s)','record(s) detected')}:</div><div class="tablescroll"><table><tr><th>${t('Nombre','Name')}</th><th>${t('Long.','Len.')}</th><th>${t('Descripción','Description')}</th><th></th></tr>`;
+  window._recs=recs;
+  recs.forEach((r,i)=>{
+    html+=`<tr><td class="mono">${r.name}</td><td>${r.seq.length}</td><td>${(r.desc||'').substring(0,60)}</td>
+     <td><button class="act ghost" style="padding:2px 8px" onclick="useRec(${i})">${t('cargar','load')}</button></td></tr>`;
+  });
+  html+='</table></div>';
+  document.getElementById('recList').innerHTML=html;
+}
+function useRec(i){
+  const r=window._recs[i];
+  document.getElementById('mainSeq').value=r.seq;
+  document.getElementById('expName').value=r.name;
+  // ir a pestaña secuencia
+  document.querySelector('nav button[data-tab="seq"]').click();
+  analyzeMain();
+}
+function exportFasta(){
+  const s=WORK||cleanSeq(document.getElementById('mainSeq').value,false);
+  if(!s){alert('No hay secuencia.');return;}
+  const name=document.getElementById('expName').value||'secuencia';
+  let out='>'+name+'\n';
+  for(let i=0;i<s.length;i+=70)out+=s.substr(i,70)+'\n';
+  download(out,name+'.fasta','text/plain');
+}
+function exportTxt(){
+  const s=WORK||cleanSeq(document.getElementById('mainSeq').value,false);
+  download(s,(document.getElementById('expName').value||'secuencia')+'.txt','text/plain');
+}
+function download(content,fname,mime){
+  const blob=new Blob([content],{type:mime});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname;a.click();
+}
+
+/* ============================================================
+   i18n ES/EN completo — interfaz estática (por textContent en hojas) +
+   contenido generado (función t()). Placeholders por id.
+   ============================================================ */
+let LANG = (function(){try{return localStorage.getItem('gbt_lang')||'es';}catch(e){return 'es';}})();
+function t(es,en){ return LANG==='en' ? en : es; }   // para contenido generado por JS
+const TYPE_LABEL_EN={'doble corte (IIB)':'double cut (IIB)','nickasa (hebra +)':'nickase (+ strand)','nickasa (hebra −)':'nickase (− strand)','IIS':'IIS','—':'—'};
+const END_EN={'cohesivo':'cohesive','romo':'blunt','2 cortes':'2 cuts','mella 1 hebra':'nicks 1 strand'};
+const I18N_EN = {
+  // pestañas + títulos
+  "Secuencia":"Sequence","Traducción / ORFs":"Translation / ORFs","Restricción":"Restriction",
+  "Dot plot":"Dot plot","Uso de codones":"Codon usage","Archivos":"Files",
+  "Secuencia de trabajo":"Working sequence","Estadísticas":"Statistics",
+  "Traducción de seis marcos":"Six-frame translation","Buscador de ORFs":"ORF finder",
+  "Mapa de restricción":"Restriction map","Mapa":"Map","Sitios":"Sites",
+  "Digestión y gel virtual":"Digestion & virtual gel","Dot plot (matriz de identidad)":"Dot plot (identity matrix)",
+  "Importar archivo (FASTA / GenBank / texto)":"Import file (FASTA / GenBank / text)","Exportar":"Export",
+  "Importar / actualizar enzimas desde REBASE (avanzado)":"Import / update enzymes from REBASE (advanced)",
+  // botones
+  "Analizar":"Analyze","Reverso-complemento":"Reverse complement","Complemento":"Complement",
+  "Reverso":"Reverse","Mayúsculas":"Uppercase","Demo":"Demo","Traducir 6 marcos":"Translate 6 frames",
+  "Traer secuencia de trabajo":"Bring working sequence","Buscar ORFs":"Find ORFs",
+  "Simular digestión":"Simulate digestion","Generar":"Generate","Calcular":"Compute",
+  "Descargar FASTA":"Download FASTA","Descargar texto plano":"Download plain text","Borrar set importado":"Clear imported set",
+  // etiquetas
+  "Código genético":"Genetic code","Long. mínima (aa)":"Min length (aa)","Codón de inicio":"Start codon",
+  "Hebras":"Strands","Topología":"Topology","Mostrar":"Show","Set de enzimas":"Enzyme set",
+  "Isoesquizómeros":"Isoschizomers","Secuencia de DNA":"DNA sequence","Archivo REBASE":"REBASE file",
+  "Filtro":"Filter","Enzima 1":"Enzyme 1","Enzima 2 (opcional)":"Enzyme 2 (optional)",
+  "Ventana (nt)":"Window (nt)","Mínimo de coincidencias en ventana":"Min matches in window","Comparar":"Compare",
+  "Secuencia A (eje X)":"Sequence A (X axis)",
+  "Secuencia B (eje Y) — vacío = comparar A consigo misma":"Sequence B (Y axis) — empty = compare A with itself",
+  "Marco":"Frame","Secuencia codificante (CDS)":"Coding sequence (CDS)","Nombre / encabezado":"Name / header",
+  "Secuencia (usa la pestaña Secuencia o pega aquí)":"Sequence (use the Sequence tab or paste here)",
+  // opciones de menús
+  "1 — Estándar":"1 — Standard","2 — Mitocondrial vertebrados":"2 — Vertebrate mitochondrial",
+  "3 — Mitocondrial levadura":"3 — Yeast mitochondrial","5 — Mitocondrial invertebrados":"5 — Invertebrate mitochondrial",
+  "11 — Bacteriano/plastidio":"11 — Bacterial/plastid","2 — Mito vertebrados":"2 — Vertebrate mito","11 — Bacteriano":"11 — Bacterial",
+  "Solo ATG":"ATG only","Cualquier marco (Met→Stop)":"Any frame (Met→Stop)",
+  "Ambas":"Both","Directa (+)":"Forward (+)","Reversa (−)":"Reverse (−)",
+  "Lineal":"Linear","Circular":"Circular",
+  "Todas las que cortan":"All cutters","Solo de corte único":"Single cutters only","≤ 2 cortes":"≤ 2 cuts","No cortan (ausentes)":"Non-cutters (absent)",
+  "NEB comercial (269)":"NEB commercial (269)","Curado básico (~70)":"Basic curated (~70)","Importadas (REBASE)":"Imported (REBASE)",
+  "Listar todos":"List all","Colapsar por sitio":"Collapse by site",
+  "Solo comerciales (campo <7> / suppl)":"Commercial only (field <7> / suppl)","Todas las del archivo":"All in the file",
+  "— ninguna —":"— none —","Directa":"Forward","Directa + reversa-complemento":"Forward + reverse-complement",
+  // hints simples (sin HTML anidado)
+  "Se detecta el formato automáticamente. En FASTA multi-registro se listan todos; elige cuál cargar.":"Format is auto-detected. In multi-record FASTA all are listed; choose which to load.",
+  "La diagonal indica regiones idénticas; líneas perpendiculares = repeticiones invertidas (si activas reversa-complemento). Secuencias muy largas (>3000 nt) pueden tardar.":"The diagonal marks identical regions; perpendicular lines = inverted repeats (if reverse-complement is on). Very long sequences (>3000 nt) may be slow.",
+  "Exporta la secuencia de trabajo actual (pestaña Secuencia).":"Exports the current working sequence (Sequence tab).",
+  "Elige 1 o 2 enzimas (solo aparecen las que cortan la secuencia analizada). Para enzimas de doble corte se usan ambos cortes.":"Choose 1 or 2 enzymes (only those cutting the analyzed sequence appear). For double-cut enzymes both cuts are used."
+};
+const PLACEHOLDER_EN = {
+  mainSeq:["Pega DNA, RNA o proteína. Se aceptan códigos IUPAC. Encabezados FASTA y números se ignoran automáticamente.",
+           "Paste DNA, RNA or protein. IUPAC codes accepted. FASTA headers and numbers are ignored automatically."],
+  transSeq:["Secuencia de DNA/RNA","DNA/RNA sequence"]
+};
+const I18N_HTML = {
+  subtitle:`Tool in the DNA Strider style, 100% in the browser, no server — Gallardo BioTools (UANL)\n     · <a href="instructivo_strider-web.html" style="color:#9ad1f0">User guide ↗</a>`,
+  pressAnalyze:`Press <b>Analyze</b>.`,
+  detType:`Detected type:`,
+  rebaseP1:`The <b>NEB commercial set (269 enzymes)</b> is already embedded and active by default. This section is optional: only if you want the full REBASE catalog (all suppliers) or a newer version.`,
+  rebaseP2:`To have <b>all commercially available endonucleases</b> with verified sites and cuts (incl. Type IIS), import an official REBASE file. No data is fabricated: the tool only reads the file you download.`,
+  rebaseOl:`<li>Download from REBASE (rebase.neb.com → "REBASE files"): the <b>withrefm</b> file (<span class="tag">link_withrefm</span>, contains the commercial field <span class="tag">&lt;7&gt;</span>) or the compact <b>bionet</b> (<span class="tag">link_bionet</span>).</li>\n      <li>Biopython's <span class="tag">Restriction_Dictionary.py</span> (embedded REBASE EMBOSS) also works.</li>`,
+  footer:`StriderWeb · no data sent to any server — all computation happens in your browser.<br>\nTm: SantaLucia 1998 (nearest-neighbor) + Owczarzy 2004 salt correction. Enzymes: REBASE-style canonical sites (curated subset).<br>\n<b>How to cite:</b> Gallardo-Blanco HL. <i>StriderWeb</i>, in Gallardo BioTools (v1.0.0). UANL, 2026. DOI:10.5281/zenodo.20725635 · part of Gallardo BioTools DOI:10.5281/zenodo.20723201 · https://gallardo-lab.github.io/gallardo-biotools/ · ORCID 0000-0002-7816-4967`
+};
+function applyLang(){
+  document.querySelectorAll('[data-ihtml]').forEach(el=>{
+    if(el.dataset.esHtml===undefined) el.dataset.esHtml=el.innerHTML;
+    const k=el.getAttribute('data-ihtml');
+    el.innerHTML = (LANG==='en' && I18N_HTML[k]) ? I18N_HTML[k] : el.dataset.esHtml;
+  });
+  document.querySelectorAll('nav button[data-tab], h3, label, option, button.act, details>summary, .hint').forEach(el=>{
+    if(el.children.length>0) return;            // solo hojas (sin HTML anidado)
+    if(el.dataset.es===undefined) el.dataset.es=el.textContent;
+    const key=el.dataset.es.trim();
+    el.textContent = (LANG==='en' && I18N_EN[key]) ? I18N_EN[key] : el.dataset.es;
+  });
+  for(const id in PLACEHOLDER_EN){
+    const el=document.getElementById(id); if(!el)continue;
+    el.placeholder = LANG==='en' ? PLACEHOLDER_EN[id][1] : PLACEHOLDER_EN[id][0];
+  }
+  const b=document.getElementById('langBtn'); if(b) b.textContent = LANG==='en'?'ES':'EN';
+  document.documentElement.lang = LANG;
+}
+function toggleLang(){ LANG = LANG==='en'?'es':'en'; try{localStorage.setItem('gbt_lang',LANG);}catch(e){} applyLang(); }
+try{ applyLang(); }catch(e){}
+
+/* carga set REBASE importado (si existe en localStorage) */
+try{ loadImportedCache(); }catch(e){}
+
+/* exporta núcleo para pruebas Node */
+if(typeof module!=='undefined'){module.exports={revComp,complement,translate,gcContent,tmSantaLucia,findSites,ENZYMES,detectType,geneticCode,parseRebaseFile,parseRecognition,parseRebaseVersion,digestFragments};}
+</script>
+</body>
+</html>

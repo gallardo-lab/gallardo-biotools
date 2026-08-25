@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X5BT5RP5WF"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag("js", new Date());
+    gtag("config", "G-X5BT5RP5WF");
+  </script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Flashcards · La NP que no llegaba · Biomedicina UANL</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;500;600;700&display=swap');
+:root{
+  --ink:#0b2545; --accent:#2a6f97; --accent2:#1a7a4a; --gold:#b8860b;
+  --bg:#f0f4f8; --card-bg:#ffffff; --muted:#556070; --border:#c8d3df;
+  --red:#8b1a1a; --amber:#7a5200;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Inter',Arial,sans-serif;background:var(--bg);color:#222;min-height:100vh;}
+
+header{background:var(--ink);color:#fff;padding:24px 20px 18px;text-align:center;}
+header h1{font-size:19px;line-height:1.35;margin-bottom:5px;}
+header p{font-size:12.5px;opacity:.8;max-width:680px;margin:0 auto;}
+.header-meta{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin-top:10px;}
+.badge{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;}
+
+.controls{max-width:1080px;margin:16px auto 0;padding:0 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+.fbtn{border:1px solid var(--border);background:#fff;color:var(--ink);padding:5px 13px;border-radius:999px;cursor:pointer;font-weight:700;font-size:12px;transition:all .15s;}
+.fbtn:hover,.fbtn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.count{margin-left:auto;font-size:12px;color:var(--muted);font-weight:700;}
+
+.prog-wrap{max-width:1080px;margin:8px auto 0;padding:0 16px;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);}
+.prog-bar{flex:1;height:6px;background:var(--border);border-radius:999px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--accent2);border-radius:999px;transition:width .4s;}
+.reset-btn{border:1px solid var(--border);background:#fff;color:var(--muted);padding:3px 9px;border-radius:7px;cursor:pointer;font-size:11px;font-weight:700;}
+
+.hint{text-align:center;font-size:11px;color:var(--muted);padding:4px 16px 0;}
+kbd{background:#e4e8ec;border:1px solid #bcc5ce;border-radius:4px;padding:1px 5px;font-size:10px;font-family:monospace;}
+
+.grid{max-width:1080px;margin:14px auto 40px;padding:0 16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:18px;}
+
+/* Flip card */
+.cw{perspective:1000px;height:220px;cursor:pointer;}
+.ci{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.4,0,.2,1);border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.10);}
+.cw.flipped .ci{transform:rotateY(180deg);}
+.cf{position:absolute;width:100%;height:100%;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:14px;padding:18px;display:flex;flex-direction:column;overflow:hidden;}
+
+/* Front colors by topic */
+.cw[data-t="caso"]      .cf.front{background:linear-gradient(135deg,#0b2545,#1a4a7a);}
+.cw[data-t="fallo"]     .cf.front{background:linear-gradient(135deg,#4a0a0a,#8b1a1a);}
+.cw[data-t="rediseno"]  .cf.front{background:linear-gradient(135deg,#1a3a00,#2e6b00);}
+.cw[data-t="validacion"].cf.front{background:linear-gradient(135deg,#2a1a4a,#5a2a9a);}
+.cw[data-t="sesgo"]     .cf.front{background:linear-gradient(135deg,#4a3000,#8a6000);}
+.cw[data-t="epistemico"].cf.front{background:linear-gradient(135deg,#0a3a3a,#1a7a7a);}
+
+.cf.front{color:#fff;}
+.cf.back{transform:rotateY(180deg);background:#fff;color:#111;border:1.5px solid var(--border);}
+.c-tag{font-size:.65rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;opacity:.65;margin-bottom:5px;}
+.c-icon{font-size:22px;margin-bottom:5px;}
+.c-num{position:absolute;top:10px;right:12px;font-size:.65rem;font-weight:700;opacity:.4;}
+.c-q{font-size:.85rem;line-height:1.4;flex:1;display:flex;align-items:center;}
+.c-hint{font-size:.65rem;opacity:.5;margin-top:8px;text-align:right;}
+.bl{font-size:.65rem;font-weight:800;color:#2a6f97;letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px;}
+.bb{font-size:.76rem;line-height:1.55;flex:1;overflow-y:auto;color:#222;}
+.bb b{color:#0b2545;}.bb em{color:#1a7a4a;font-style:normal;font-weight:700;}
+.br{font-size:.63rem;color:#888;margin-top:5px;border-top:1px solid #ddd;padding-top:4px;}
+
+.seen-dot{position:absolute;top:7px;left:9px;z-index:5;background:#22c55e;color:#fff;border-radius:999px;width:18px;height:18px;font-size:.6rem;font-weight:900;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .3s;}
+.cw.seen .seen-dot{opacity:1;}
+
+footer{text-align:center;padding:18px;font-size:12px;color:var(--muted);}
+footer a{color:var(--accent);}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>«La nanopartícula que no llegaba» — Diagnóstico de fallo experimental</h1>
+  <p>Sesión con doctorandos · Tema 04 · Biomedicina Molecular · Posgrado Ciencias Básicas · UANL</p>
+  <div class="header-meta">
+    <span class="badge">🎓 Nivel Doctorado</span>
+    <span class="badge">🃏 24 Tarjetas</span>
+    <span class="badge">Hugo L. Gallardo-Blanco · UANL</span>
+  </div>
+</header>
+
+<div class="controls" id="controls">
+  <button class="fbtn active" data-f="all">Todas</button>
+  <button class="fbtn" data-f="caso">El Caso</button>
+  <button class="fbtn" data-f="fallo">Diagnóstico del Fallo</button>
+  <button class="fbtn" data-f="rediseno">Rediseño</button>
+  <button class="fbtn" data-f="validacion">Validación in vitro</button>
+  <button class="fbtn" data-f="sesgo">Sesgos</button>
+  <button class="fbtn" data-f="epistemico">Epistemología</button>
+  <span class="count" id="cnt">24 / 24</span>
+</div>
+<div class="prog-wrap">
+  <span id="ptxt">0 / 24 vistas</span>
+  <div class="prog-bar"><div class="prog-fill" id="pfill" style="width:0%"></div></div>
+  <button class="reset-btn" id="resetBtn">↺ Reiniciar</button>
+</div>
+<p class="hint">Clic para voltear · <kbd>Space</kbd> voltear · <kbd>→</kbd><kbd>←</kbd> navegar</p>
+
+<div class="grid" id="grid"></div>
+
+<footer>
+  <p>Basado en: «La nanopartícula que no llegaba» · H. Gallardo-Blanco · FacMed UANL · 26 Mayo 2026</p>
+  <p style="margin-top:5px;"><a href="cuestionario-np-caso.html">→ Ir al Cuestionario</a> · <a href="../index.html">← Gallardo BioTools</a></p>
+</footer>
+
+<script>
+const CARDS = [
+  // ── EL CASO ──
+  {id:1,t:"caso",icon:"🎯",
+   q:"¿Cuál es el objetivo del constructo nanoteranóstico y qué línea celular se usa como modelo?",
+   a:"Plataforma contra <b>cáncer de mama HER2+ resistente a trastuzumab</b>. Línea: <em>HCC1954</em> — HER2 sobreexpresado + mutación PIK3CA H1047R.",
+   r:"Slide 2 — El caso"},
+  {id:2,t:"caso",icon:"🔬",
+   q:"¿Cuáles son los tres componentes del constructo propuesto inicialmente?",
+   a:"1) <b>AuNP 20 nm</b> (síntesis por citrato) · 2) <b>Aptámero anti-HER2 HA1</b> modificado con 5'-tiol-C6 · 3) <b>DOX intercalada</b> en la doble hélice del aptámero.",
+   r:"Slide 2 — El caso"},
+  {id:3,t:"caso",icon:"📊",
+   q:"¿Qué valores de caracterización inicial presentó el constructo (DLS, PDI, potencial Z)?",
+   a:"DLS Z-avg: <em>22.4 nm</em> · PDI: <em>0.18</em> · Potencial Z: <em>−28 mV</em>. Parámetros aparentemente aceptables antes de pasar a ensayos celulares.",
+   r:"Slide 2 — El caso"},
+  {id:4,t:"caso",icon:"⚠️",
+   q:"¿Qué dos validaciones CRÍTICAS omitió el equipo antes de pasar a experimentos celulares?",
+   a:"1) <b>Cuantificar la densidad de aptámeros</b> en superficie de la NP. 2) <b>Validar la afinidad de unión post-conjugación</b> mediante SPR, ITC o BLI. Sin estos datos, el constructo es una caja negra.",
+   r:"Slide 2 — Lo que el equipo NO hizo"},
+
+  // ── DIAGNÓSTICO DEL FALLO ──
+  {id:5,t:"fallo",icon:"📉",
+   q:"¿Qué le ocurrió al potencial Z tras la conjugación del aptámero y qué implica?",
+   a:"Cayó de <b>−28 mV → −8 mV</b>. Carga casi neutra → la NP pierde estabilidad coloidal y es susceptible a <em>opsonización</em> por proteínas plasmáticas.",
+   r:"Slide 3 — El fallo en datos"},
+  {id:6,t:"fallo",icon:"🔴",
+   q:"¿Qué reveló el ensayo de selectividad celular (p = 0.47)?",
+   a:"La entrada de la NP en <b>HCC1954 fue estadísticamente igual a MCF7</b> (HER2-bajo). Valor p = 0.47 indica que la diferencia observada es compatible con el azar → <em>la internalización NO está mediada por receptor HER2</em>.",
+   r:"Slide 3 — El fallo en datos"},
+  {id:7,t:"fallo",icon:"🔭",
+   q:"¿Qué mostró la microscopía de campo oscuro (DFM) intracelularmente?",
+   a:"<b>Agregados intracelulares</b> — evidencia de <em>desestabilización coloidal</em> de las AuNPs dentro de la célula. Las NPs no se distribuyeron individualmente sino en cúmulos, lo que invalida la lectura de señal LSPR.",
+   r:"Slide 3 — El fallo en datos"},
+  {id:8,t:"fallo",icon:"🔑",
+   q:"¿Cuál fue la causa raíz del fallo según el diagnóstico de la Pausa 1?",
+   a:"El <b>buffer de conjugación en PBS sin K⁺</b> (opción C). Sin K⁺, el aptámero HA1 no forma la estructura <em>G-cuádruplex</em> necesaria para reconocer HER2. Todo el protocolo posterior es irrelevante si el aptámero no está plegado.",
+   r:"Slide 4–5 — Resolución Pausa 1"},
+  {id:9,t:"fallo",icon:"🧊",
+   q:"¿Por qué el ion K⁺ es indispensable para el plegamiento del aptámero HA1?",
+   a:"El aptámero HA1 es un <b>G-cuádruplex</b> — su estructura terciaria activa requiere <em>K⁺ (100 mM)</em> que estabiliza los tetrámeros de guanina por coordinación con el centro del canal iónico. Sin K⁺, el aptámero adopta una conformación lineal sin actividad de unión.",
+   r:"Slide 5 — Rediseño"},
+  {id:10,t:"fallo",icon:"⚡",
+   q:"¿Por qué los otros dos errores (falta de PEG, densidad excesiva) agravan pero NO invalidan por sí solos?",
+   a:"Sin PEG → opsonización y agregación (agravan biodistribución). Densidad >200 apt/NP → oclusión estérica del dominio de unión (reduce afinidad). Pero ambos son problemas <em>de eficiencia</em>; el buffer sin K⁺ es un problema <em>de funcionalidad</em> — el aptámero simplemente no funciona.",
+   r:"Slide 4–5"},
+
+  // ── REDISEÑO ──
+  {id:11,t:"rediseno",icon:"🏗️",
+   q:"¿Cuál es el orden correcto de los tres pasos en el rediseño del constructo?",
+   a:"1) <b>Pasivación</b>: tiol-PEG-COOH 5 kDa, 300 PEG/NP, 12h a 4°C. 2) <b>Funcionalización</b>: 50 HA1/NP en buffer K⁺ 100 mM + Mg²⁺ 1 mM, plegamiento 95°C→37°C. 3) <b>Carga</b>: DOX intercalada relación 3:1, purificación en gradiente.",
+   r:"Slide 5 — Rediseño"},
+  {id:12,t:"rediseno",icon:"🧲",
+   q:"¿Por qué se agrega Mg²⁺ 1 mM al buffer de plegamiento del aptámero, además del K⁺?",
+   a:"El <b>Mg²⁺</b> estabiliza la estructura secundaria de ARN/ADN por neutralización de cargas negativas del esqueleto fosfato, complementando el efecto del K⁺ sobre el G-cuádruplex. Favorece el plegamiento a la temperatura de desnaturalización/renaturalización (95°C→37°C).",
+   r:"Slide 5 — Rediseño"},
+  {id:13,t:"rediseno",icon:"📈",
+   q:"¿Qué valores de caracterización se obtuvieron tras el rediseño?",
+   a:"Z: <em>−32 mV</em> (estabilidad coloidal recuperada) · PDI: <em>0.12</em> (mayor monodispersidad) · Kd por SPR: <em>68 nM</em> (afinidad funcional confirmada) · Encapsulación DOX: <em>82%</em>.",
+   r:"Slide 5 — Tras el rediseño"},
+  {id:14,t:"rediseno",icon:"🔢",
+   q:"¿Por qué se redujo la densidad de aptámeros de >200 a 50 HA1/NP en el rediseño?",
+   a:"A alta densidad (>200/NP), los aptámeros adyacentes se <b>ocluyen estéricamente</b> entre sí y contra la superficie de AuNP, bloqueando el dominio de unión a HER2. Con 50 apt/NP, cada aptámero tiene espacio suficiente para adoptar su conformación G-cuádruplex activa.",
+   r:"Slide 5 — Rediseño"},
+
+  // ── VALIDACIÓN IN VITRO ──
+  {id:15,t:"validacion",icon:"🎯",
+   q:"¿Cuál fue el índice de selectividad (IS) del constructo rediseñado y qué lo hace significativo?",
+   a:"IS = <em>13.3×</em> (IC₅₀ HCC1954: 0.18 µM vs. MCF7: 2.4 µM). Comparado con AuNP-DOX sin aptámero: IS ≈ 1×. El aptámero HA1 funcional confiere <b>selectividad HER2-mediada real</b>, no actividad inespecífica.",
+   r:"Slide 6 — Validación in vitro"},
+  {id:16,t:"validacion",icon:"🔵",
+   q:"¿Qué confirmó la microscopía confocal con LysoTracker a 4h?",
+   a:"<b>Co-localización con LysoTracker</b> → la NP es internalizada por <em>endocitosis mediada por receptor</em> HER2 (vía endosomal/lisosomal), no por macropinocitosis inespecífica. Valida funcionalmente el aptámero en contexto celular.",
+   r:"Slide 6 — Validación in vitro"},
+  {id:17,t:"validacion",icon:"✂️",
+   q:"¿Cómo se conjugó el antimiR-21-LNA al constructo y por qué se usó un enlazador disulfuro?",
+   a:"Conjugación mediante <b>click azida-DBCO</b> en el 3' del aptámero. Enlazador: <em>disulfuro SPDP</em> (redox-sensible). El GSH intracelular (≈5 mM) escinde el disulfuro → liberación del antimiR-21-LNA <em>selectivamente en citoplasma</em>.",
+   r:"Slide 6 — Validación in vitro"},
+  {id:18,t:"validacion",icon:"🔬",
+   q:"¿Por qué añadir antimiR-21 sinergiza con DOX en HCC1954?",
+   a:"miR-21 inhibe <b>PTEN</b> → activa la vía PI3K/Akt → promueve supervivencia y resistencia. HCC1954 tiene además mutación <em>PIK3CA H1047R</em> que amplifica esa misma vía. Silenciar miR-21 restaura PTEN → sensibiliza a DOX. Resultado: IC₅₀ de 0.18 → <em>0.09 µM (↓2×)</em>.",
+   r:"Slide 6 — Validación in vitro"},
+
+  // ── SESGOS ──
+  {id:19,t:"sesgo",icon:"📦",
+   q:"¿Qué es el sesgo de 'completitud prematura' y cómo se manifiesta en diseño de constructos?",
+   a:"Añadir un componente al constructo <b>antes de validar que el anterior funciona</b>. Cinco componentes sin controles de ablación = caja negra. Ejemplo del caso: DOX cargada antes de confirmar que el aptámero reconoce HER2.",
+   r:"Slide 8 — Sesgo 1"},
+  {id:20,t:"sesgo",icon:"🧫",
+   q:"¿Qué es el sesgo de 'generalización desde una línea' y por qué HCC1954 no es suficiente?",
+   a:"HCC1954 ≠ ZR-75-30 ≠ DU145. Cada línea tiene un perfil molecular distinto. Los resultados en una sola línea <b>no son extrapolables</b>. El panel de líneas es parte del diseño experimental, no un adorno post-hoc.",
+   r:"Slide 8 — Sesgo 2"},
+  {id:21,t:"sesgo",icon:"🔭",
+   q:"¿En qué consiste el sesgo de 'capacidad teranóstica implícita' en plataformas de AuNP?",
+   a:"Usar AuNPs <b>sin explotar ni reportar el LSPR</b> — diseñar un teranóstico y publicarlo como solo terapéutico. Las AuNPs tienen capacidad intrínseca de imagen (LSPR, PAT, CT); no documentarla es un desperdicio científico y una imprecisión de nomenclatura.",
+   r:"Slide 8 — Sesgo 3"},
+
+  // ── EPISTEMOLOGÍA ──
+  {id:22,t:"epistemico",icon:"🧠",
+   q:"Según la síntesis epistemológica, ¿cuál fue el error fundamental del equipo (no el técnico)?",
+   a:"<b>Avanzar a experimentos celulares sin haber validado que el constructo funcionalizado retiene la funcionalidad del aptámero</b>. El error no fue técnico (buffer incorrecto) sino de <em>orden</em>: saltarse la validación funcional antes de añadir capas de complejidad.",
+   r:"Slide 8 — Síntesis epistemológica"},
+  {id:23,t:"epistemico",icon:"🔄",
+   q:"¿Cuál es el ciclo metodológico propuesto y por qué el fallo NO es señal de incompetencia?",
+   a:"<em>Hipótesis → fallo → diagnóstico → corrección → nueva hipótesis</em>. El fallo es <b>información</b>, no fracaso. El razonamiento experto no consiste en dominar más técnicas, sino en saber <em>en qué orden hacerlas</em> y por qué cada paso es condición del siguiente.",
+   r:"Slide 8–10 — Cierre"},
+  {id:24,t:"epistemico",icon:"❓",
+   q:"¿Cuáles son las 4 preguntas de transferencia que cada doctorando debe aplicar a su propio experimento?",
+   a:"1) ¿Qué afirmación de tu protocolo NO tiene control que la respalde? 2) Si removieras un componente hoy, ¿cuál perderías sin notar diferencia? 3) ¿Qué dato del paper que replicas NO está publicado pero asumes que se cumple? 4) ¿Qué métrica adicional convencería al revisor más escéptico?",
+   r:"Slide 9 — Pausa 3"}
+];
+
+let filter = 'all';
+let seen = new Set(JSON.parse(localStorage.getItem('npcaso_seen')||'[]'));
+
+function saveSeen(){ localStorage.setItem('npcaso_seen',JSON.stringify([...seen])); }
+function topicLabel(t){ return {caso:'El Caso',fallo:'Diagnóstico del Fallo',rediseno:'Rediseño',validacion:'Validación in vitro',sesgo:'Sesgos Cognitivos',epistemico:'Epistemología'}[t]||t; }
+
+function visible(){ return filter==='all'?CARDS:CARDS.filter(c=>c.t===filter); }
+
+function render(){
+  const v=visible();
+  document.getElementById('cnt').textContent=`${v.length} / ${CARDS.length}`;
+  const grid=document.getElementById('grid'); grid.innerHTML='';
+  v.forEach((c,i)=>{
+    const w=document.createElement('div');
+    w.className='cw'+(seen.has(c.id)?' seen':'');
+    w.dataset.t=c.t; w.dataset.id=c.id; w.dataset.i=i;
+    w.setAttribute('tabindex','0');
+    w.innerHTML=`<div class="seen-dot">✓</div><div class="ci">
+      <div class="cf front">
+        <span class="c-icon">${c.icon}</span><span class="c-num">#${c.id}</span>
+        <div class="c-tag">${topicLabel(c.t)}</div>
+        <div class="c-q">${c.q}</div>
+        <div class="c-hint">clic para respuesta →</div>
+      </div>
+      <div class="cf back">
+        <div class="bl">${topicLabel(c.t)}</div>
+        <div class="bb">${c.a}</div>
+        <div class="br">📄 ${c.r}</div>
+      </div></div>`;
+    w.addEventListener('click',()=>flip(w,c.id));
+    w.addEventListener('keydown',e=>{ if(e.key===' '||e.key==='Enter'){e.preventDefault();flip(w,c.id);} });
+    grid.appendChild(w);
+  });
+  updateProg();
+}
+
+function flip(w,id){
+  w.classList.toggle('flipped');
+  if(!seen.has(id)){ seen.add(id); w.classList.add('seen'); saveSeen(); updateProg(); }
+}
+
+function updateProg(){
+  const v=visible(); const n=v.filter(c=>seen.has(c.id)).length;
+  document.getElementById('ptxt').textContent=`${n} / ${v.length} vistas`;
+  document.getElementById('pfill').style.width=v.length?`${(n/v.length)*100}%`:'0%';
+}
+
+document.getElementById('controls').addEventListener('click',e=>{
+  const b=e.target.closest('.fbtn'); if(!b||!b.dataset.f) return;
+  document.querySelectorAll('.fbtn[data-f]').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active'); filter=b.dataset.f; render();
+});
+
+document.getElementById('resetBtn').addEventListener('click',()=>{
+  seen.clear(); localStorage.removeItem('npcaso_seen');
+  document.querySelectorAll('.cw').forEach(w=>w.classList.remove('flipped','seen'));
+  updateProg();
+});
+
+render();
+</script>
+</body>
+</html>

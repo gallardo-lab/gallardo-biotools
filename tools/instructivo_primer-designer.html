@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X5BT5RP5WF"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-X5BT5RP5WF');
+  </script>
+<title>Cómo usar PrimerDesigner — Guía rápida | Gallardo BioTools</title>
+<style>
+:root{
+  --accent:#2a6f97;--accent2:#1b4965;--bg:#f5f7fa;--border:#c8d3df;
+  --card:#ffffff;--ink:#0b2545;--muted:#556070;--good:#2e7d32;--warn:#c77700;--bad:#c62828;
+  --mono:'SF Mono',Menlo,Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;font-size:15px}
+header{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;padding:20px}
+header h1{margin:0;font-size:22px}
+header p{margin:4px 0 0;opacity:.92;font-size:13px}
+.wrap{max-width:820px;margin:0 auto;padding:0 18px 60px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin:18px 0}
+h2{color:var(--accent2);font-size:18px;border-bottom:2px solid var(--border);padding-bottom:6px;margin-top:0}
+h3{color:var(--accent2);font-size:15px;margin:14px 0 4px}
+.step{display:flex;gap:14px;margin:14px 0;align-items:flex-start}
+.num{flex:0 0 32px;height:32px;border-radius:50%;background:var(--accent);color:#fff;font-weight:bold;display:flex;align-items:center;justify-content:center}
+.step .body{flex:1}
+code,.tag{font-family:var(--mono);background:#eef3f8;border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:13px}
+.note{background:#fff8e6;border:1px solid #f0d98a;border-radius:8px;padding:10px 14px;font-size:13.5px;color:#6b5300;margin:12px 0}
+.tip{background:#e9f5ec;border:1px solid #b3ddc0;border-radius:8px;padding:10px 14px;font-size:13.5px;color:#235c33;margin:12px 0}
+.warn{background:#fbe9e7;border:1px solid #f0b8ad;border-radius:8px;padding:10px 14px;font-size:13.5px;color:#7a2418;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:13px;margin-top:8px}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:#eef3f8;color:var(--accent2)}
+ul{margin:6px 0;padding-left:20px}li{margin:4px 0}
+.kbd{font-family:var(--mono);background:#0b2545;color:#d7e8f5;border-radius:4px;padding:1px 6px;font-size:12.5px}
+footer{font-size:12px;color:var(--muted);text-align:center;padding:18px;border-top:1px solid var(--border);margin-top:20px}
+</style>
+</head>
+<body>
+<header>
+  <h1>PrimerDesigner — Guía rápida</h1>
+  <p>Diseño de primers para PCR, en el navegador · Gallardo BioTools (UANL)</p>
+</header>
+<div class="wrap">
+
+<div class="card">
+  <h2>1. Qué es y cómo abrirla</h2>
+  <p>PrimerDesigner diseña y evalúa primers de PCR sin instalar nada y <b>sin enviar datos a ningún
+  servidor</b>: todo el cálculo ocurre en tu navegador. Calcula Tm por el método
+  <i>nearest-neighbor</i> (SantaLucia 1998) con corrección de sales (Owczarzy 2004), el mismo criterio
+  que usan Primer3/Primer-BLAST.</p>
+  <p>Tiene cuatro pestañas: <b>Diseño</b>, <b>PCR in silico</b>, <b>Base de datos</b> y <b>Ayuda</b>.</p>
+</div>
+
+<div class="card">
+  <h2>2. Diseñar primers</h2>
+  <div class="step"><div class="num">1</div><div class="body">
+    <p>En <b>Diseño</b>, pega la secuencia molde (acepta FASTA e IUPAC). Si te interesa una variante/SNP,
+    escribe su <b>posición (1-based)</b> en el campo correspondiente.</p>
+  </div></div>
+  <div class="step"><div class="num">2</div><div class="body">
+    <p>(Opcional) Ajusta <b>parámetros avanzados</b> (longitud, Tm, GC%, amplicón, sales). Los valores por
+    defecto son compatibles con Primer3.</p>
+  </div></div>
+  <div class="step"><div class="num">3</div><div class="body">
+    <p>Pulsa <b>Diseñar primers</b>. Verás una tabla de pares ordenados por calidad. Haz clic en una fila
+    para el <b>detalle</b>: Tm, GC%, dG 3', self-dimer, Ta sugerida y enlace a <b>Primer-BLAST</b>.</p>
+  </div></div>
+  <div class="tip">Si indicaste un SNP, los pares con <b>borde verde</b> cumplen la distancia de lectura
+  Sanger a ambos lados; los de <b>borde rojo</b> no. Puedes guardar el par en la base de datos.</div>
+</div>
+
+<div class="card">
+  <h2>3. PCR in silico y base de datos</h2>
+  <p><b>PCR in silico:</b> pega molde + tus dos primers (5'→3') y obtén el amplicón predicho, su tamaño y,
+  si das la posición del SNP, las distancias variante↔primer con semáforo de legibilidad Sanger
+  (verde ≥60 nt, ámbar ≥45, rojo &lt;45).</p>
+  <p><b>Base de datos:</b> guarda pares con nombre y notas (queda en tu navegador, IndexedDB), y expórtalos
+  a CSV para tu bitácora de oligos.</p>
+</div>
+
+<div class="card">
+  <h2>4. Aplicaciones</h2>
+  <ul>
+    <li>Diseño rápido de primers para <b>PCR convencional</b> y <b>secuenciación Sanger</b> de variantes/SNPs.</li>
+    <li>Comprobar <b>Tm, GC%, dG 3' y auto-dímero</b> de oligos <b>antes de pedirlos</b>.</li>
+    <li><b>PCR in silico</b> para anticipar el tamaño de amplicón y dónde cae la variante.</li>
+    <li>Verificar que una <b>variante sea legible por Sanger</b> (distancia suficiente a cada primer).</li>
+    <li>Mantener una <b>base de datos local</b> de oligos con notas y exportación a CSV.</li>
+    <li>Apoyo <b>docente</b>: enseñar cómo Tm, GC y posición afectan el diseño.</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h2>5. Limitaciones (léelas)</h2>
+  <div class="warn">Esta herramienta es de <b>apoyo al diseño</b>. No sustituye la verificación de
+  especificidad ni la validación experimental.</div>
+  <ul>
+    <li><b>No verifica especificidad genómica.</b> No alinea contra el genoma; siempre confirma con
+      <b>Primer-BLAST</b> (enlace incluido en cada par) que los primers no peguen en otros sitios.</li>
+    <li><b>Tm aproximada.</b> Calculada por nearest-neighbor con sales; puede diferir <b>±1–3 °C</b> de otros
+      calculadores según parámetros. Validada por rango de plausibilidad, no contra un dataset experimental.</li>
+    <li><b>No modela estructuras secundarias completas:</b> no calcula hairpins ni heterodímeros F–R; el
+      "self-dimer 3'" es una <b>heurística simple</b> de complementariedad terminal.</li>
+    <li><b>Legibilidad Sanger = regla de distancia</b> (≥60 nt por defecto). Es una guía; la calidad real de
+      lectura depende del equipo, química y plantilla.</li>
+    <li><b>PCR in silico simplificada:</b> busca coincidencias con <b>≤1 mismatch</b>, no modela eficiencia,
+      Ta real, ni amplificación de pseudogenes/variantes alélicas; el amplicón es teórico.</li>
+    <li><b>No diseña sobre bases degeneradas (IUPAC).</b> Un molde con muchas N reduce o impide candidatos en esa zona.</li>
+    <li><b>No cubre:</b> primers con colas/adaptadores o sitios de restricción, multiplex, qPCR con sondas
+      (TaqMan), bisulfito/metilación, ni primers para clonación tipo Gibson/Golden Gate.</li>
+    <li><b>Rendimiento:</b> el cálculo es en el navegador; moldes muy largos pueden tardar.</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h2>6. Problemas frecuentes</h2>
+  <table>
+    <tr><th>Síntoma</th><th>Solución</th></tr>
+    <tr><td>"No se encontraron pares"</td><td>Relaja parámetros (Tm/GC/amplicón) o, si usas SNP, amplía la secuencia flanqueante (≥60 nt limpios a cada lado) o baja la distancia mínima.</td></tr>
+    <tr><td>Pocos candidatos en una región</td><td>Probablemente hay bases degeneradas (N/IUPAC) ahí: no se diseñan primers sobre ellas.</td></tr>
+    <tr><td>PCR in silico no da amplicón</td><td>Revisa la orientación de los primers (el Reverse va 5'→3' tal como se sintetiza) y sube a ≤1 mismatch.</td></tr>
+    <tr><td>La Tm no coincide con otro programa</td><td>Normal (±1–3 °C): depende de [Na⁺], [Mg²⁺], [dNTP], [oligo] y método. Ajusta las sales a tu PCR real.</td></tr>
+    <tr><td>No veo la versión nueva</td><td>Recarga forzando caché: <span class="kbd">Cmd</span>+<span class="kbd">Shift</span>+<span class="kbd">R</span>.</td></tr>
+  </table>
+</div>
+
+<footer>
+Gallardo BioTools · UANL — Herramienta educativa/de apoyo. Verifica siempre especificidad (Primer-BLAST) y valida en el laboratorio.<br>
+Tm: SantaLucia 1998 (DOI:10.1073/pnas.95.4.1460) + Owczarzy 2004 (DOI:10.1021/bi034621r).
+</footer>
+</div>
+</body>
+</html>

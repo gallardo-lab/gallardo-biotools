@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X5BT5RP5WF"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag("js", new Date());
+    gtag("config", "G-X5BT5RP5WF");
+  </script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarjetas de Estudio — Bioquímica UANL 2026</title>
+<style>
+  :root {
+    --azul-oscuro: #1F4E79;
+    --azul-medio: #2E75B6;
+    --azul-claro: #D6E4F0;
+    --verde-acento: #1a7a4a;
+    --gris-fondo: #f4f6f9;
+    --gris-borde: #d0d7e2;
+    --texto: #1a1a2e;
+    --blanco: #ffffff;
+    --sombra: rgba(31,78,121,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--gris-fondo);
+    color: var(--texto);
+    min-height: 100vh;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    background: var(--azul-oscuro);
+    color: var(--blanco);
+    padding: 1.4rem 2rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    width: 44px; height: 44px;
+    background: var(--azul-medio);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; font-weight: 900; color: var(--blanco);
+    flex-shrink: 0;
+  }
+  .header-text h1 { font-size: 1.15rem; font-weight: 700; letter-spacing: 0.01em; }
+  .header-text p { font-size: 0.78rem; opacity: 0.72; margin-top: 2px; }
+
+  .header-stats {
+    margin-left: auto;
+    display: flex; gap: 1.4rem; align-items: center;
+  }
+  .stat-pill {
+    background: rgba(255,255,255,0.12);
+    border-radius: 20px;
+    padding: 0.3rem 0.9rem;
+    font-size: 0.78rem;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+  .stat-pill strong { font-size: 1rem; }
+
+  /* ─── TABS ─── */
+  .tabs-wrapper {
+    background: var(--blanco);
+    border-bottom: 2px solid var(--azul-claro);
+    padding: 0 2rem;
+    display: flex; gap: 0;
+    overflow-x: auto;
+  }
+  .tab-btn {
+    background: none; border: none; cursor: pointer;
+    padding: 0.9rem 1.4rem;
+    font-size: 0.85rem; font-weight: 600;
+    color: #6b7a90;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    white-space: nowrap;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .tab-btn:hover { color: var(--azul-medio); }
+  .tab-btn.active {
+    color: var(--azul-oscuro);
+    border-bottom-color: var(--azul-oscuro);
+  }
+  .tab-chip {
+    display: inline-block;
+    background: var(--azul-claro);
+    color: var(--azul-oscuro);
+    border-radius: 10px;
+    font-size: 0.7rem; font-weight: 700;
+    padding: 1px 7px; margin-left: 6px;
+  }
+
+  /* ─── MAIN ─── */
+  main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  .practica-panel { display: none; }
+  .practica-panel.active { display: block; }
+
+  .practica-header {
+    margin-bottom: 1.6rem;
+  }
+  .practica-header h2 {
+    font-size: 1.25rem; font-weight: 700;
+    color: var(--azul-oscuro);
+  }
+  .practica-header p {
+    font-size: 0.84rem; color: #5a6478; margin-top: 4px;
+  }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-bar-container {
+    margin-bottom: 1.8rem;
+    background: var(--azul-claro);
+    border-radius: 8px;
+    height: 8px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--azul-medio);
+    border-radius: 8px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .progress-label {
+    display: flex; justify-content: space-between;
+    font-size: 0.76rem; color: #5a6478;
+    margin-bottom: 6px;
+  }
+
+  /* ─── GRID ─── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.2rem;
+  }
+
+  /* ─── CARD ─── */
+  .card {
+    background: var(--blanco);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px var(--sombra);
+    border: 1px solid var(--gris-borde);
+    overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.2s;
+    cursor: pointer;
+    position: relative;
+  }
+  .card:hover {
+    box-shadow: 0 6px 20px var(--sombra);
+    transform: translateY(-2px);
+  }
+
+  .card-num {
+    position: absolute; top: 10px; right: 12px;
+    font-size: 0.7rem; font-weight: 700;
+    color: var(--azul-medio); opacity: 0.7;
+  }
+
+  .card-question {
+    background: var(--azul-claro);
+    padding: 1rem 1rem 0.9rem;
+    min-height: 90px;
+    display: flex; align-items: flex-start;
+    gap: 0.6rem;
+  }
+  .card-question .q-icon {
+    font-size: 1rem; margin-top: 2px; flex-shrink: 0;
+    color: var(--azul-medio);
+  }
+  .card-question p {
+    font-size: 0.87rem; line-height: 1.5;
+    font-weight: 600; color: var(--azul-oscuro);
+    padding-right: 1.2rem;
+  }
+
+  .card-answer {
+    padding: 0.9rem 1rem;
+    font-size: 0.84rem; line-height: 1.6;
+    color: #2d3748;
+    display: none;
+    border-top: 1px solid var(--gris-borde);
+  }
+  .card.revealed .card-answer { display: block; }
+
+  /* reveal btn */
+  .card-footer {
+    padding: 0.5rem 1rem 0.7rem;
+    display: flex; gap: 0.6rem; align-items: center;
+    border-top: 1px solid var(--gris-borde);
+  }
+  .btn-reveal {
+    background: var(--azul-oscuro);
+    color: var(--blanco);
+    border: none; border-radius: 6px;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.78rem; font-weight: 600;
+    cursor: pointer;
+    transition: background 0.18s;
+    flex-shrink: 0;
+  }
+  .btn-reveal:hover { background: var(--azul-medio); }
+  .btn-reveal.secondary {
+    background: var(--blanco);
+    color: var(--azul-oscuro);
+    border: 1.5px solid var(--azul-medio);
+  }
+  .btn-reveal.secondary:hover { background: var(--azul-claro); }
+
+  .card-status {
+    margin-left: auto;
+    font-size: 0.75rem; color: #8a95a3;
+  }
+  .card.revealed .card-status { color: var(--verde-acento); font-weight: 600; }
+
+  /* mastered */
+  .card.mastered {
+    border-color: #a8d5b5;
+  }
+  .card.mastered .card-question {
+    background: #e6f5ec;
+  }
+  .card.mastered .card-question p { color: #1a5c35; }
+
+  /* expanded detail */
+  .card-detail {
+    display: none;
+    background: #f8fafb;
+    border-top: 1px dashed var(--gris-borde);
+    padding: 0.8rem 1rem;
+    font-size: 0.8rem; line-height: 1.65;
+    color: #404860;
+  }
+  .card.expanded .card-detail { display: block; }
+  .card-detail-label {
+    font-size: 0.7rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--azul-medio); margin-bottom: 6px;
+  }
+
+  /* ─── CONTROLS ─── */
+  .controls {
+    display: flex; gap: 0.8rem; flex-wrap: wrap;
+    margin-bottom: 1.4rem; align-items: center;
+  }
+  .ctrl-btn {
+    background: var(--blanco);
+    border: 1.5px solid var(--gris-borde);
+    border-radius: 8px;
+    padding: 0.4rem 1rem;
+    font-size: 0.8rem; font-weight: 600;
+    color: var(--azul-oscuro);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .ctrl-btn:hover { border-color: var(--azul-medio); background: var(--azul-claro); }
+  .ctrl-btn.primary {
+    background: var(--azul-oscuro); color: var(--blanco); border-color: var(--azul-oscuro);
+  }
+  .ctrl-btn.primary:hover { background: var(--azul-medio); border-color: var(--azul-medio); }
+
+  /* ─── MODAL (expanded detail) ─── */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(10,20,40,0.55);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--blanco);
+    border-radius: 14px;
+    max-width: 600px; width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 12px 48px rgba(0,0,0,0.3);
+    animation: modalIn 0.2s ease;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to   { opacity: 1; transform: none; }
+  }
+  .modal-header {
+    background: var(--azul-oscuro);
+    color: var(--blanco);
+    padding: 1rem 1.2rem;
+    border-radius: 14px 14px 0 0;
+    display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .modal-header h3 { font-size: 0.95rem; font-weight: 700; line-height: 1.4; }
+  .modal-close {
+    background: rgba(255,255,255,0.15);
+    border: none; border-radius: 6px;
+    color: var(--blanco); cursor: pointer;
+    font-size: 1.1rem; padding: 0.2rem 0.6rem;
+    margin-left: 0.8rem; flex-shrink: 0;
+  }
+  .modal-close:hover { background: rgba(255,255,255,0.3); }
+  .modal-body { padding: 1.2rem; }
+  .modal-section { margin-bottom: 1rem; }
+  .modal-section-label {
+    font-size: 0.7rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--azul-medio); margin-bottom: 5px;
+  }
+  .modal-section p {
+    font-size: 0.87rem; line-height: 1.65; color: #2d3748;
+  }
+  .modal-section.answer-section {
+    background: var(--azul-claro);
+    border-radius: 8px; padding: 0.8rem;
+  }
+  .modal-section.detail-section {
+    background: #f0f4f0;
+    border-radius: 8px; padding: 0.8rem;
+  }
+  .modal-section.detail-section .modal-section-label { color: var(--verde-acento); }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 600px) {
+    header { padding: 1rem; }
+    .header-stats { display: none; }
+    main { padding: 1.2rem 0.8rem 3rem; }
+    .cards-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">B</div>
+  <div class="header-text">
+    <h1>Tarjetas de Estudio — Bioquímica UANL 2026</h1>
+    <p>Etapa 4: Biología Molecular &nbsp;·&nbsp; 80 tarjetas en 4 prácticas</p>
+  </div>
+  <div class="header-stats">
+    <div class="stat-pill"><strong id="total-revealed">0</strong> revisadas</div>
+    <div class="stat-pill"><strong id="total-mastered">0</strong> dominadas</div>
+  </div>
+</header>
+
+<div class="tabs-wrapper">
+  <button class="tab-btn active" onclick="showTab('p11',this)">P11 — Extracción ADN <span class="tab-chip">20</span></button>
+  <button class="tab-btn" onclick="showTab('p12',this)">P12 — PCR <span class="tab-chip">20</span></button>
+  <button class="tab-btn" onclick="showTab('p13',this)">P13 — Electroforesis <span class="tab-chip">20</span></button>
+  <button class="tab-btn" onclick="showTab('p14',this)">P14 — Bioinformática <span class="tab-chip">20</span></button>
+</div>
+
+<main>
+
+<!-- ══════════════════════════════════════════════════════════════
+     PRÁCTICA 11
+══════════════════════════════════════════════════════════════ -->
+<div id="panel-p11" class="practica-panel active">
+  <div class="practica-header">
+    <h2>Práctica 11 — Extracción y Análisis de ADN Genómico</h2>
+    <p>Técnica TSNT · Espectrofotometría UV · Buffer TE · Relación A260/A280</p>
+  </div>
+  <div class="controls">
+    <button class="ctrl-btn primary" onclick="revealAll('p11')">Mostrar todas las respuestas</button>
+    <button class="ctrl-btn" onclick="resetAll('p11')">Reiniciar práctica</button>
+    <button class="ctrl-btn" onclick="shuffleCards('p11')">Mezclar tarjetas</button>
+  </div>
+  <div class="progress-label">
+    <span>Progreso P11</span>
+    <span id="prog-label-p11">0 / 20</span>
+  </div>
+  <div class="progress-bar-container"><div class="progress-bar-fill" id="prog-bar-p11"></div></div>
+  <div class="cards-grid" id="grid-p11"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     PRÁCTICA 12
+══════════════════════════════════════════════════════════════ -->
+<div id="panel-p12" class="practica-panel">
+  <div class="practica-header">
+    <h2>Práctica 12 — Reacción en Cadena de la Polimerasa (PCR)</h2>
+    <p>TaqADN polimerasa · Ciclo PCR · Gen beta-globina · qPCR · Controles</p>
+  </div>
+  <div class="controls">
+    <button class="ctrl-btn primary" onclick="revealAll('p12')">Mostrar todas las respuestas</button>
+    <button class="ctrl-btn" onclick="resetAll('p12')">Reiniciar práctica</button>
+    <button class="ctrl-btn" onclick="shuffleCards('p12')">Mezclar tarjetas</button>
+  </div>
+  <div class="progress-label">
+    <span>Progreso P12</span>
+    <span id="prog-label-p12">0 / 20</span>
+  </div>
+  <div class="progress-bar-container"><div class="progress-bar-fill" id="prog-bar-p12"></div></div>
+  <div class="cards-grid" id="grid-p12"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     PRÁCTICA 13
+══════════════════════════════════════════════════════════════ -->
+<div id="panel-p13" class="practica-panel">
+  <div class="practica-header">
+    <h2>Práctica 13 — Separación Electroforética del ADN</h2>
+    <p>Gel de agarosa 1.5% · Buffer TBE · Gel Red · Marcador de PM · UV</p>
+  </div>
+  <div class="controls">
+    <button class="ctrl-btn primary" onclick="revealAll('p13')">Mostrar todas las respuestas</button>
+    <button class="ctrl-btn" onclick="resetAll('p13')">Reiniciar práctica</button>
+    <button class="ctrl-btn" onclick="shuffleCards('p13')">Mezclar tarjetas</button>
+  </div>
+  <div class="progress-label">
+    <span>Progreso P13</span>
+    <span id="prog-label-p13">0 / 20</span>
+  </div>
+  <div class="progress-bar-container"><div class="progress-bar-fill" id="prog-bar-p13"></div></div>
+  <div class="cards-grid" id="grid-p13"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     PRÁCTICA 14
+══════════════════════════════════════════════════════════════ -->
+<div id="panel-p14" class="practica-panel">
+  <div class="practica-header">
+    <h2>Práctica 14 — Bioinformática Médica</h2>
+    <p>Bases de datos · BLAST · GenBank · OMIM · SNPs · ORF Finder</p>
+  </div>
+  <div class="controls">
+    <button class="ctrl-btn primary" onclick="revealAll('p14')">Mostrar todas las respuestas</button>
+    <button class="ctrl-btn" onclick="resetAll('p14')">Reiniciar práctica</button>
+    <button class="ctrl-btn" onclick="shuffleCards('p14')">Mezclar tarjetas</button>
+  </div>
+  <div class="progress-label">
+    <span>Progreso P14</span>
+    <span id="prog-label-p14">0 / 20</span>
+  </div>
+  <div class="progress-bar-container"><div class="progress-bar-fill" id="prog-bar-p14"></div></div>
+  <div class="cards-grid" id="grid-p14"></div>
+</div>
+
+</main>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal-box" id="modal-box">
+    <div class="modal-header">
+      <h3 id="modal-title"></h3>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section answer-section">
+        <div class="modal-section-label">Respuesta</div>
+        <p id="modal-answer"></p>
+      </div>
+      <div class="modal-section detail-section" id="modal-detail-section">
+        <div class="modal-section-label">Explicación extendida</div>
+        <p id="modal-detail"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// DATA
+// ════════════════════════════════════════════════════════════════
+const DATA = {
+
+p11: [
+  {
+    p: "¿Qué es el ADN genómico y en qué tipos de células puede encontrarse?",
+    r: "El ADN genómico es la molécula que contiene toda la información necesaria para que la célula viva y se reproduzca. Se encuentra en cualquier célula nucleada del organismo.",
+    d: "El término 'genómico' distingue este ADN del ADN mitocondrial o plastídico. En humanos, el genoma haploide contiene ~3.2 Gb distribuidos en 23 cromosomas. Las células enucleadas (eritrocitos maduros, plaquetas) carecen de él."
+  },
+  {
+    p: "Menciona cuatro tipos de muestras biológicas de las que se puede extraer ADN genómico.",
+    r: "Sangre, tejido fresco o congelado, raspado de mucosa bucal, líquidos biológicos como saliva u orina, huesos o dientes con raíz, y células de cultivos celulares.",
+    d: "La elección de la muestra depende de disponibilidad, cantidad necesaria y calidad requerida. La sangre es la más usada en diagnóstico porque es accesible, estandarizada y los leucocitos son una fuente abundante de ADN nuclear."
+  },
+  {
+    p: "¿Cuáles son los cuatro criterios principales para elegir una técnica de extracción de ADN?",
+    r: "(1) Tipo y cantidad de la muestra, (2) rendimiento e integridad del ADN, (3) uso o no de reactivos peligrosos, y (4) costo de los reactivos.",
+    d: "Existen métodos comerciales (columnas de sílica, beads magnéticas) que minimizan el uso de fenol pero tienen mayor costo. La técnica TSNT es clásica, de bajo costo, y permite comprender los principios bioquímicos del proceso."
+  },
+  {
+    p: "¿Qué significan las siglas TSNT en la técnica de extracción?",
+    r: "TSNT corresponde a los componentes del buffer de lisis: Tritón X-100, SDS, NaCl y Tris-HCl.",
+    d: "Tritón X-100 es un detergente no iónico; SDS es un detergente aniónico fuerte. Actúan sinérgicamente para romper membranas celulares y desnaturalizar proteínas. NaCl precipita polisacáridos y Tris-HCl mantiene el pH en 8.0."
+  },
+  {
+    p: "¿Cuál es el papel del fenol saturado con Tris-HCl pH 8 en la técnica TSNT?",
+    r: "El fenol desnaturaliza y precipita proteínas. Al centrifugar, las proteínas forman una interfase sólida entre la fase acuosa superior (con el ADN) y la fase orgánica inferior.",
+    d: "El pH 8 es crítico: a pH ácido, el ADN se particiona hacia la fase orgánica. A pH ≥7.5, el ADN permanece en la fase acuosa. Por eso se usa fenol saturado con Tris pH 8, no fenol ácido."
+  },
+  {
+    p: "¿Por qué se agrega etanol al 70% después de precipitar el ADN con etanol al 96%?",
+    r: "El lavado con etanol al 70% elimina sales residuales atrapadas en el precipitado, sin redisolver el ADN, mejorando la pureza de la muestra.",
+    d: "Las sales residuales (NaCl, Tris, EDTA) interferirían con digestiones enzimáticas y PCR. El etanol al 70% tiene suficiente agua para disolver sales pero no suficiente para solubilizar el ADN precipitado."
+  },
+  {
+    p: "¿En qué consiste el buffer TE y cuál es su función?",
+    r: "El buffer TE es Tris-HCl 10 mM (pH 8) + EDTA 1 mM. El Tris mantiene el pH estable y el EDTA inhibe las ADNasas al quelar iones Mg²⁺.",
+    d: "Las ADNasas requieren Mg²⁺ o Ca²⁺ como cofactores. El EDTA secuestra estos cationes divalentes, inhibiendo la actividad nucleasa. El pH 8 favorece la ionización de los fosfatos del ADN, manteniéndolo soluble."
+  },
+  {
+    p: "¿Por qué el ADN absorbe luz ultravioleta a 260 nm?",
+    r: "Las bases nitrogenadas (purinas y pirimidinas) poseen anillos aromáticos que absorben energía a 260 nm, permitiendo cuantificar el ADN por espectrofotometría sin reactivos adicionales.",
+    d: "Las proteínas absorben a 280 nm (por triptófano y tirosina) y el fenol también absorbe cerca de 270 nm. Esta diferencia de absorción es la base de la relación A260/A280 para evaluar pureza."
+  },
+  {
+    p: "¿Cómo se calcula la concentración de ADN a partir de la absorbancia a 260 nm?",
+    r: "[ADN] en ng/µL = Factor de dilución × 50 × D.O.260. El factor 50 deriva de que una D.O.260 = 1 corresponde a 50 µg/mL de ADN de doble cadena.",
+    d: "Para ARN el factor es 40, y para oligonucleótidos de cadena sencilla ~33. La ley de Beer-Lambert establece que la absorbancia es proporcional a la concentración; el coeficiente de extinción molar del ADN determina el factor 50."
+  },
+  {
+    p: "¿Qué mide la relación A260/A280 y cuál es el rango aceptable?",
+    r: "Mide la pureza del ADN respecto a contaminación proteica o por fenol. El rango aceptable es 1.8–2.0.",
+    d: "Valores < 1.8 indican proteínas o fenol residual (que absorben a 280 nm). Valores > 2.0 sugieren contaminación con ARN. Estas contaminaciones pueden inhibir la PCR o las enzimas de restricción."
+  },
+  {
+    p: "¿Qué indica un valor A260/A280 de 1.5 en una muestra de ADN?",
+    r: "Indica contaminación con proteínas y/o fenol residual, que absorben preferentemente a 280 nm, reduciendo la relación.",
+    d: "Una muestra con A260/A280 = 1.5 puede aún funcionar en PCR si está suficientemente diluida, pero fallará en aplicaciones más sensibles como clonación o secuenciación. Lo ideal es repetir la purificación."
+  },
+  {
+    p: "¿Cuál es el volumen de muestra utilizado en la práctica 11 y de qué fuente proviene?",
+    r: "Se utilizan 500 µL de sangre anticoagulada con EDTA. El ADN proviene principalmente de los leucocitos.",
+    d: "La sangre periférica contiene ~5,000–10,000 leucocitos/µL, cada uno con ~6 pg de ADN. Esto produce teóricamente ~15–30 µg de ADN total en 500 µL, aunque el rendimiento práctico con TSNT es ~50 µg/mL."
+  },
+  {
+    p: "¿Por qué el ADN de la sangre proviene de los leucocitos y no de los eritrocitos?",
+    r: "Los eritrocitos maduros humanos carecen de núcleo y por tanto no contienen ADN genómico. Los leucocitos sí poseen núcleo y son la fuente del ADN extraído.",
+    d: "Los eritrocitos maduros expulsan el núcleo durante la eritropoyesis. Esta es una característica única de los mamíferos; los eritrocitos de aves y anfibios sí son nucleados. Las plaquetas tampoco tienen núcleo pero sí pueden tener fragmentos de ARN."
+  },
+  {
+    p: "¿Qué ocurre con el ADN durante el paso de vortex en la técnica TSNT?",
+    r: "El vortex homogeniza la mezcla de muestra, buffer TSNT, fenol y Sevag, asegurando que los detergentes lisien todas las células y el fenol contacte todas las proteínas.",
+    d: "Un mezclado insuficiente deja células sin lisar y proteínas sin precipitar, reduciendo el rendimiento. Sin embargo, el vortex excesivo puede fragmetar el ADN genómico de alto peso molecular, que es mecánicamente frágil."
+  },
+  {
+    p: "¿A qué velocidad y por cuánto tiempo se centrifuga en la técnica TSNT?",
+    r: "Se centrifuga a 14,000 rpm durante 5 minutos en microcentrífuga. Los tubos deben colocarse equilibrados frente a frente.",
+    d: "La alta velocidad de centrifugación es necesaria para separar eficientemente la interfase proteica densa de las fases acuosa y orgánica. El equilibrado de los tubos previene vibración y daño al rotor."
+  },
+  {
+    p: "¿Cuál es el rendimiento esperado con la técnica TSNT a partir de sangre?",
+    r: "Aproximadamente 50 µg/mL de ADN. La concentración final depende del volumen de buffer TE en que se resuspende la pastilla.",
+    d: "Si la pastilla es grande (mucha muestra o alto rendimiento), se puede resuspender en mayor volumen de TE y ajustar la concentración final según la necesidad de la aplicación posterior. Para PCR se requieren solo 50–100 ng."
+  },
+  {
+    p: "¿Qué función tiene el EDTA en el tubo vacutainer para recolectar la muestra de sangre?",
+    r: "El EDTA actúa como anticoagulante al quelar Ca²⁺ necesario para la cascada de coagulación, y también inhibe ADNasas que requieren cationes divalentes.",
+    d: "Los tubos con tapa morada contienen EDTA dipotásico o tripotásico en concentración ~1.5 mg/mL. El EDTA quela Ca²⁺ antes de que active los factores de coagulación. Su doble función (anticoagulante + inhibidor de ADNasas) lo hace ideal para extracción de ADN."
+  },
+  {
+    p: "¿Cuáles son las dos técnicas que el manual menciona para verificar que la extracción fue exitosa?",
+    r: "(1) Espectrofotometría UV: evalúa concentración y pureza (A260/A280). (2) Electroforesis en gel de agarosa: evalúa integridad y tamaño del ADN.",
+    d: "Ambas técnicas son complementarias: la espectrofotometría da información cuantitativa pero no detecta degradación si los fragmentos resultantes aún absorben a 260 nm. La electroforesis sí distingue ADN íntegro (banda de alto PM) de ADN degradado (barrido difuso)."
+  },
+  {
+    p: "¿Por qué se debe trabajar con guantes durante todo el proceso de extracción?",
+    r: "La piel humana contiene ADNasas que pueden degradar la muestra, y los reactivos (fenol, cloroformo) son tóxicos y corrosivos.",
+    d: "El fenol causa quemaduras graves en piel y mucosas sin dolor inmediato. El cloroformo es volátil y hepatotóxico. Además, el ADN humano de la piel del operador puede contaminar la muestra. Se requieren guantes de nitrilo, no látex (el látex puede contener ADNasas)."
+  },
+  {
+    p: "¿Cómo se resuspende correctamente la pastilla de ADN y qué se debe evitar?",
+    r: "La pastilla se seca al aire y se resuspende en 50–100 µL de buffer TE agitando suavemente el fondo del tubo. Se debe evitar el pipeteo vigoroso o el vortex intenso.",
+    d: "El ADN genómico de alto peso molecular es extremadamente frágil mecánicamente debido a su gran longitud. Las fuerzas de cizallamiento generadas por pipeteo agresivo o vortex fragmentan el ADN, lo que puede afectar aplicaciones como el Southern blot o la secuenciación de lectura larga."
+  }
+],
+
+p12: [
+  {
+    p: "¿Qué significan las siglas PCR y cuál es el principio general de la técnica?",
+    r: "PCR: Polymerase Chain Reaction (Reacción en Cadena de la Polimerasa). Simula in vitro el proceso de replicación del ADN para amplificar exponencialmente un segmento específico de ácido nucleico.",
+    d: "El concepto clave es la replicación selectiva: solo el segmento entre los dos iniciadores se amplifica. La amplificación exponencial permite detectar cantidades mínimas de ADN molde, incluso de una sola célula."
+  },
+  {
+    p: "¿Cuáles son los cinco componentes esenciales de una reacción de PCR?",
+    r: "(1) ADN molde, (2) par de iniciadores, (3) dNTPs, (4) TaqADN polimerasa, y (5) solución amortiguadora con MgCl₂ y agua ultrapura.",
+    d: "Cada componente es crítico: sin iniciadores no hay síntesis dirigida; sin dNTPs no hay bloques de construcción; sin MgCl₂ la polimerasa es inactiva; sin buffer estable la enzima se inactiva. La concentración óptima de cada componente debe titularse."
+  },
+  {
+    p: "¿Qué ocurre durante el paso de desnaturalización y a qué temperatura se realiza?",
+    r: "A 94–96°C, el calor rompe los puentes de hidrógeno que unen las dos cadenas del ADN, separándolas en cadenas sencillas que servirán de molde.",
+    d: "Los puentes de hidrógeno son débiles individualmente, pero el ADN tiene miles o millones de ellos. Al 94°C, la energía térmica es suficiente para romperlos simultáneamente (proceso cooperativo). La Tm del ADN depende de su contenido en G+C."
+  },
+  {
+    p: "¿Qué ocurre durante el paso de alineamiento (annealing) y a qué temperatura se realiza?",
+    r: "A 55–65°C (57°C en el programa B-GLOBINA), los iniciadores se unen por complementariedad a sus secuencias en las cadenas sencillas del ADN molde.",
+    d: "La temperatura de alineamiento óptima es ~5°C por debajo de la Tm de los iniciadores. Muy alta: los iniciadores no se unen (falta de producto). Muy baja: alineamiento inespecífico (bandas extras). La especificidad de la PCR depende en gran parte de este paso."
+  },
+  {
+    p: "¿Qué ocurre durante el paso de extensión y a qué temperatura trabaja la TaqADN polimerasa?",
+    r: "A 72°C, la TaqADN polimerasa sintetiza la nueva cadena desde el extremo 3' de cada iniciador, incorporando los dNTPs disponibles según la secuencia molde.",
+    d: "72°C es la temperatura óptima de la Taq polimerasa. Su velocidad de síntesis es ~1,000 bp/min. Para el fragmento de 268 pb, ~15–20 segundos son suficientes para la extensión completa. Fragmentos más largos requieren más tiempo."
+  },
+  {
+    p: "¿Por qué la amplificación por PCR es exponencial y no lineal?",
+    r: "Porque cada copia generada en un ciclo sirve de molde en el siguiente. El número de copias se duplica por ciclo: tras n ciclos se obtienen ~2ⁿ copias.",
+    d: "En la práctica la eficiencia no es exactamente 2ⁿ porque los primeros ciclos generan fragmentos de longitud variable, la enzima se deteriora y los reactivos se agotan. La eficiencia real es E = (1+e)ⁿ donde e < 1. Aun así, 25–35 ciclos producen millones de copias."
+  },
+  {
+    p: "¿De qué organismo se aisló la TaqADN polimerasa y por qué es adecuada para la PCR?",
+    r: "De Thermus aquaticus, bacteria termófila de fuentes hidrotermales. Es termoestable: mantiene su actividad a 94°C sin inactivarse durante los ciclos.",
+    d: "Antes del descubrimiento de la Taq, se debía agregar ADN polimerasa nueva en cada ciclo porque las polimerasas convencionales se desnaturalizan a 94°C. La Taq revolucionó la técnica permitiendo la automatización en termocicladores. No tiene actividad de corrección de errores (3'→5' exonucleasa), por eso tiene tasa de error ~10⁻⁵."
+  },
+  {
+    p: "¿Cuál es la concentración final de MgCl₂ en la mezcla de reacción y por qué es importante controlarla?",
+    r: "La concentración final es 2 mM. Concentración excesiva reduce la especificidad; concentración insuficiente reduce la eficiencia.",
+    d: "El Mg²⁺ forma un complejo con los dNTPs (Mg-dNTP) que es el sustrato real de la polimerasa, y también estabiliza la unión iniciador-molde. Los dNTPs compiten con la Taq por el Mg²⁺: si se aumenta la concentración de dNTPs, se debe ajustar también la de MgCl₂."
+  },
+  {
+    p: "¿Qué son los dNTPs y cuál es su función en la PCR?",
+    r: "Los dNTPs (dATP, dCTP, dGTP, dTTP) son los bloques de construcción de las nuevas cadenas de ADN, incorporados secuencialmente por la TaqADN polimerasa.",
+    d: "La concentración estándar es 200 µM de cada dNTP. La 'd' distingue los desoxirribonucleótidos de los ribonucleótidos (NTP). La incorporación es energéticamente favorable: se libera pirofosfato al formar el enlace fosfodiéster, y la pirofosfatasa hidroliza el pirofosfato impulsando la reacción hacia adelante."
+  },
+  {
+    p: "¿Qué es el control negativo en la PCR y qué indica si aparece una banda en su carril?",
+    r: "El control negativo tiene todos los componentes excepto el ADN molde (sustituido por agua). Si aparece banda, indica contaminación de reactivos o materiales con ADN externo.",
+    d: "La contaminación más frecuente es con amplicones de reacciones anteriores (carry-over), que se dispersan como aerosoles. Por eso se prohíbe hablar durante la preparación. La contaminación invalida todos los resultados positivos del experimento."
+  },
+  {
+    p: "¿Qué es el control positivo en la PCR y cuál es su propósito?",
+    r: "Contiene un ADN molde previamente amplificado o una muestra positiva conocida. Confirma que la reacción funciona; si no produce banda, sugiere fallo en la mezcla, enzima o termociclador.",
+    d: "El control positivo diferencia un verdadero negativo (la muestra no tiene el blanco) de un falso negativo (la reacción falló). En diagnóstico clínico, un control positivo que no amplifica obliga a repetir todas las muestras procesadas en ese lote."
+  },
+  {
+    p: "¿Qué fragmento se amplifica en la práctica 12 y de qué gen proviene?",
+    r: "Un fragmento de 268 pares de bases del gen de la beta-globina humana (cromosoma 11). Los iniciadores BG-1 (forward) y BG-2 (reverse) delimitan esta región.",
+    d: "El gen HBB que codifica la beta-globina es clásico en prácticas de PCR porque es bien caracterizado, está en todas las células nucleadas humanas, y la mutación p.Glu6Val causa anemia drepanocítica, ejemplo paradigmático de diagnóstico molecular."
+  },
+  {
+    p: "¿Cuántos ciclos se programan en el termociclador B-GLOBINA y cuánto dura el programa?",
+    r: "Se programan 25 ciclos de amplificación, precedidos de desnaturalización inicial (5 min a 94°C) y seguidos de extensión final (5 min a 72°C). Duración total ~2 horas.",
+    d: "La desnaturalización inicial (hot start) asegura que el ADN genómico se desnaturalice completamente antes de iniciar los ciclos. La extensión final garantiza que todos los fragmentos incompletos del último ciclo sean completados por la polimerasa."
+  },
+  {
+    p: "¿Por qué es importante mantener las muestras y reactivos en hielo durante la preparación de la mezcla de PCR?",
+    r: "Las bajas temperaturas minimizan la actividad de la TaqADN polimerasa antes del programa, evitando amplificación inespecífica por unión no específica de los iniciadores a temperatura ambiente.",
+    d: "Este fenómeno se llama 'amplificación en frío' o mispriming. Para evitarlo existe también la técnica hot start PCR, donde la polimerasa o los iniciadores están bloqueados por anticuerpos o modificaciones químicas que se liberan solo al calentarse a 94°C."
+  },
+  {
+    p: "¿Qué es un producto amplificado (amplicón) y cómo se verifica su presencia?",
+    r: "Un amplicón es el fragmento de ADN sintetizado a partir del par de iniciadores durante la PCR. Se verifica mediante electroforesis en gel de agarosa, donde migra como banda a la altura correspondiente a su tamaño.",
+    d: "El tamaño exacto del amplicón está determinado por la posición de los iniciadores en el genoma. Si los iniciadores se diseñan para flanquear un intrón, el amplicón de ADN genómico será mayor que el de ADNc, permitiendo distinguir amplificación desde ADN o ARN."
+  },
+  {
+    p: "¿Qué es la PCR en tiempo real (qPCR) y en qué se diferencia de la PCR convencional?",
+    r: "La qPCR monitorea la acumulación del producto en tiempo real durante cada ciclo mediante fluorescencia. La PCR convencional solo evalúa el producto al terminar todos los ciclos, en gel.",
+    d: "La qPCR usa el ciclo umbral (Ct) donde la fluorescencia supera el fondo: cuanto más molde inicial, menor el Ct. Con una curva estándar se puede cuantificar el número de copias inicial. SYBR Green es el intercalante más usado; las sondas TaqMan son más específicas."
+  },
+  {
+    p: "¿Cuáles son las dos aplicaciones de la qPCR mencionadas en el manual?",
+    r: "(1) Cuantificación de carga viral de un patógeno. (2) Determinación cualitativa de presencia o ausencia de un gen (ej. diagnóstico de SARS-CoV-2).",
+    d: "En COVID-19 se usa RT-qPCR (reverse transcription-qPCR) porque el SARS-CoV-2 tiene genoma de ARN. Primero se transcribe a ADNc con retrotranscriptasa, luego se amplifica por qPCR. El resultado positivo con Ct < 40 indica presencia viral."
+  },
+  {
+    p: "¿Cuál fue la primera aplicación médica de la PCR?",
+    r: "El diagnóstico de una mutación genética específica en la anemia de células falciformes (drepanocitosis).",
+    d: "En 1985, el propio Kary Mullis y colaboradores usaron PCR para amplificar el gen de la beta-globina y detectar la mutación p.Glu6Val (GAG→GTG). Esta demostración validó la utilidad médica de la técnica, que posteriormente se aplicó a miles de enfermedades genéticas."
+  },
+  {
+    p: "¿Por qué se prohíbe hablar durante la preparación de la mezcla de PCR?",
+    r: "El hablar genera aerosoles que pueden contener ADN humano (de saliva o mucosas), contaminando la mezcla y produciendo resultados falsos positivos.",
+    d: "Los aerosoles del habla pueden cubrir distancias de 1–2 metros y permanecer suspendidos varios minutos. Un solo amplicón contaminante puede amplificarse exponencialmente y producir una banda visible. En laboratorios de diagnóstico se utilizan cabinas de flujo laminar y áreas segregadas para pre- y post-PCR."
+  },
+  {
+    p: "¿Qué tipo de termociclador se requiere para la qPCR y en qué difiere del convencional?",
+    r: "La qPCR requiere un termociclador con detector de fluorescencia que mide la señal en tiempo real en cada ciclo. El convencional solo controla temperatura y tiempo.",
+    d: "Los termocicladores de qPCR incorporan una fuente de luz (LED o láser) y un detector óptico (fotodiodo o CCD) dentro de la cámara. Permiten analizar la curva de disociación (melting curve) post-amplificación para verificar la especificidad del producto."
+  },
+  {
+    p: "¿Si se realizan 30 ciclos de PCR desde una sola molécula, cuántas copias se obtienen teóricamente?",
+    r: "~1×10⁹ copias (2³⁰ ≈ 1,073,741,824). La amplificación es exponencial: 2ⁿ copias tras n ciclos.",
+    d: "En la práctica, la eficiencia decrece en ciclos tardíos por: (1) agotamiento de dNTPs e iniciadores, (2) pérdida gradual de actividad de la Taq (vida media a 95°C ~40 min), y (3) reanillamiento de cadenas complementarias que compiten con los iniciadores (efecto 'plateau')."
+  }
+],
+
+p13: [
+  {
+    p: "¿Qué es la electroforesis y qué tipos de moléculas pueden separarse con esta técnica?",
+    r: "La electroforesis es una técnica de separación de moléculas basada en su migración diferencial bajo un campo eléctrico. Permite separar ácidos nucleicos (ADN y ARN), aminoácidos y proteínas.",
+    d: "La electroforesis en gel aprovecha dos propiedades: la carga de las moléculas (que determina la dirección e intensidad de la migración) y el tamaño (que determina la resistencia del gel como tamiz molecular). La combinación de ambas logra separaciones de alta resolución."
+  },
+  {
+    p: "¿Cuáles son los tres usos principales de la electroforesis en gel de agarosa para el ADN?",
+    r: "(1) Separar fragmentos de ADN por tamaño, (2) identificar y purificar fragmentos específicos, y (3) determinar si una muestra de ADN está íntegra o se degradó.",
+    d: "Para purificar fragmentos del gel se utiliza la técnica de electroelución o kits comerciales de extracción de gel (sílica). El ADN purificado puede usarse directamente para clonación, secuenciación o transfección."
+  },
+  {
+    p: "¿Por qué el ADN migra únicamente en función de su tamaño durante la electroforesis en gel?",
+    r: "Porque la carga del ADN (grupos fosfato) es constante por unidad de nucleótido en todas las moléculas. La relación carga/masa es igual para todos, y el gel actúa como tamiz: separa solo por tamaño.",
+    d: "Esto contrasta con las proteínas, que tienen carga variable según su composición de aminoácidos. Por eso las proteínas requieren SDS-PAGE (desnaturalización con SDS para igualar las cargas) o geles isoeléctricamente más complejos para separarse por tamaño."
+  },
+  {
+    p: "¿Qué es la agarosa y de dónde se obtiene?",
+    r: "La agarosa es un polisacárido altamente purificado derivado del agar de algas marinas rojas. Se presenta en polvo, se disuelve al calentar y forma gel sólido al enfriarse por debajo de ~40°C.",
+    d: "La agarosa es una mezcla de agarosa y agaropectina. La agarosa pura tiene menor cantidad de grupos sulfato, lo que reduce la electroendósmosis (migración del buffer por efecto electroosmótico) y da mejores resultados. Existen agarosas de bajo punto de fusión (~65°C) para aplicaciones especiales."
+  },
+  {
+    p: "¿A qué temperatura gelifica la agarosa y a qué temperatura se funde?",
+    r: "Gelifica por debajo de ~40°C al enfriarse. El gel es estable y no se funde a menos que vuelva a los 100°C.",
+    d: "Esta gran diferencia entre temperatura de gelificación (~40°C) y temperatura de fusión (~100°C) es un fenómeno de histéresis térmica. Permite trabajar con geles a temperatura ambiente sin riesgo de que se fundan. La agarosa de bajo punto de fusión gelifica a ~30°C y se funde a ~65°C."
+  },
+  {
+    p: "¿Cuál es la concentración de agarosa usada en la práctica 13 y para qué tipo de fragmentos es adecuada?",
+    r: "Agarosa al 1.5% en buffer TBE 1X. Adecuada para fragmentos de tamaño mediano-pequeño (100–2000 pb), como productos de PCR (~268 pb) y verificación de integridad del ADN genómico.",
+    d: "La concentración del gel determina el rango de separación: 0.5–0.8% para fragmentos grandes (5–30 kb), 1–1.5% para 200–8,000 pb, 2–3% para fragmentos pequeños (<200 pb). A mayor concentración, menor tamaño de poro y mayor resolución para fragmentos pequeños."
+  },
+  {
+    p: "¿Qué es el buffer TBE y cuál es su función en la electroforesis?",
+    r: "TBE es Tris-Borato-EDTA. Mantiene el pH estable (~8), conduce la corriente eléctrica a través del gel, y el EDTA inhibe las ADNasas.",
+    d: "El pH 8 mantiene los grupos fosfato del ADN completamente ionizados (carga negativa máxima), asegurando migración uniforme hacia el ánodo. Existe también el buffer TAE (Tris-Acetato-EDTA), más común para geles preparativos porque tiene menor tamponamiento pero permite mayor velocidad de corrimiento."
+  },
+  {
+    p: "¿Cómo funcionan los colorantes intercalantes para visualizar el ADN en el gel?",
+    r: "Se intercalan en los espacios de la doble hélice del ADN formando un complejo estable. Al irradiar con luz UV, el complejo ADN-colorante emite fluorescencia visible, permitiendo observar las bandas.",
+    d: "El bromuro de etidio (EtBr) clásico intercala entre las bases del ADN y emite fluorescencia naranja-roja bajo UV a 302 nm. La intensidad de fluorescencia es proporcional a la masa de ADN en la banda. El Gel Red imita este mecanismo pero con menor genotoxicidad."
+  },
+  {
+    p: "¿Qué ventaja ofrece el Gel Red sobre el Bromuro de Etidio?",
+    r: "El Gel Red tiene menor toxicidad y mutagenidad. En la práctica se mezcla directamente con el jugo de carga, evitando la tinción posterior del gel.",
+    d: "El EtBr es un agente intercalante potente y mutagénico que requiere manejo especial y disposición como residuo peligroso. El Gel Red no penetra membranas celulares intactas (reduciendo toxicidad celular) y su inactivación para desecho es más sencilla. Tiene sensibilidad de detección similar al EtBr."
+  },
+  {
+    p: "¿Cuáles son los peligros del uso de luz UV en la electroforesis y cómo se deben prevenir?",
+    r: "La luz UV puede causar lesiones oculares graves y quemaduras en piel. Se deben usar lentes protectores y no exponer la piel por más de 30–60 segundos al transiluminador.",
+    d: "Los transiluminadores emiten UV a 302 nm (UV-B). La exposición ocular puede causar fotoqueratitis (similar a 'ceguera de la nieve') y aumenta el riesgo de cataratas a largo plazo. La exposición cutánea puede causar eritema y aumenta el riesgo de cáncer de piel. Los trasiluminadores de luz azul son una alternativa más segura."
+  },
+  {
+    p: "¿Por qué no se debe abrir la cámara de electroforesis mientras está conectada a la fuente de poder?",
+    r: "La corriente eléctrica aplicada puede causar choques eléctricos accidentales con riesgo de lesiones graves. Siempre se debe apagar la fuente antes de abrir la cámara.",
+    d: "La electroforesis opera típicamente a 50–200 V. Aunque la corriente es baja (50–200 mA), voltajes de este nivel pueden causar fibrilación ventricular. El peligro es mayor si el operador tiene las manos húmedas o mojadas por el buffer conductor."
+  },
+  {
+    p: "¿Cuál es el voltaje de corrimiento en la práctica 13 y cómo se sabe cuándo detenerla?",
+    r: "Se inicia a 50 V hasta que las muestras entran al gel, luego se aumenta a 100 V. Se detiene cuando el gel ha corrido ~¾ partes de su longitud, monitoreado con el colorante del jugo de carga.",
+    d: "El colorante de jugo de carga (azul de bromofenol) migra al mismo tamaño que fragmentos de ~300 pb en geles al 1% y ~50 pb en geles al 3%. Sirve como guía visual para detener la electroforesis en el momento adecuado, antes de que los fragmentos de interés salgan del gel."
+  },
+  {
+    p: "¿Qué es un marcador de peso molecular y cuál es su función en el gel?",
+    r: "Es una mezcla de fragmentos de ADN de tamaño conocido. Al comparar la posición de las bandas de las muestras con las del marcador, se puede estimar el tamaño de los fragmentos en pares de bases.",
+    d: "Existen marcadores estándar (1 kb ladder, 100 bp ladder, etc.) con fragmentos que abarcan rangos definidos. En análisis cuantitativos, los marcadores también pueden usarse como referencia de masa si se conoce la concentración de cada banda, permitiendo estimar la concentración del producto de PCR."
+  },
+  {
+    p: "¿Cuáles son las dos muestras que se analizan en la práctica 13?",
+    r: "(1) ADN genómico humano de la práctica 11: se verifica su integridad. (2) Productos de PCR de la práctica 12: se confirma la amplificación del fragmento de 268 pb del gen de beta-globina.",
+    d: "Esta práctica integra los resultados de las dos anteriores, creando un flujo experimental completo: extracción (P11) → amplificación (P12) → verificación (P13). Es un diseño pedagógico que simula el flujo real de un laboratorio de biología molecular diagnóstica."
+  },
+  {
+    p: "¿Cómo se prepara la muestra de ADN genómico viscoso para cargarla en el gel?",
+    r: "Se mezcla 1 µL de jugo azul 6X, 4 µL de TE y 1 µL de ADN genómico. Si la muestra es muy viscosa, se puede diluir 1:10 en TE y usar 5 µL de la dilución con 1 µL de jugo azul.",
+    d: "El ADN genómico de alto peso molecular tiene alta viscosidad que dificulta la carga en el pozo. La dilución en TE reduce la viscosidad sin alterar la calidad del ADN. El jugo de carga (loading buffer) contiene glicerol o Ficoll para hacer la muestra más densa que el buffer y que se hunda en el pozo."
+  },
+  {
+    p: "¿Cómo se prepara la muestra de producto amplificado por PCR para cargarla en el gel?",
+    r: "Se mezcla 1 µL de jugo de carga (azul o naranja 6X con Gel Red incorporado) con 5 µL del producto amplificado.",
+    d: "La proporción 5:1 (muestra:jugo) es estándar para jugo de carga 6X, resultando en concentración 1X en la mezcla final. El Gel Red ya está incorporado en el jugo, por lo que no se requiere teñir el gel posteriormente. Se carga el total de 6 µL por pozo."
+  },
+  {
+    p: "¿Por qué la muestra debe depositarse rápidamente en el pozo del gel?",
+    r: "Las muestras pueden difundirse hacia el buffer TBE que cubre el gel si no se cargan rápidamente, contaminando pozos adyacentes y produciendo bandas difusas.",
+    d: "El gel debe estar sumergido en buffer ~5 mm sobre su superficie. Esta capa de buffer facilita que las muestras se difundan si no se inyectan directamente al fondo del pozo. La técnica correcta es introducir la pipeta suavemente hasta el fondo del pozo antes de dispensar."
+  },
+  {
+    p: "¿Qué indica en el gel una banda nítida de alto peso molecular para el ADN genómico?",
+    r: "Indica que el ADN extraído está íntegro y no fue degradado. Si hay barrido difuso o bandas de bajo PM, el ADN sufrió fragmentación.",
+    d: "El ADN genómico íntegro de sangre humana tiene peso molecular de ~100–200 kpb (fragmentado por la técnica de extracción, que naturalmente rompe el ADN de varios megabases). Un barrido difuso hasta el frente del gel indica degradación severa por ADNasas o daño mecánico excesivo."
+  },
+  {
+    p: "¿Por qué el corrimiento electroforético del ADN se realiza en cámara horizontal?",
+    r: "La electroforesis horizontal es la configuración estándar para ácidos nucleicos. El gel sumergido en buffer mantiene condiciones estables. La vertical se usa principalmente para proteínas en geles de poliacrilamida.",
+    d: "En electroforesis vertical (PAGE), el gel está contenido entre dos placas de vidrio y no necesita estar sumergido. La poliacrilamida es un gel sintético con mayor resolución que la agarosa, ideal para separar proteínas o fragmentos de ADN muy pequeños (<100 pb), como en la secuenciación de Sanger."
+  },
+  {
+    p: "¿Cuáles son los datos que deben incluirse al reportar resultados de una electroforesis?",
+    r: "Tipo y concentración del gel, voltaje y tiempo de corrimiento, identificación de muestras por carril, tamaño estimado de cada fragmento (en pb, comparando con el marcador), y esquema del gel dibujado bajo UV.",
+    d: "El esquema del gel es fundamental porque la fotografía bajo UV puede perder calidad o contraste. El esquema incluye: posición del marcador, nombre y posición de cada muestra, posición de las bandas observadas y su tamaño estimado. Es parte del cuaderno de laboratorio y debe conservarse con el reporte."
+  }
+],
+
+p14: [
+  {
+    p: "¿Cómo define el manual a la bioinformática y de qué disciplinas surge?",
+    r: "La bioinformática es la disciplina del análisis cuantitativo de información de macromoléculas biológicas con ayuda de la computadora. Surge de la convergencia entre biología molecular y ciencias de la computación, integrando matemáticas, estadística y tecnología de la información.",
+    d: "El término fue acuñado por Paulien Hogeweg en 1970. La explosión de la bioinformática como disciplina ocurrió con el Proyecto Genoma Humano (1990–2003), que generó volúmenes de datos imposibles de analizar manualmente y requirió el desarrollo de nuevas herramientas computacionales."
+  },
+  {
+    p: "¿Cuál es la diferencia entre bioinformática y biología computacional?",
+    r: "La bioinformática se limita al análisis de secuencias, estructura y función de genes, genomas y proteínas. La biología computacional abarca todas las áreas biológicas que involucran computación, sin necesariamente involucrar macromoléculas.",
+    d: "La biología computacional incluye modelaje de redes neuronales, dinámica poblacional, simulación de ecosistemas, y modelos de comportamiento animal. En la práctica, ambos términos se usan frecuentemente como sinónimos en contextos biomédicos."
+  },
+  {
+    p: "¿Cuál es el objetivo final de la bioinformática según el manual?",
+    r: "El mejor entendimiento del comportamiento de la célula y sus funciones a nivel molecular, mediante el análisis computacional de la información biológica disponible sobre genes, genomas y proteínas.",
+    d: "Este objetivo converge con el de la biología de sistemas, que busca entender las interacciones entre todos los componentes celulares. La bioinformática provee las herramientas para analizar los datos 'ómicos' (genómica, proteómica, transcriptómica) que son la materia prima de la biología de sistemas."
+  },
+  {
+    p: "¿En qué dos grandes campos se divide la bioinformática?",
+    r: "(1) El desarrollo de herramientas computacionales y bases de datos para almacenar y analizar información biológica, y (2) la aplicación de esas herramientas para generar conocimiento y entender mejor los sistemas vivos.",
+    d: "El primer campo requiere programación, algoritmia y diseño de bases de datos. El segundo requiere conocimiento biológico profundo para interpretar los resultados. Los bioinformáticos más exitosos combinan ambas habilidades, aunque en la práctica los equipos suelen ser multidisciplinarios."
+  },
+  {
+    p: "Menciona tres actividades del área de análisis de secuencias en bioinformática.",
+    r: "Alineamiento de secuencias, comparación de genomas, reconstrucción filogenética, predicción de genes y promotores, descubrimiento de motivos, y búsqueda en bases de datos.",
+    d: "El alineamiento de secuencias es la base de la mayoría de las demás actividades. Los algoritmos de Smith-Waterman (local) y Needleman-Wunsch (global) son los fundamentos matemáticos. BLAST implementa una versión heurística más rápida pero casi tan sensible, esencial para buscar en bases de datos con millones de secuencias."
+  },
+  {
+    p: "¿Qué es INSDC y cuáles son sus tres bases de datos miembro?",
+    r: "INSDC es la Colaboración Internacional de Bases de Datos de Secuencias Nucleotídicas. Sus miembros son: GenBank (EE.UU., NCBI), ENA (Europa, EMBL-EBI), y DDBJ (Japón). Sincronizan información entre sí.",
+    d: "La sincronización diaria entre las tres bases de datos garantiza que cualquier secuencia depositada en una esté disponible en las otras 24–48 horas después. Esta colaboración internacional comenzó en 1987 y es uno de los ejemplos más exitosos de cooperación científica global."
+  },
+  {
+    p: "¿Qué es GenBank y a través de qué institución se accede a él?",
+    r: "GenBank es la base de datos de secuencias genéticas del NCBI (National Center for Biotechnology Information) de EE.UU. Acceso en: https://www.ncbi.nlm.nih.gov/genbank",
+    d: "GenBank contiene más de 220 millones de secuencias (2024) y crece exponencialmente. Cada entrada tiene un número de acceso único (ej. NM_000518 para el ARNm de beta-globina humana). Las secuencias de referencia (RefSeq) son versiones curadas y anotadas de alta calidad."
+  },
+  {
+    p: "¿Cuál es la función de UniProt y qué tipo de información contiene?",
+    r: "UniProt provee recursos sobre secuencias proteicas e información funcional de alta calidad. Contiene proteomas de referencia de organismos modelo y de interés biomédico. URL: http://www.uniprot.org",
+    d: "UniProt se divide en Swiss-Prot (entradas revisadas manualmente, alta calidad, ~560,000 entradas) y TrEMBL (traducción automática de GenBank, >200 millones de entradas). Swiss-Prot es la fuente de referencia para investigación; TrEMBL cubre la inmensa mayoría de las secuencias conocidas."
+  },
+  {
+    p: "¿Qué es la base de datos PDB y qué tipo de información almacena?",
+    r: "PDB (Protein Data Bank) almacena las estructuras tridimensionales de biomoléculas grandes como proteínas y ácidos nucleicos. Es gratuita y se actualiza semanalmente. URL: http://www.rcsb.org",
+    d: "Las estructuras en PDB se determinan por cristalografía de rayos X, RMN o criomicroscopía electrónica (cryo-EM). Cada entrada incluye las coordenadas atómicas, el método de resolución, la resolución (Å) y los factores de validación. AlphaFold2 ha generado estructuras predichas de >200 millones de proteínas que complementan al PDB."
+  },
+  {
+    p: "¿Qué es OMIM y cuál es su relevancia en medicina?",
+    r: "OMIM (Online Mendelian Inheritance in Man) es un compendio de genes humanos y sus fenotipos. Contiene información de todos los desórdenes mendelianos conocidos y más de 15,000 genes, enfocándose en la relación fenotipo-genotipo. URL: https://www.omim.org",
+    d: "OMIM fue creado por Victor McKusick en 1966 como catálogo en papel antes de existir las computadoras modernas. Cada gen y enfermedad tiene un número MIM único (ej. MIM #603903 para HER2). Es la referencia estándar en genética clínica y medicina molecular."
+  },
+  {
+    p: "¿Qué información contiene PubMed y quién lo mantiene?",
+    r: "PubMed contiene más de 26 millones de citas de literatura biomédica de MEDLINE y revistas de ciencias de la vida. Lo mantiene el NCBI y es de libre acceso. URL: https://www.ncbi.nlm.nih.gov/pubmed/",
+    d: "PubMed indexa artículos de más de 5,200 revistas biomédicas. PubMed Central (PMC) proporciona acceso al texto completo de los artículos de acceso abierto. La función de búsqueda MeSH (Medical Subject Headings) permite búsquedas semánticas más precisas que la búsqueda por palabras clave simples."
+  },
+  {
+    p: "¿Qué es BLAST y cuáles son sus dos aplicaciones principales?",
+    r: "BLAST (Basic Local Alignment Search Tool) busca similitud entre secuencias. Aplicaciones: (1) búsqueda de nucleótidos; (2) búsqueda de proteínas. URL: https://blast.ncbi.nlm.nih.gov/Blast.cgi",
+    d: "Existen variantes específicas: BLASTn (nucleótido vs. nucleótido), BLASTp (proteína vs. proteína), BLASTx (nucleótido traducido vs. proteína), tBLASTn (proteína vs. nucleótido traducido). El E-value (expect value) indica la probabilidad de que un alineamiento ocurra por azar: E < 0.05 se considera significativo."
+  },
+  {
+    p: "¿Qué es el ORF Finder y qué predicciones realiza?",
+    r: "ORF Finder busca los marcos de lectura abiertos (Open Reading Frames) en una secuencia de ADN. Predice los posibles marcos de lectura y las proteínas traducidas. URL: https://www.ncbi.nlm.nih.gov/orffinder/",
+    d: "Un ORF es cualquier secuencia de ADN que comienza con un codón de inicio (ATG) y termina con un codón de paro (TAA, TAG o TGA). El ORF Finder evalúa los 6 marcos de lectura posibles (3 en cada hebra). El marco correcto se identifica por la longitud de la proteína predicha y su similitud con proteínas conocidas en BLAST."
+  },
+  {
+    p: "¿Qué es un SNP y por qué la mayoría de la variabilidad genética humana se atribuye a ellos?",
+    r: "Un SNP (Single Nucleotide Polymorphism) es un polimorfismo de un solo nucleótido. Son la forma más común de variación genética; millones han sido documentados y la mayoría de la variabilidad entre individuos puede atribuirse a ellos.",
+    d: "El genoma humano contiene ~4–5 millones de SNPs por individuo respecto al genoma de referencia. El Proyecto Internacional HapMap y el Proyecto 1000 Genomas catalogaron millones de SNPs. Los GWAS (Genome-Wide Association Studies) usan SNPs para identificar variantes asociadas con enfermedades complejas como diabetes o cáncer de mama."
+  },
+  {
+    p: "¿Cómo conecta la bioinformática el fenotipo con el genotipo en el contexto médico?",
+    r: "Permite correlacionar el fenotipo (manifestación clínica) con el genotipo (variantes en ADN), usando como intermediarios el transcriptoma (ARNm) y el proteoma (proteínas). Esto identifica variantes con patrones de expresión anormales.",
+    d: "El flujo genotipo→transcriptoma→proteoma→fenotipo es el dogma central aplicado a la medicina de precisión. Herramientas como eQTL mapping identifican SNPs que afectan la expresión génica; el análisis de variantes funcionales evalúa si un SNP cambia la secuencia de aminoácidos y si ese cambio es deletéreo."
+  },
+  {
+    p: "Menciona cuatro bases de datos de genomas mencionadas en el manual.",
+    r: "Ensembl (genomas de vertebrados), EnsemblGenomes (bacterias, hongos, plantas, protistas), 1000genomes (variantes humanas en grupos de población) y NCBI Genome.",
+    d: "Ensembl es particularmente valioso porque integra anotaciones funcionales (genes, transcritos, variantes, regulación) con visualización gráfica. El UCSC Genome Browser es una alternativa popular con herramientas de visualización avanzadas y acceso a datos de ENCODE (regulación epigenómica)."
+  },
+  {
+    p: "¿Qué herramienta bioinformática se usa para comparar dos secuencias específicas entre sí?",
+    r: "Bl2seq (BLAST 2 sequences), desde el portal de BLAST del NCBI. Permite alinear directamente dos secuencias de nucleótidos o proteínas para identificar similitudes, diferencias y mutaciones.",
+    d: "Bl2seq es útil cuando se compara la secuencia de un paciente con la secuencia de referencia de un gen, o cuando se comparan dos variantes de splicing del mismo gen. El alineamiento por pares revela deleciones, inserciones, sustituciones y reordenamientos locales que podrían pasar desapercibidos en una búsqueda BLAST convencional."
+  },
+  {
+    p: "¿Qué es GeneCards y para qué sirve en el contexto médico?",
+    r: "GeneCards es una base de datos que provee información integrada sobre todos los genes humanos encontrados y predichos, incluyendo función, expresión, localización cromosómica y asociaciones con enfermedades. URL: http://www.genecards.org",
+    d: "GeneCards es especialmente útil como punto de entrada porque agrega información de >150 fuentes de datos (OMIM, UniProt, Ensembl, PubMed, etc.) en una sola página por gen. La tarjeta de cada gen incluye la ficha GeneScore que indica cuánta evidencia existe sobre ese gen."
+  },
+  {
+    p: "¿Cuál es la utilidad del Restriction Map en el diagnóstico molecular de mutaciones?",
+    r: "Permite comparar sitios de corte de enzimas de restricción entre una secuencia normal y una mutada. Si la mutación crea o elimina un sitio de restricción, se puede diseñar una prueba diagnóstica molecular basada en el patrón de bandas tras digestión.",
+    d: "Esta técnica se llama RFLP (Restriction Fragment Length Polymorphism). Ejemplo: la mutación de anemia drepanocítica (Glu6Val) elimina un sitio para MstII. Al digerir el producto de PCR del gen HBB con MstII, el alelo normal genera dos fragmentos (212 + 56 pb) y el alelo mutado no se corta (268 pb). El patrón de bandas distingue normal, portador y afectado."
+  },
+  {
+    p: "Menciona tres aplicaciones de la bioinformática en medicina según el manual.",
+    r: "(1) Identificación de variantes genéticas deletéreas asociadas con enfermedades (SNP en enfermedades complejas). (2) Estudio de enfermedades con firma genética, como el síndrome X frágil. (3) Diseño de microarreglos para detectar ADN bacteriano en choque séptico. (4) Descubrimiento de fármacos mediante análisis computacional.",
+    d: "El síndrome X frágil se debe a expansión de tripletes CGG en el gen FMR1. La bioinformática permite analizar el número de repeticiones por PCR y secuenciación. Los microarreglos de ADN (DNA chips) pueden detectar miles de secuencias bacterianas simultáneamente, revolucionando el diagnóstico de sepsis donde identificar el patógeno en 24 horas puede salvar la vida."
+  }
+]
+
+};
+
+// ════════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════════
+const state = { p11:{}, p12:{}, p13:{}, p14:{} };
+// state[prac][idx] = { revealed: bool, mastered: bool }
+
+function initState(prac) {
+  DATA[prac].forEach((_, i) => {
+    if (!state[prac][i]) state[prac][i] = { revealed: false, mastered: false };
+  });
+}
+
+// ════════════════════════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════════════════════════
+function renderGrid(prac) {
+  initState(prac);
+  const grid = document.getElementById(`grid-${prac}`);
+  grid.innerHTML = '';
+  DATA[prac].forEach((card, i) => {
+    const s = state[prac][i];
+    const div = document.createElement('div');
+    div.className = 'card' + (s.revealed ? ' revealed' : '') + (s.mastered ? ' mastered' : '');
+    div.dataset.prac = prac;
+    div.dataset.idx = i;
+
+    div.innerHTML = `
+      <span class="card-num">${i+1} / ${DATA[prac].length}</span>
+      <div class="card-question">
+        <span class="q-icon">?</span>
+        <p>${card.p}</p>
+      </div>
+      <div class="card-answer">${card.r}</div>
+      <div class="card-footer">
+        <button class="btn-reveal" onclick="toggleReveal('${prac}',${i},event)">
+          ${s.revealed ? 'Ocultar' : 'Ver respuesta'}
+        </button>
+        ${s.revealed ? `<button class="btn-reveal secondary" onclick="openModal('${prac}',${i},event)">Más detalle</button>` : ''}
+        ${s.revealed ? `<button class="btn-reveal secondary" onclick="toggleMaster('${prac}',${i},event)" style="border-color:${s.mastered?'#1a7a4a':'var(--azul-medio)'};color:${s.mastered?'#1a7a4a':'var(--azul-oscuro)'}">
+          ${s.mastered ? '✓ Dominada' : 'Marcar dominada'}
+        </button>` : ''}
+        <span class="card-status">${s.mastered ? '✓ Dominada' : s.revealed ? 'Revisada' : 'Sin ver'}</span>
+      </div>
+    `;
+    grid.appendChild(div);
+  });
+  updateProgress(prac);
+}
+
+// ════════════════════════════════════════════════════════════════
+// ACTIONS
+// ════════════════════════════════════════════════════════════════
+function toggleReveal(prac, idx, e) {
+  e && e.stopPropagation();
+  state[prac][idx].revealed = !state[prac][idx].revealed;
+  if (!state[prac][idx].revealed) state[prac][idx].mastered = false;
+  renderGrid(prac);
+}
+
+function toggleMaster(prac, idx, e) {
+  e && e.stopPropagation();
+  state[prac][idx].mastered = !state[prac][idx].mastered;
+  renderGrid(prac);
+  updateGlobalStats();
+}
+
+function revealAll(prac) {
+  initState(prac);
+  DATA[prac].forEach((_, i) => { state[prac][i].revealed = true; });
+  renderGrid(prac);
+}
+
+function resetAll(prac) {
+  DATA[prac].forEach((_, i) => { state[prac][i] = { revealed: false, mastered: false }; });
+  renderGrid(prac);
+  updateGlobalStats();
+}
+
+function shuffleCards(prac) {
+  // Shuffle data array
+  const arr = DATA[prac];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  // Reset state for this prac
+  DATA[prac].forEach((_, i) => { state[prac][i] = { revealed: false, mastered: false }; });
+  renderGrid(prac);
+  updateGlobalStats();
+}
+
+// ════════════════════════════════════════════════════════════════
+// PROGRESS
+// ════════════════════════════════════════════════════════════════
+function updateProgress(prac) {
+  initState(prac);
+  const revealed = Object.values(state[prac]).filter(s => s.revealed).length;
+  const total = DATA[prac].length;
+  document.getElementById(`prog-bar-${prac}`).style.width = `${(revealed/total)*100}%`;
+  document.getElementById(`prog-label-${prac}`).textContent = `${revealed} / ${total}`;
+  updateGlobalStats();
+}
+
+function updateGlobalStats() {
+  let totalRevealed = 0, totalMastered = 0;
+  ['p11','p12','p13','p14'].forEach(prac => {
+    Object.values(state[prac]).forEach(s => {
+      if (s.revealed) totalRevealed++;
+      if (s.mastered) totalMastered++;
+    });
+  });
+  document.getElementById('total-revealed').textContent = totalRevealed;
+  document.getElementById('total-mastered').textContent = totalMastered;
+}
+
+// ════════════════════════════════════════════════════════════════
+// MODAL
+// ════════════════════════════════════════════════════════════════
+function openModal(prac, idx, e) {
+  e && e.stopPropagation();
+  const card = DATA[prac][idx];
+  document.getElementById('modal-title').textContent = card.p;
+  document.getElementById('modal-answer').textContent = card.r;
+  document.getElementById('modal-detail').textContent = card.d;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal-overlay')) {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+}
+function closeModalDirect() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.getElementById('modal-overlay').classList.remove('open');
+});
+
+// ════════════════════════════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════════════════════════════
+function showTab(prac, btn) {
+  document.querySelectorAll('.practica-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`panel-${prac}`).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ════════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════════
+['p11','p12','p13','p14'].forEach(prac => renderGrid(prac));
+
+</script>
+</body>
+</html>

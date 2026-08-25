@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X5BT5RP5WF"></script>
+  <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-X5BT5RP5WF');
+  </script>
+<title>Cómo usar StriderWeb — Guía rápida | Gallardo BioTools</title>
+<style>
+:root{
+  --accent:#2a6f97;--accent2:#1b4965;--bg:#f5f7fa;--border:#c8d3df;
+  --card:#ffffff;--ink:#0b2545;--muted:#556070;--good:#2e7d32;--warn:#c77700;
+  --mono:'SF Mono',Menlo,Consolas,'Courier New',monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5;font-size:15px}
+header{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#fff;padding:20px}
+header h1{margin:0;font-size:22px}
+header p{margin:4px 0 0;opacity:.92;font-size:13px}
+.wrap{max-width:820px;margin:0 auto;padding:0 18px 60px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px;margin:18px 0}
+h2{color:var(--accent2);font-size:18px;border-bottom:2px solid var(--border);padding-bottom:6px;margin-top:0}
+h3{color:var(--accent2);font-size:15px;margin:14px 0 4px}
+.step{display:flex;gap:14px;margin:16px 0;align-items:flex-start}
+.num{flex:0 0 34px;height:34px;border-radius:50%;background:var(--accent);color:#fff;font-weight:bold;
+  display:flex;align-items:center;justify-content:center;font-size:16px}
+.step .body{flex:1}
+.step .body p{margin:2px 0}
+code,.tag{font-family:var(--mono);background:#eef3f8;border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:13px}
+.note{background:#fff8e6;border:1px solid #f0d98a;border-radius:8px;padding:10px 14px;font-size:13.5px;color:#6b5300;margin:12px 0}
+.tip{background:#e9f5ec;border:1px solid #b3ddc0;border-radius:8px;padding:10px 14px;font-size:13.5px;color:#235c33;margin:12px 0}
+.opt{border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin:10px 0;background:#fafcfe}
+.opt b{color:var(--accent2)}
+table{border-collapse:collapse;width:100%;font-size:13px;margin-top:8px}
+th,td{border:1px solid var(--border);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:#eef3f8;color:var(--accent2)}
+svg{display:block;max-width:100%;height:auto;margin:10px 0;border:1px solid var(--border);border-radius:8px;background:#fff}
+.kbd{font-family:var(--mono);background:#0b2545;color:#d7e8f5;border-radius:4px;padding:1px 6px;font-size:12.5px}
+footer{font-size:12px;color:var(--muted);text-align:center;padding:18px;border-top:1px solid var(--border);margin-top:20px}
+ul{margin:6px 0 6px 0;padding-left:20px}
+li{margin:3px 0}
+</style>
+</head>
+<body>
+<header>
+  <h1>StriderWeb — Guía rápida de uso</h1>
+  <p>Análisis de secuencias de DNA/RNA en el navegador · Gallardo BioTools (UANL)</p>
+</header>
+<div class="wrap">
+
+<div class="card">
+  <h2>1. Qué es y cómo abrirla</h2>
+  <p>StriderWeb analiza secuencias de ácidos nucleicos sin instalar nada y <b>sin enviar datos a ningún
+  servidor</b>: todo el cálculo ocurre en tu navegador. Para abrirla, haz doble clic en
+  <code>strider-web.html</code> o arrástralo a Chrome/Safari/Firefox.</p>
+  <p>Tiene seis pestañas:</p>
+  <table>
+    <tr><th>Pestaña</th><th>Para qué sirve</th></tr>
+    <tr><td>Secuencia</td><td>Estadísticas (longitud, %GC, Tm, MW), reverso-complemento, DNA↔RNA</td></tr>
+    <tr><td>Traducción / ORFs</td><td>Traducción de 6 marcos y buscador de marcos abiertos de lectura</td></tr>
+    <tr><td>Restricción</td><td>Mapa de enzimas de restricción, cortes y fragmentos</td></tr>
+    <tr><td>Dot plot</td><td>Comparar dos secuencias (o una consigo misma)</td></tr>
+    <tr><td>Uso de codones</td><td>Tabla de frecuencia de codones de una CDS</td></tr>
+    <tr><td>Archivos</td><td>Importar/exportar FASTA y GenBank</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h2>2. Flujo básico (analizar una secuencia)</h2>
+  <div class="step"><div class="num">1</div><div class="body">
+    <p>Abre la pestaña <b>Secuencia</b> y pega tu secuencia. Puedes pegar FASTA completo: los
+    encabezados <code>&gt;</code> y los números se ignoran solos.</p>
+    <p>¿No tienes una a la mano? Pulsa <b>Demo</b>.</p>
+  </div></div>
+  <div class="step"><div class="num">2</div><div class="body">
+    <p>Pulsa <b>Analizar</b>. Verás el tipo detectado (DNA/RNA/Proteína), %GC, Tm y composición.</p>
+  </div></div>
+  <div class="step"><div class="num">3</div><div class="body">
+    <p>Para llevar esa misma secuencia a otra pestaña, usa el botón
+    <b>"Traer secuencia de trabajo"</b> que aparece en Traducción, Restricción y Uso de codones.</p>
+  </div></div>
+  <div class="tip">La Tm que se muestra es válida para oligos cortos (≤60 nt) con el método
+  nearest-neighbor (SantaLucia 1998 + sales Owczarzy 2004). Para secuencias largas no aplica.</div>
+</div>
+
+<div class="card">
+  <h2>3. Set completo de enzimas (importar REBASE)</h2>
+  <p>La herramienta <b>ya trae embebido el catálogo comercial de NEB (269 enzimas)</b> con sitios y cortes
+  verificados, incluidas las Tipo IIS (BsaI, BsmBI, BbsI, SapI, Esp3I…), homing (I-SceI, I-CeuI) y nickasas (Nb./Nt.).
+  Es el set por defecto: no necesitas importar nada para trabajar.</p>
+  <p>Si además quieres el <b>catálogo completo de REBASE</b> (todos los proveedores, miles de enzimas) o una
+  versión más reciente, puedes importar <u>una sola vez</u> un archivo oficial de REBASE. La herramienta
+  <b>no inventa datos</b>: solo lee el archivo que tú descargas.</p>
+  <div class="tip">En <b>Set de enzimas</b> eliges: <b>NEB comercial (269)</b> [por defecto], <b>Curado básico (~70)</b>,
+  o <b>Importadas (REBASE)</b> si importaste un archivo.</div>
+
+  <h3>3.1 Descarga el archivo (elige una opción)</h3>
+  <div class="opt"><b>Opción A — REBASE «withrefm» (recomendada)</b><br>
+    Entra a <code>rebase.neb.com</code> → sección <i>REBASE files</i> → descarga <code>link_withrefm</code>.
+    Incluye el campo comercial <span class="tag">&lt;7&gt;</span>, así que el filtro «solo comerciales» funciona.</div>
+  <div class="opt"><b>Opción B — Biopython</b><br>
+    Descarga en tu navegador el archivo <code>Restriction_Dictionary.py</code> de Biopython
+    (REBASE EMBOSS, edición 2024). En un navegador normal se descarga completo.</div>
+  <div class="opt"><b>Opción C — «bionet»</b><br>
+    Archivo compacto <code>link_bionet</code> de REBASE. No trae la marca comercial, así que importa todas las del archivo.</div>
+
+  <h3>3.2 Impórtalo en la herramienta</h3>
+  <p>En la pestaña <b>Restricción</b>, panel <b>"Importar set completo de enzimas (REBASE)"</b>:</p>
+
+  <!-- esquema (no es una foto: es un diagrama de la interfaz) -->
+  <svg viewBox="0 0 760 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Esquema del panel de importación">
+    <rect x="8" y="8" width="744" height="214" rx="8" fill="#fafcfe" stroke="#c8d3df"/>
+    <text x="24" y="34" font-family="Arial" font-size="14" font-weight="bold" fill="#1b4965">Importar set completo de enzimas (REBASE)</text>
+    <text x="24" y="58" font-family="Arial" font-size="11.5" fill="#556070">No se fabrican datos: la herramienta solo lee el archivo que descargas.</text>
+    <!-- file input -->
+    <rect x="24" y="78" width="250" height="40" rx="5" fill="#fff" stroke="#c8d3df"/>
+    <rect x="34" y="88" width="120" height="20" rx="4" fill="#eef3f8" stroke="#c8d3df"/>
+    <text x="44" y="102" font-family="Arial" font-size="11" fill="#1b4965">Elegir archivo…</text>
+    <text x="164" y="102" font-family="Arial" font-size="10.5" fill="#556070">withrefm.txt</text>
+    <text x="24" y="74" font-family="Arial" font-size="10" fill="#556070">Archivo REBASE ①</text>
+    <!-- filtro -->
+    <rect x="290" y="78" width="240" height="40" rx="5" fill="#fff" stroke="#c8d3df"/>
+    <text x="300" y="103" font-family="Arial" font-size="11" fill="#1b4965">Solo comerciales (&lt;7&gt;) ▾</text>
+    <text x="290" y="74" font-family="Arial" font-size="10" fill="#556070">Filtro ②</text>
+    <!-- status -->
+    <rect x="24" y="138" width="506" height="30" rx="5" fill="#e9f5ec" stroke="#b3ddc0"/>
+    <text x="34" y="157" font-family="Arial" font-size="11.5" fill="#235c33">✓ Set importado: 760 enzimas (612 comerciales) · formato withrefm ③</text>
+    <!-- set selector hint -->
+    <rect x="24" y="184" width="300" height="28" rx="5" fill="#fff" stroke="#c8d3df"/>
+    <text x="34" y="202" font-family="Arial" font-size="11" fill="#1b4965">Set de enzimas: Importadas (REBASE) ▾ ④</text>
+  </svg>
+
+  <div class="step"><div class="num">1</div><div class="body"><p>En <b>Archivo REBASE</b> selecciona el archivo que descargaste.</p></div></div>
+  <div class="step"><div class="num">2</div><div class="body"><p>Deja <b>Filtro = "Solo comerciales"</b> (o "Todas" si quieres el catálogo completo).</p></div></div>
+  <div class="step"><div class="num">3</div><div class="body"><p>Verás un mensaje verde con cuántas enzimas se importaron. Quedan <b>guardadas en tu navegador</b>; no hay que reimportar cada vez.</p></div></div>
+  <div class="step"><div class="num">4</div><div class="body"><p>En <b>Set de enzimas</b> elige <b>"Importadas (REBASE)"</b> y pulsa <b>Analizar</b>.</p></div></div>
+
+  <div class="note">Si cambias de computadora o navegador, o borras los datos del sitio, tendrás que volver
+  a importar el archivo (el set vive en el almacenamiento local de ese navegador).</div>
+  <div class="tip"><b>Versión y vigencia.</b> Al importar, la herramienta lee y muestra la versión de REBASE
+  del archivo (p. ej. «REBASE 412 (2025)») y la fecha de importación. Si el set parece de un año anterior,
+  aparece un aviso ámbar recomendando reimportar — REBASE publica varias versiones al año. Mientras no importes
+  nada, el análisis usa un <b>set embebido curado</b> (verificado, pero no es el catálogo comercial completo).</div>
+</div>
+
+<div class="card">
+  <h2>4. Leer el mapa de restricción</h2>
+  <ul>
+    <li><b>Topología:</b> Lineal o Circular (plásmidos).</li>
+    <li><b>Mostrar:</b> filtra por enzimas de corte único, ≤2 cortes, o las que NO cortan.</li>
+    <li><b>Isoesquizómeros:</b> "Colapsar por sitio" agrupa enzimas que reconocen el mismo sitio para reducir el desorden.</li>
+  </ul>
+  <p>En la tabla, la columna <b>Pos. reconocimiento</b> es dónde está el sitio y <b>Pos. de corte</b>
+  dónde corta. En enzimas <b>Tipo IIS</b> el corte cae <i>fuera</i> del sitio de reconocimiento — por eso
+  ambas columnas difieren.</p>
+  <p>La columna <b>Tipo</b> y los colores del mapa distinguen:</p>
+  <ul>
+    <li><b style="color:#2a6f97">Estándar / romo</b> — corte dentro del sitio (marca completa azul).</li>
+    <li><b style="color:#0a9396">IIS</b> — corte desplazado fuera del sitio (BsaI, BsmBI, BbsI…).</li>
+    <li><b style="color:#7b2ff0">Doble corte (IIB)</b> — corta a <i>ambos</i> lados del sitio, 2 cortes por sitio (BaeI, BcgI, BsaXI, CspCI). Marca morada doble.</li>
+    <li><b style="color:#c77700">Nickasa</b> — mella <i>una sola</i> hebra (Nb./Nt.). Se dibuja como <i>media marca</i> (arriba = hebra +, abajo = hebra −).</li>
+  </ul>
+
+  <svg viewBox="0 0 760 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Esquema de corte Tipo IIS">
+    <text x="20" y="24" font-family="Arial" font-size="12" font-weight="bold" fill="#1b4965">Tipo IIS (ej. BsaI · GGTCTC(1/5))</text>
+    <text x="20" y="60" font-family="'Courier New',monospace" font-size="15" fill="#0b2545">5'-…G G T C T C N</text>
+    <text x="232" y="60" font-family="'Courier New',monospace" font-size="15" fill="#c62828">▾</text>
+    <text x="246" y="60" font-family="'Courier New',monospace" font-size="15" fill="#0b2545">N N N N…-3'</text>
+    <text x="20" y="84" font-family="'Courier New',monospace" font-size="15" fill="#0b2545">3'-…C C A G A G N N N N N</text>
+    <text x="316" y="84" font-family="'Courier New',monospace" font-size="15" fill="#c62828">▴</text>
+    <text x="20" y="108" font-family="Arial" font-size="11.5" fill="#556070">El sitio (GGTCTC) y el corte (▾▴) están en posiciones distintas → genera extremos cohesivos.</text>
+  </svg>
+</div>
+
+<div class="card">
+  <h2>5. Digestión y gel virtual</h2>
+  <p>Tras pulsar <b>Analizar</b>, aparece el panel <b>Digestión y gel virtual</b>. Sus menús solo listan
+  las enzimas que <i>realmente cortan</i> la secuencia (con el número de cortes entre paréntesis).</p>
+  <div class="step"><div class="num">1</div><div class="body"><p>Elige <b>Enzima 1</b> y, opcionalmente, <b>Enzima 2</b> (doble digestión).</p></div></div>
+  <div class="step"><div class="num">2</div><div class="body"><p>Pulsa <b>Simular digestión</b>. Obtienes la lista de fragmentos ordenados por tamaño (la suma debe igualar la longitud total) y un <b>gel de agarosa simulado</b> con carril de marcador (ladder) y carril de muestra, en escala logarítmica.</p></div></div>
+  <div class="tip">Respeta la <b>topología</b> elegida arriba (lineal vs. circular): en circular, N cortes dan N fragmentos; en lineal, N cortes dan N+1. El gel es esquemático (escala log), no reproduce la migración exacta de un porcentaje de agarosa concreto.</div>
+</div>
+
+<div class="card">
+  <h2>6. Problemas frecuentes</h2>
+  <table>
+    <tr><th>Síntoma</th><th>Solución</th></tr>
+    <tr><td>"No hay set importado"</td><td>Importa primero un archivo REBASE (sección 3) y elige "Importadas (REBASE)" en Set de enzimas.</td></tr>
+    <tr><td>El archivo no se reconoce</td><td>Debe ser <code>withrefm</code>, <code>bionet</code> o <code>Restriction_Dictionary.py</code>. Otros formatos no se parsean.</td></tr>
+    <tr><td>El filtro "solo comerciales" no reduce nada</td><td>El formato <code>bionet</code> no trae la marca comercial; usa <code>withrefm</code> para filtrar por proveedor.</td></tr>
+    <tr><td>El análisis tarda con miles de enzimas</td><td>Usa los filtros "corte único" o "≤2 cortes", o colapsa isoesquizómeros.</td></tr>
+    <tr><td>No veo la versión nueva tras actualizar</td><td>Recarga forzando caché: <span class="kbd">Cmd</span>+<span class="kbd">Shift</span>+<span class="kbd">R</span>.</td></tr>
+  </table>
+</div>
+
+<footer>
+Gallardo BioTools · UANL — StriderWeb es una herramienta educativa. Los datos de enzimas provienen de
+REBASE (Roberts RJ et al., <i>Nucleic Acids Res</i>); impórtalos desde la fuente oficial.<br>
+Tm: SantaLucia 1998 (DOI:10.1073/pnas.95.4.1460) + Owczarzy 2004 (DOI:10.1021/bi034621r).
+</footer>
+</div>
+</body>
+</html>

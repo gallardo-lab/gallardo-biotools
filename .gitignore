@@ -1,0 +1,17 @@
+# --- material privado: NUNCA se versiona (regla del incidente 2026-08-25) ---
+bitacora*.md
+bitácora*.md
+bitacora*/
+*.docx
+*.doc
+*.pages
+*.numbers
+*.key
+*.ris
+review_*
+manuscript*
+Manuscript*
+*_concepcion*
+*PCT*
+# --- ruido del sistema ---
+.DS_Store
