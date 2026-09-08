@@ -523,7 +523,7 @@
             <p id="finalMsg"></p>
             <div>
                 <button class="btn-play" onclick="game.restart()">DISE&Ntilde;AR OTRA VEZ</button>
-                <button class="btn-ghost" onclick="document.getElementById('eduSection').classList.add('show');document.getElementById('inspireSection').classList.add('show');this.style.display='none';trackEvent('explore_science',{from:'finale'});">VER LA CIENCIA REAL</button>
+                <button class="btn-ghost" id="btnScience" onclick="game.showScience(this)">VER LA CIENCIA REAL</button>
             </div>
 
             <div class="edu-section" id="eduSection">
@@ -587,7 +587,7 @@
 
             <!-- LEADERBOARD -->
             <div class="leaderboard" id="leaderboard">
-                <h3>&#127942; Tablero de Puntajes <button onclick="congress.renderLeaderboard_once()" style="float:right;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);border-radius:8px;color:#fbbf24;font-size:0.65rem;padding:4px 10px;cursor:pointer;font-family:'Orbitron',monospace;">&#x21bb; Actualizar</button></h3>
+                <h3>&#127942; Tablero de Puntajes <button onclick="congress.renderLeaderboard(false)" style="float:right;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.3);border-radius:8px;color:#fbbf24;font-size:0.65rem;padding:4px 10px;cursor:pointer;font-family:'Orbitron',monospace;">&#x21bb; Actualizar</button></h3>
                 <div id="lbContent"><p class="lb-empty">Cargando tablero...</p></div>
                 <p class="lb-count" id="lbCount"></p>
             </div>
@@ -608,10 +608,16 @@
 // === AUDIO ENGINE ===
 const audio = {
     ctx: null, muted: false, bgInterval: null, bgStep: 0,
-    init() { if (this.ctx) return; this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+    init() {
+        if (this.ctx) return;
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        try { this.ctx = new AC(); } catch (e) { this.ctx = null; }
+    },
     toggle() {
+        this.init();
         this.muted = !this.muted;
-        document.getElementById('muteBtn').textContent = this.muted ? '\uD83D\uDD07' : '\uD83D\uDD0A';
+        document.getElementById('muteBtn').textContent = this.muted ? '🔇' : '🔊';
         if (this.muted) this.stopBg(); else this.startBg();
     },
     note(freq, dur, type, vol, delay) {
@@ -641,6 +647,19 @@ const audio = {
     stopBg() { if(this.bgInterval){clearInterval(this.bgInterval);this.bgInterval=null;} }
 };
 
+// === UTILIDADES ===
+// localStorage puede lanzar excepcion en modo privado o dentro de un iframe.
+const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* sin persistencia */ } }
+};
+
+// Escapa todo lo que provenga del usuario antes de inyectarlo como HTML.
+const ESC_MAP = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
+function escHtml(v) {
+    return String(v === null || v === undefined ? '' : v).replace(/[&<>"']/g, c => ESC_MAP[c]);
+}
+
 // === FIREBASE CONFIG ===
 // INSTRUCCIONES: Reemplaza estos valores con tu proyecto Firebase
 // 1. Ve a console.firebase.google.com
@@ -663,6 +682,7 @@ const firebaseConfig = {
 let fbReady = false;
 let dbRef = null;
 try {
+    if (typeof firebase === 'undefined') throw new Error('SDK de Firebase no cargado');
     firebase.initializeApp(firebaseConfig);
     // Evento distinguible por URL: congreso.html?evento=<nombre>  (default si no se indica)
     var _ev = (new URLSearchParams(location.search).get('evento') || 'default')
@@ -679,23 +699,44 @@ const congress = {
     playerName: '',
     playerInst: '',
     playerId: '',
+    listening: false,
+    _refreshTimer: null,
+
+    storageKey(suffix) {
+        return 'nanomision_congreso_' + (window.EVENTO_ACTUAL || 'default') + '_' + suffix;
+    },
 
     init() {
         const inp = document.getElementById('playerName');
+        const inpInst = document.getElementById('playerInst');
         const btn = document.getElementById('btnReg');
+
+        // Si el jugador ya se registro en este dispositivo, se precargan sus datos
+        // para que un refresco de pagina no genere una fila duplicada en el tablero.
+        const savedName = store.get(this.storageKey('name'));
+        const savedInst = store.get(this.storageKey('inst'));
+        if (savedName) {
+            inp.value = savedName;
+            if (savedInst) inpInst.value = savedInst;
+            btn.disabled = savedName.trim().length < 2;
+        }
+
         inp.addEventListener('input', () => {
             btn.disabled = inp.value.trim().length < 2;
         });
-        inp.addEventListener('keydown', (e) => {
+        const submitOnEnter = (e) => {
             if (e.key === 'Enter' && !btn.disabled) this.register();
-        });
-        // Listen for participant count
+        };
+        inp.addEventListener('keydown', submitOnEnter);
+        inpInst.addEventListener('keydown', submitOnEnter);
+
+        // Contador de participantes en vivo
         if (fbReady) {
             dbRef.on('value', snap => {
                 const data = snap.val();
                 const count = data ? Object.keys(data).length : 0;
                 document.getElementById('partCount').textContent = count;
-            });
+            }, err => console.warn('Firebase read error', err));
         }
     },
 
@@ -705,43 +746,85 @@ const congress = {
         if (name.length < 2) return;
         this.playerName = name;
         this.playerInst = inst;
-        this.playerId = 'p_' + Date.now() + '_' + Math.random().toString(36).substr(2,5);
+
+        // Se reutiliza el id previo solo si es la misma persona (mismo alias),
+        // para no sobrescribir el puntaje de alguien mas en un dispositivo compartido.
+        const savedId = store.get(this.storageKey('id'));
+        const savedName = store.get(this.storageKey('name'));
+        this.playerId = (savedId && savedName === name)
+            ? savedId
+            : 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+        store.set(this.storageKey('id'), this.playerId);
+        store.set(this.storageKey('name'), name);
+        store.set(this.storageKey('inst'), inst);
+
+        // Alta inmediata: asi el contador refleja registrados, no partidas terminadas.
+        if (fbReady) {
+            dbRef.child(this.playerId).update({
+                name: name,
+                inst: inst || '',
+                registered: firebase.database.ServerValue.TIMESTAMP
+            }).catch(e => console.warn('Firebase write error', e));
+        }
+
         document.getElementById('regOverlay').classList.add('hidden');
         document.getElementById('partBadge').style.display = 'block';
-        trackEvent('congress_register', {name: name, institution: inst});
+        // Sin nombre en Analytics: solo se envia si declaro institucion.
+        trackEvent('congress_register', {has_institution: inst.length > 0});
     },
 
     submitScore(score, total, lives) {
-        if (!fbReady || !this.playerId) return;
+        if (!fbReady || !this.playerId || !total) return;
+        const pct = Math.round((score / total) * 100);
         const entry = {
             name: this.playerName,
             inst: this.playerInst || '',
             score: score,
             total: total,
             lives: lives,
-            pct: Math.round((score/total)*100),
+            pct: pct,
             ts: firebase.database.ServerValue.TIMESTAMP
         };
-        dbRef.child(this.playerId).set(entry).catch(e => console.warn('Firebase write error', e));
+        const ref = dbRef.child(this.playerId);
+        // En un tablero de competencia se conserva el mejor intento, no el ultimo.
+        ref.once('value').then(snap => {
+            const prev = snap.val();
+            if (prev && typeof prev.pct === 'number') {
+                if (prev.pct > pct) return null;
+                if (prev.pct === pct && prev.lives >= lives) return null;
+            }
+            return ref.update(entry);
+        }).catch(e => console.warn('Firebase write error', e));
     },
 
-    renderLeaderboard() {
+    // attach = true solo la primera vez, para no apilar listeners en cada repeticion.
+    renderLeaderboard(attach) {
+        const content = document.getElementById('lbContent');
+        const countEl = document.getElementById('lbCount');
         if (!fbReady) {
-            document.getElementById('lbContent').innerHTML = '<p class="lb-empty">Tablero no disponible (Firebase no configurado)</p>';
+            content.innerHTML = '<p class="lb-empty">Tablero no disponible (Firebase no configurado)</p>';
+            countEl.textContent = '';
             return;
         }
+
         dbRef.orderByChild('pct').once('value', snap => {
-            const entries = [];
-            snap.forEach(child => { entries.push({id: child.key, ...child.val()}); });
+            const all = [];
+            snap.forEach(child => { all.push(Object.assign({id: child.key}, child.val())); });
+
+            // Los registrados que aun no terminan tienen nodo sin pct: cuentan como
+            // participantes, pero no aparecen en la tabla.
+            const entries = all.filter(e => typeof e.pct === 'number' && typeof e.score === 'number');
             entries.sort((a,b) => {
                 if (b.pct !== a.pct) return b.pct - a.pct;
-                if (b.lives !== a.lives) return b.lives - a.lives;
+                if ((b.lives||0) !== (a.lives||0)) return (b.lives||0) - (a.lives||0);
                 return (a.ts||0) - (b.ts||0);
             });
 
+            document.getElementById('partCount').textContent = all.length;
+
             if (entries.length === 0) {
-                document.getElementById('lbContent').innerHTML = '<p class="lb-empty">Aun no hay puntajes. Se el primero.</p>';
-                document.getElementById('lbCount').textContent = '';
+                content.innerHTML = '<p class="lb-empty">Aun no hay puntajes. Se el primero.</p>';
+                countEl.textContent = all.length + (all.length === 1 ? ' jugador registrado' : ' jugadores registrados');
                 return;
             }
 
@@ -750,53 +833,38 @@ const congress = {
             entries.forEach((e, i) => {
                 const isMe = e.id === this.playerId;
                 const rank = i < 3 ? medals[i] : (i+1);
-                const instTag = e.inst ? ' <span style="color:#64748b;font-size:0.6rem;">('+e.inst+')</span>' : '';
-                html += '<tr'+(isMe?' class="me"':'')+'>';
-                html += '<td class="rank-col">'+rank+'</td>';
-                html += '<td>'+(isMe?'<strong>':'')+e.name+instTag+(isMe?'</strong>':'')+'</td>';
-                html += '<td>'+e.score+'/'+e.total+' ('+e.pct+'%)</td>';
-                html += '<td>'+('&#10084;'.repeat(e.lives))+'</td>';
+                const instTag = e.inst ? ' <span style="color:#64748b;font-size:0.6rem;">(' + escHtml(e.inst) + ')</span>' : '';
+                const lives = Math.max(0, Math.min(3, Number(e.lives) || 0));
+                html += '<tr' + (isMe ? ' class="me"' : '') + '>';
+                html += '<td class="rank-col">' + rank + '</td>';
+                html += '<td>' + (isMe?'<strong>':'') + escHtml(e.name) + instTag + (isMe?'</strong>':'') + '</td>';
+                html += '<td>' + escHtml(e.score) + '/' + escHtml(e.total) + ' (' + escHtml(e.pct) + '%)</td>';
+                html += '<td>' + ('&#10084;'.repeat(lives)) + '</td>';
                 html += '</tr>';
             });
             html += '</tbody></table>';
-            document.getElementById('lbContent').innerHTML = html;
-            document.getElementById('lbCount').textContent = entries.length + ' participante'+(entries.length!==1?'s':'')+' registrado'+(entries.length!==1?'s':'');
+            content.innerHTML = html;
+            countEl.textContent = entries.length + (entries.length === 1 ? ' puntaje' : ' puntajes')
+                + ' de ' + all.length + (all.length === 1 ? ' participante' : ' participantes');
+        }, err => {
+            console.warn('Firebase read error', err);
+            content.innerHTML = '<p class="lb-empty">No se pudo leer el tablero.</p>';
         });
 
-        // Also listen for real-time updates
-        dbRef.on('child_added', () => { setTimeout(() => this.renderLeaderboard_once(), 500); });
+        // Actualizacion en vivo: se engancha una sola vez por sesion.
+        if (attach && !this.listening) {
+            this.listening = true;
+            const refresh = () => this.scheduleRefresh();
+            dbRef.on('child_added', refresh);
+            dbRef.on('child_changed', refresh);
+            dbRef.on('child_removed', refresh);
+        }
     },
 
-    renderLeaderboard_once() {
-        // One-shot re-render without re-attaching listener
-        if (!fbReady) return;
-        dbRef.orderByChild('pct').once('value', snap => {
-            const entries = [];
-            snap.forEach(child => { entries.push({id: child.key, ...child.val()}); });
-            entries.sort((a,b) => {
-                if (b.pct !== a.pct) return b.pct - a.pct;
-                if (b.lives !== a.lives) return b.lives - a.lives;
-                return (a.ts||0) - (b.ts||0);
-            });
-            if (entries.length === 0) return;
-            const medals = ['&#129351;','&#129352;','&#129353;'];
-            let html = '<table class="lb-table"><thead><tr><th class="rank-col">#</th><th>Jugador</th><th>Puntaje</th><th>Vidas</th></tr></thead><tbody>';
-            entries.forEach((e, i) => {
-                const isMe = e.id === this.playerId;
-                const rank = i < 3 ? medals[i] : (i+1);
-                const instTag = e.inst ? ' <span style="color:#64748b;font-size:0.6rem;">('+e.inst+')</span>' : '';
-                html += '<tr'+(isMe?' class="me"':'')+'>';
-                html += '<td class="rank-col">'+rank+'</td>';
-                html += '<td>'+(isMe?'<strong>':'')+e.name+instTag+(isMe?'</strong>':'')+'</td>';
-                html += '<td>'+e.score+'/'+e.total+' ('+e.pct+'%)</td>';
-                html += '<td>'+('&#10084;'.repeat(e.lives))+'</td>';
-                html += '</tr>';
-            });
-            html += '</tbody></table>';
-            document.getElementById('lbContent').innerHTML = html;
-            document.getElementById('lbCount').textContent = entries.length + ' participante'+(entries.length!==1?'s':'')+' registrado'+(entries.length!==1?'s':'');
-            document.getElementById('partCount').textContent = entries.length;
-        });
+    // Agrupa rafagas de eventos en un solo re-render.
+    scheduleRefresh() {
+        clearTimeout(this._refreshTimer);
+        this._refreshTimer = setTimeout(() => this.renderLeaderboard(false), 600);
     }
 };
 
@@ -806,9 +874,9 @@ const game = {
 
     start() {
         audio.init(); audio.startBg();
-        const plays = parseInt(localStorage.getItem('nanomision_plays')||'0')+1;
-        localStorage.setItem('nanomision_plays', plays);
-        trackEvent('game_start',{game:'nanomision_congreso',play_number:plays, player:congress.playerName});
+        const plays = parseInt(store.get('nanomision_plays') || '0', 10) + 1;
+        store.set('nanomision_plays', plays);
+        trackEvent('game_start',{game:'nanomision_congreso',play_number:plays});
         this.go('intro',1);
     },
 
@@ -832,12 +900,20 @@ const game = {
 
     bindChoices(el, stepNum) {
         this.shuffleChoices(el);
+        // El listener se agrega una sola vez. Antes se volvia a agregar en cada
+        // partida, asi que tras "DISENAR OTRA VEZ" un clic contaba dos veces.
+        if (el.dataset.bound === '1') return;
+        el.dataset.bound = '1';
         el.querySelectorAll('.opt[data-ok]').forEach(btn=>{
             btn.addEventListener('click',()=>this.choose(btn,el,stepNum));
         });
     },
 
     choose(btn, el, stepNum) {
+        // Segundo cerrojo: un paso solo se responde una vez.
+        if (el.dataset.answered === '1') return;
+        el.dataset.answered = '1';
+
         const all=el.querySelectorAll('.opt[data-ok]');
         const ok=btn.dataset.ok==='1';
         this.total++;
@@ -860,31 +936,31 @@ const game = {
         fb.style.display='block';
         btn.insertAdjacentElement('afterend',fb);
 
-        if(btn.dataset.sci||(! ok && el.querySelector('.opt[data-ok="1"]')?.dataset.sci)){
-            const sciData=ok?btn.dataset.sci:el.querySelector('.opt[data-ok="1"]').dataset.sci;
-            if(sciData){
-                const box=document.createElement('div');
-                box.className='sci-box';
-                box.innerHTML='<h4>&#129516; Ciencia real</h4><p>'+sciData+'</p>';
-                el.querySelector('.choices').appendChild(box);
-            }
+        const correctBtn = el.querySelector('.opt[data-ok="1"]');
+        const sciData = ok ? btn.dataset.sci : (correctBtn ? correctBtn.dataset.sci : '');
+        if(sciData){
+            const box=document.createElement('div');
+            box.className='sci-box';
+            box.innerHTML='<h4>&#129516; Ciencia real</h4><p>'+sciData+'</p>';
+            el.querySelector('.choices').appendChild(box);
         }
 
         document.getElementById('xpBar').style.width=Math.min(this.xp,100)+'%';
         this.updateRank();
 
-        // Add continue button instead of auto-advance
-            const contBtn = document.createElement('button');
-            contBtn.className = 'fb-continue';
-            contBtn.textContent = 'Continuar →';
-            contBtn.onclick = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (stepNum === 5) this.showFinale();
-                else this.go(stepNum, stepNum + 1);
-            };
-            fb.appendChild(contBtn);
-            setTimeout(() => contBtn.classList.add('visible'), 3000);
+        // Boton de continuar en lugar de avance automatico
+        const contBtn = document.createElement('button');
+        contBtn.className = 'fb-continue';
+        contBtn.textContent = 'Continuar →';
+        contBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            contBtn.disabled = true;
+            if (stepNum === 5) this.showFinale();
+            else this.go(stepNum, stepNum + 1);
+        });
+        fb.appendChild(contBtn);
+        setTimeout(() => contBtn.classList.add('visible'), 3000);
     },
 
     updateRank() {
@@ -892,7 +968,15 @@ const game = {
         if(this.xp>=100){b.textContent='Maestro Nano';b.style.borderColor='rgba(245,158,11,0.6)';b.style.color='#fbbf24';}
         else if(this.xp>=75){b.textContent='Investigador';b.style.color='#34d399';}
         else if(this.xp>=50){b.textContent='Ingeniero';b.style.color='#a78bfa';}
-        else if(this.xp>=25){b.textContent='Becario';}
+        else if(this.xp>=25){b.textContent='Becario';b.style.color='#fbbf24';}
+        else {b.textContent='Recluta';b.style.color='#fbbf24';}
+    },
+
+    showScience(btn) {
+        document.getElementById('eduSection').classList.add('show');
+        document.getElementById('inspireSection').classList.add('show');
+        if (btn) btn.style.display = 'none';
+        trackEvent('explore_science',{from:'finale'});
     },
 
     showFinale() {
@@ -909,9 +993,9 @@ const game = {
 
         const badge=document.getElementById('finalBadge');
         if(this.score===this.total){
-            badge.innerHTML='&#128300; Diseño Perfecto: '+this.score+'/'+this.total;
+            badge.innerHTML='&#128300; Dise&ntilde;o Perfecto: '+this.score+'/'+this.total;
         } else {
-            badge.innerHTML='&#11088; Puntuación: '+this.score+'/'+this.total+' | Vidas: '+this.lives+'/3';
+            badge.innerHTML='&#11088; Puntuaci&oacute;n: '+this.score+'/'+this.total+' | Vidas: '+this.lives+'/3';
         }
 
         const msg=document.getElementById('finalMsg');
@@ -923,32 +1007,40 @@ const game = {
             msg.textContent='Tu nanopartícula necesita mejoras. Vuelve al laboratorio y optimiza tu diseño.';
         }
 
-        
-        // Save best score to localStorage for mission map
-        const prev_nanomision = JSON.parse(localStorage.getItem('nanomision_best') || 'null');
-        if (!prev_nanomision || this.score > prev_nanomision.score) {
-            localStorage.setItem('nanomision_best', JSON.stringify({score:this.score,total:this.total,lives:this.lives}));
+        // Mejor puntaje local, para el mapa de misiones
+        let prevBest = null;
+        try { prevBest = JSON.parse(store.get('nanomision_best') || 'null'); } catch (e) { prevBest = null; }
+        if (!prevBest || this.score > prevBest.score) {
+            store.set('nanomision_best', JSON.stringify({score:this.score,total:this.total,lives:this.lives}));
         }
-trackEvent('game_complete',{game:'nanomision_congreso',score:this.score,total:this.total,lives_remaining:this.lives,perfect:this.score===this.total&&this.lives===3,player:congress.playerName});
 
-        // Congress: submit score and show leaderboard
+        trackEvent('game_complete',{game:'nanomision_congreso',score:this.score,total:this.total,lives_remaining:this.lives,perfect:this.score===this.total&&this.lives===3});
+
+        // Congreso: envia el puntaje y muestra el tablero
         congress.submitScore(this.score, this.total, this.lives);
-        setTimeout(() => congress.renderLeaderboard(), 1000);
+        setTimeout(() => congress.renderLeaderboard(true), 1000);
     },
 
     restart() {
         audio.startBg();
         this.step=0;this.score=0;this.total=0;this.lives=3;this.xp=0;
         document.getElementById('xpBar').style.width='0%';
-        document.getElementById('rankBadge').textContent='Recluta';
-        document.getElementById('rankBadge').style.color='#fbbf24';
+        this.updateRank();
         document.getElementById('rankBadge').style.borderColor='rgba(245,158,11,0.4)';
         document.querySelectorAll('.heart').forEach(h=>h.classList.remove('lost'));
         document.getElementById('eduSection').classList.remove('show');
         document.getElementById('inspireSection').classList.remove('show');
 
+        // El boton de ciencia se oculta al usarlo: hay que devolverlo en cada partida.
+        const sciBtn=document.getElementById('btnScience');
+        if(sciBtn) sciBtn.style.display='';
+
+        document.getElementById('lbContent').innerHTML='<p class="lb-empty">Cargando tablero...</p>';
+        document.getElementById('lbCount').textContent='';
+
         document.querySelectorAll('.step').forEach(s=>{
             s.classList.remove('active','past');
+            delete s.dataset.answered;
             s.querySelectorAll('.opt[data-ok]').forEach(b=>{
                 b.disabled=false;b.style.pointerEvents='';
                 b.classList.remove('correct','wrong');
