@@ -1,14 +1,39 @@
 #!/bin/sh
 # Aborta el commit si se intenta versionar material privado.
-PATRON='(^|/)(bitacora|bitácora).*\.md$|\.(docx|doc|pages|numbers|key|ris)$|(^|/)review_|(^|/)[Mm]anuscript|_concepcion|PCT'
+#
+# v02 · 2026-09-25 · SUSTITUYE a INCIDENTE_filtracion_biotools_2026-08-25/hook_pre-commit.sh
+#
+# Cambio respecto de la v01, y el motivo:
+#   Se comprobó el 2026-09-25 que el patrón de la v01 NO atrapa los archivos del
+#   protocolo de borrador pre-edición:
+#       BORRADOR_M1-Discussion_v00_propio_2026-09-25.md   -> PASABA
+#       PROVENANCE_M1.md                                   -> PASABA
+#   Solo caía la variante .docx, y por la extensión, no por el nombre.
+#   La v02 añade BORRADOR_, PROVENANCE_, v00_propio, vNN_asistido y SELLADO_/manifiesto_.
+#
+# Instalación, por repositorio:
+#   cp este_archivo <repo>/.git/hooks/pre-commit && chmod +x <repo>/.git/hooks/pre-commit
+# Para todo repositorio futuro:
+#   mkdir -p ~/.git-templates/hooks
+#   cp este_archivo ~/.git-templates/hooks/pre-commit
+#   chmod +x ~/.git-templates/hooks/pre-commit
+#   git config --global init.templateDir ~/.git-templates
+# Los hooks NO viajan con `git clone`: hay que instalarlos en cada clon existente.
+
+PATRON='(^|/)(bitacora|bitácora).*\.md$|\.(docx|doc|pages|numbers|key|ris)$|(^|/)review_|(^|/)[Mm]anuscript|_concepcion|PCT|(^|/)BORRADOR_|(^|/)PROVENANCE_|_v00_propio|_v[0-9][0-9]_asistido|(^|/)borradores/|(^|/)SELLADO_|(^|/)manifiesto_[0-9]'
+
 SOSPECHOSOS=$(git diff --cached --name-only --diff-filter=ACM | grep -iE "$PATRON")
 if [ -n "$SOSPECHOSOS" ]; then
   echo "=========================================================="
   echo " COMMIT ABORTADO. Material privado en el area de preparacion:"
-  echo "$SOSPECHOSOS" | sed 's/^/   /'
+  echo "$SOSPECHOSOS" | sed "s/^/   /"
   echo ""
   echo " El material privado vive en el DMG cifrado, no en un repo."
-  echo " Quitarlo del indice:  git restore --staged <archivo>"
+  echo " Un borrador pre-edicion (v00) NUNCA se versiona: su valor"
+  echo " probatorio viene del sellado por hash, no de un commit, y la"
+  echo " fecha de un commit es autoasertada."
+  echo ""
+  echo " Quitarlo del indice:   git restore --staged <archivo>"
   echo " Saltarlo a conciencia: git commit --no-verify"
   echo "=========================================================="
   exit 1
