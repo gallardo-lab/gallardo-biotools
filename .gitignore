@@ -15,3 +15,79 @@ Manuscript*
 *PCT*
 # --- ruido del sistema ---
 .DS_Store
+
+# =====================================================================
+# BLOQUE DE PROTECCIÓN v02 · 2026-09-25
+# Se AÑADE al .gitignore existente, no lo sustituye.
+#
+# Procedencia: el bloque de 50 líneas se rescató del clon
+# `Sin título`, donde se había aplicado el 2026-09-08 y nunca se
+# commiteó. Comprobado el 2026-09-25 que el clon canónico NO lo tenía
+# (`grep -c 'bitacora_'` devolvía 0 sobre un .gitignore de 17 líneas).
+# Se le suma el bloque del protocolo de borrador pre-edición.
+#
+# Recordatorio: .gitignore es la capa 1 y NO protege de un `git add -f`
+# ni de un archivo ya rastreado. La capa que de verdad detiene es el
+# hook pre-commit v02.
+# =====================================================================
+
+# ── Repositorio PÚBLICO. Todo lo que se commitea aquí queda accesible para siempre
+# ── en el historial de git, aunque después se borre del árbol. Ver incidente 2026-08-25.
+
+# Documentos de trabajo. NUNCA en un repo de sitio web.
+*.docx
+*.doc
+*.odt
+*.pdf
+*.pptx
+*.xlsx
+*.rtf
+*.rtfd
+
+# Bitácoras y notas internas
+bitacora_*.md
+BITACORA_*.md
+notas_*.md
+borrador_*.md
+INFORME_CRITICO_*.md
+
+# Manuscritos y material de revisión
+review_*
+manuscrito_*
+*_v[0-9]_20[0-9][0-9]-*
+respuesta_revisor*
+cover_letter*
+
+# Datos
+*.csv
+*.tsv
+*.xls
+*.sav
+*.RData
+
+# Basura del sistema
+.DS_Store
+**/.DS_Store
+*~
+.~lock.*
+Thumbs.db
+
+# Credenciales (por si acaso; nunca deberían existir aquí)
+.env
+*.pem
+*.key
+secrets.*
+serviceAccount*.json
+
+# ── Borrador pre-edición y sellado (protocolo del 2026-09-25) ──
+BORRADOR_*
+PROVENANCE_*
+borradores/
+*_v00_propio*
+*_asistido_*
+SELLADO_*
+manifiesto_*
+
+# ── EXCEPCIONES: archivos del sitio que sí deben publicarse pese a las reglas de arriba.
+# ── Añadir aquí con "!" si alguna vez se necesita publicar un PDF del sitio.
+!gallardo-lab_onepager.pdf
