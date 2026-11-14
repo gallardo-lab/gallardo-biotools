@@ -71,11 +71,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://gallardo-lab.github.io/gallardo-biotools/biomol/Bioinformatica_Medica/HBB/quiz_HBB.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
     <loc>https://gallardo-lab.github.io/gallardo-biotools/nanomision/index.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>

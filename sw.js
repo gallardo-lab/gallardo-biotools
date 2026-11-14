@@ -25,7 +25,6 @@ const ASSETS = [
   './biomol/transcripcion.html',
   './biomol/traduccion.html',
   './biomol/mutaciones.html',
-  './biomol/Bioinformatica_Medica/HBB/quiz_HBB.html',
   './tools/cuestionario_P11-P14.html',
   './tools/flashcards-nanotheranostics.html',
   './tools/cuestionario-nanotheranostics.html',
