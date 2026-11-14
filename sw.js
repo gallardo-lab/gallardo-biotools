@@ -1,5 +1,5 @@
 // Gallardo BioTools — Service Worker v9
-const CACHE_NAME = 'gallardo-biotools-v23';
+const CACHE_NAME = 'gallardo-biotools-v24';
 
 const ASSETS = [
   'index.html',
@@ -26,7 +26,6 @@ const ASSETS = [
   './biomol/traduccion.html',
   './biomol/mutaciones.html',
   './biomol/Bioinformatica_Medica/HBB/quiz_HBB.html',
-  './biomol/Bioinformatica_Medica/HBB/pipeline_HBB.html',
   './tools/cuestionario_P11-P14.html',
   './tools/flashcards-nanotheranostics.html',
   './tools/cuestionario-nanotheranostics.html',
