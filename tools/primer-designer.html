@@ -198,7 +198,7 @@ canvas{background:#fff;border:1px solid var(--border);border-radius:6px;max-widt
 </div>
 
 <footer data-ihtml="footer">
-PrimerDesigner · Gallardo BioTools — sin envío de datos a ningún servidor; todo el cómputo ocurre en tu navegador.<br>
+PrimerDesigner · Gallardo BioTools · todo el cómputo ocurre en tu navegador: tus secuencias no salen de él. La página carga un contador de visitas anónimo. <a href="../privacidad.html">Privacidad</a>.<br>
 Tm: SantaLucia 1998 (DOI:10.1073/pnas.95.4.1460) + Owczarzy 2004 (DOI:10.1021/bi034621r) · Ta: Rychlik 1990 (DOI:10.1093/nar/18.21.6409).<br>
 <b>Cómo citar:</b> Gallardo-Blanco HL. <i>PrimerDesigner</i>, en Gallardo BioTools (v1.0.0). UANL, 2026. DOI:10.5281/zenodo.20725380 · parte de Gallardo BioTools DOI:10.5281/zenodo.20723201 · https://gallardo-lab.github.io/gallardo-biotools/ · ORCID 0000-0002-7816-4967
 </footer>
@@ -685,7 +685,7 @@ const I18N_HTML = {
   helpIupac:`<b>IUPAC:</b> degenerate bases are accepted in the template (shown in amber), but primers are <b>never</b> designed over degenerate positions.`,
   helpTa:`<b>Annealing temperature (Ta):</b> the <b>optimal Ta of Rychlik 1990</b> is reported = 0.3·Tm(less stable primer) + 0.7·Tm(product) − 14.9, using the primer nearest-neighbor Tm and the product Tm (81.5 + 16.6·log₁₀[Na⁺] + 0.41·%GC − 675/N). More reliable than the simple "Tm − 5" rule, especially for long amplicons or genomic DNA; the authors reported agreement with experimental Ta within 0.7 °C. The −5 rule is also shown for reference.`,
   helpRefs:`<b>References:</b> SantaLucia J. <i>PNAS</i> 1998;95(4):1460-5. DOI:10.1073/pnas.95.4.1460 · Owczarzy R et al. <i>Biochemistry</i> 2004;43(12):3537-54. DOI:10.1021/bi034621r · Rychlik W, Spencer WJ, Rhoads RE. <i>Nucleic Acids Res</i> 1990;18(21):6409-12. DOI:10.1093/nar/18.21.6409`,
-  footer:`PrimerDesigner · Gallardo BioTools — no data sent to any server; all computation happens in your browser.<br>\nTm: SantaLucia 1998 (DOI:10.1073/pnas.95.4.1460) + Owczarzy 2004 (DOI:10.1021/bi034621r) · Ta: Rychlik 1990 (DOI:10.1093/nar/18.21.6409).<br>\n<b>How to cite:</b> Gallardo-Blanco HL. <i>PrimerDesigner</i>, in Gallardo BioTools (v1.0.0). UANL, 2026. DOI:10.5281/zenodo.20725380 · part of Gallardo BioTools DOI:10.5281/zenodo.20723201 · https://gallardo-lab.github.io/gallardo-biotools/ · ORCID 0000-0002-7816-4967`
+  footer:`PrimerDesigner · Gallardo BioTools · all computation happens in your browser: your sequences never leave it. The page loads an anonymous visit counter. <a href="../privacidad.html">Privacy</a>.<br>\nTm: SantaLucia 1998 (DOI:10.1073/pnas.95.4.1460) + Owczarzy 2004 (DOI:10.1021/bi034621r) · Ta: Rychlik 1990 (DOI:10.1093/nar/18.21.6409).<br>\n<b>How to cite:</b> Gallardo-Blanco HL. <i>PrimerDesigner</i>, in Gallardo BioTools (v1.0.0). UANL, 2026. DOI:10.5281/zenodo.20725380 · part of Gallardo BioTools DOI:10.5281/zenodo.20723201 · https://gallardo-lab.github.io/gallardo-biotools/ · ORCID 0000-0002-7816-4967`
 };
 function applyLang(){
   document.querySelectorAll('[data-ihtml]').forEach(el=>{

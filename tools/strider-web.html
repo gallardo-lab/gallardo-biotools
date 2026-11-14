@@ -282,7 +282,7 @@ footer{font-size:11px;color:var(--muted);text-align:center;padding:18px;border-t
 </div>
 
 <footer data-ihtml="footer">
-StriderWeb · sin envío de datos a ningún servidor — todo el cómputo ocurre en tu navegador.<br>
+StriderWeb · todo el cómputo ocurre en tu navegador: tus secuencias no salen de él. La página carga un contador de visitas anónimo. <a href="../privacidad.html">Privacidad</a>.<br>
 Tm: SantaLucia 1998 (nearest-neighbor) + corrección de sales Owczarzy 2004. Enzimas: sitios canónicos tipo REBASE (subset curado).<br>
 <b>Cómo citar:</b> Gallardo-Blanco HL. <i>StriderWeb</i>, en Gallardo BioTools (v1.0.0). UANL, 2026. DOI:10.5281/zenodo.20725635 · parte de Gallardo BioTools DOI:10.5281/zenodo.20723201 · https://gallardo-lab.github.io/gallardo-biotools/ · ORCID 0000-0002-7816-4967
 </footer>
@@ -1549,7 +1549,7 @@ const I18N_HTML = {
   rebaseP1:`The <b>NEB commercial set (269 enzymes)</b> is already embedded and active by default. This section is optional: only if you want the full REBASE catalog (all suppliers) or a newer version.`,
   rebaseP2:`To have <b>all commercially available endonucleases</b> with verified sites and cuts (incl. Type IIS), import an official REBASE file. No data is fabricated: the tool only reads the file you download.`,
   rebaseOl:`<li>Download from REBASE (rebase.neb.com → "REBASE files"): the <b>withrefm</b> file (<span class="tag">link_withrefm</span>, contains the commercial field <span class="tag">&lt;7&gt;</span>) or the compact <b>bionet</b> (<span class="tag">link_bionet</span>).</li>\n      <li>Biopython's <span class="tag">Restriction_Dictionary.py</span> (embedded REBASE EMBOSS) also works.</li>`,
-  footer:`StriderWeb · no data sent to any server — all computation happens in your browser.<br>\nTm: SantaLucia 1998 (nearest-neighbor) + Owczarzy 2004 salt correction. Enzymes: REBASE-style canonical sites (curated subset).<br>\n<b>How to cite:</b> Gallardo-Blanco HL. <i>StriderWeb</i>, in Gallardo BioTools (v1.0.0). UANL, 2026. DOI:10.5281/zenodo.20725635 · part of Gallardo BioTools DOI:10.5281/zenodo.20723201 · https://gallardo-lab.github.io/gallardo-biotools/ · ORCID 0000-0002-7816-4967`
+  footer:`StriderWeb · all computation happens in your browser: your sequences never leave it. The page loads an anonymous visit counter. <a href="../privacidad.html">Privacy</a>.<br>\nTm: SantaLucia 1998 (nearest-neighbor) + Owczarzy 2004 salt correction. Enzymes: REBASE-style canonical sites (curated subset).<br>\n<b>How to cite:</b> Gallardo-Blanco HL. <i>StriderWeb</i>, in Gallardo BioTools (v1.0.0). UANL, 2026. DOI:10.5281/zenodo.20725635 · part of Gallardo BioTools DOI:10.5281/zenodo.20723201 · https://gallardo-lab.github.io/gallardo-biotools/ · ORCID 0000-0002-7816-4967`
 };
 function applyLang(){
   document.querySelectorAll('[data-ihtml]').forEach(el=>{
