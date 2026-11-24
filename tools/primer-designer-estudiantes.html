@@ -7651,6 +7651,23 @@ async function NCBI_detalleDeVariantes(ids) {
   return fuera;
 }
 
+/* ------------------------------------------------------------
+   Posiciones DISTINTAS tocadas por el enmascarado (H-6)
+
+   ⚠ Antes la cabecera anunciaba `masked.length`, que cuenta OPERACIONES:
+   dbSNP devuelve identificadores fusionados que tapan la misma base varias
+   veces, asi que decia 11 en una secuencia con 2 letras raras y quien las
+   contara tenia razon en desconfiar. Arreglado el 2026-11-20; esto lo saca
+   a funcion propia el 2026-11-24 para que el banco pueda probarlo, porque
+   un arreglo sin control solo esta arreglado hasta que algo cambie.
+   Cada fila de `masked` es [rs, pos1, baseOriginal, alelos, codigoIUPAC].
+   ------------------------------------------------------------ */
+function NCBI_posicionesEnmascaradas(masked) {
+  const vistas = {};
+  (masked || []).forEach(function (m) { vistas[m[1]] = 1; });
+  return Object.keys(vistas).length;
+}
+
 async function NCBI_traerPlantilla() {
   const btn = document.getElementById('ensBtn');
   const rsid = (document.getElementById('ensRsid').value || '').trim();
@@ -7741,12 +7758,7 @@ async function NCBI_traerPlantilla() {
     });
 
     // 6. blanco y encabezado
-    // posiciones DISTINTAS tocadas por el enmascarado, que es lo que se ve
-    const _posEnmascaradas = (function () {
-      const vistas = {};
-      masked.forEach(function (m) { vistas[m[1]] = 1; });
-      return Object.keys(vistas).length;
-    })();
+    const _posEnmascaradas = NCBI_posicionesEnmascaradas(masked);
 
     const snpIdx = s0 - regStart;
     const refAtSnp = orig[snpIdx];
