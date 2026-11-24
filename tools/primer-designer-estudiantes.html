@@ -8820,6 +8820,22 @@ function REP_cabecera() {
 }
 
 /* ------------------------------------------------------------
+   Por que NO hay huella de la secuencia (H-11)
+
+   ⚠ El mensaje viejo era uno solo y culpaba a crypto.subtle siempre.
+   Medido el 2026-11-24 sobre la pagina publicada, en https: sin sesion
+   decia que crypto.subtle necesita https ESTANDO en https, cuando la
+   causa era que no habia ninguna secuencia que resumir. Un mensaje de
+   error es un puntero: si apunta al sitio equivocado, manda a buscar
+   donde no es. Son dos casos y se dicen por separado.
+   ------------------------------------------------------------ */
+function REP_porQueSinHuella(seq, haySha256) {
+  if (!seq) return '(sin secuencia: en esta sesion no se analizo ninguna)';
+  if (!haySha256) return '(no disponible: crypto.subtle necesita https o file://)';
+  return '';   /* hay secuencia y hay con que resumirla: no hay por que */
+}
+
+/* ------------------------------------------------------------
    Reunir el registro
    ------------------------------------------------------------ */
 async function REP_reunir() {
@@ -8872,7 +8888,7 @@ async function REP_reunir() {
       alelo_alterno_usado: alt || '(no declarado)',
       alelos_de_la_cabecera: cab.alleles || '(no declarados)',
       secuencia_nt: seq.length,
-      secuencia_sha256: huella || '(no disponible: crypto.subtle necesita https o file://)',
+      secuencia_sha256: huella || REP_porQueSinHuella(seq, typeof sha256Hex === 'function'),
       cabecera_fasta: cab.hay ? cab.cruda : '(no hay cabecera FASTA en ninguno de los dos cuadros)',
       cabecera_leida_de: cab.hay ? cab.de : '(ninguno)'
     },
