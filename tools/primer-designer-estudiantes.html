@@ -8180,7 +8180,9 @@ if (typeof module !== 'undefined' && module.exports) {
         paso en la sesion del alumno.
      3. NO hay nota. El instrumento del manual no califica.
 
-   Las seis preguntas son las dos de la diapositiva 2 del ejercicio, mas los
+   Las seis preguntas son las dos que el profesor tenia en la diapositiva 2
+   del ejercicio hasta el 2026-11-24, dia en que las quito del mazo y se
+   quedaron solo aqui, mas los
    CUATRO sitios donde tropezo la revision del 2026-11-20: el alelo (H-2), el
    marco de lectura (H-1), la hebra (H-3) y la enzima (paso 8 del manual).
 
@@ -8263,7 +8265,7 @@ function CUEST_vacio() {
 
 const CUEST_PREGUNTAS = [
 
-  /* --- 1 y 2: las dos de la diapositiva 2, tal cual --- */
+  /* --- 1 y 2: las dos del profesor, tal cual --- */
   {
     id: 'q1',
     es: 'En RFLP, ¿cuántos fragmentos se visualizan en el gel para el amplicón sin digerir, '
@@ -8276,7 +8278,7 @@ const CUEST_PREGUNTAS = [
       { id: 'q1het', es: 'heterocigoto', en: 'heterozygote', ancho: 58 },
       { id: 'q1alt', es: 'homocigoto alterno', en: 'alternative homozygote', ancho: 58 }
     ],
-    porque: { es: 'Es tuya, de la diapositiva 2.', en: 'Yours, from slide 2.' },
+    porque: { es: 'La pone tu profesor.', en: 'Set by your instructor.' },
     comprueba: function () {
       const c = CUEST_enzimaElegida();
       if (!c) {
@@ -8311,7 +8313,7 @@ const CUEST_PREGUNTAS = [
         { v: 'si', es: 'sí', en: 'yes' },
         { v: 'no', es: 'no', en: 'no' }] }
     ],
-    porque: { es: 'Es tuya, de la diapositiva 2.', en: 'Yours, from slide 2.' },
+    porque: { es: 'La pone tu profesor.', en: 'Set by your instructor.' },
     comprueba: function () {
       const c = CUEST_enzimaElegida();
       if (!c) {
