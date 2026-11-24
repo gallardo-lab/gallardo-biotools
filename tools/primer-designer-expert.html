@@ -8764,14 +8764,20 @@ try { CUEST_pintar(); } catch (e) {
      sello           SHA-256 sobre el JSON canonico, con el mismo aparato que
                      ya usa la constancia de primers
 
-   ⚠ LA SECUENCIA VA POR HUELLA, no entera: 601 nt en un PDF ocupan y nadie los
-   lee, pero sin nada no se puede verificar despues. La huella ocupa una linea
-   y permite comprobarlo. HLGB puede pedir la secuencia entera y entonces se
-   cambia `REP_SECUENCIA_ENTERA` a true; esta aqui y no escondido para que sea
-   una linea y no una reescritura.
+   ⚠ LA SECUENCIA VA ENTERA, decidido por HLGB el 2026-11-24, y la huella se
+   queda. El coste esta MEDIDO, no estimado: el JSON canonico pasa de 3 780
+   caracteres en 142 lineas a 4 479 en 145 con una secuencia de 601 nt dentro,
+   es decir 641 caracteres y tres lineas mas. Y la razon de fondo no es el
+   tamano: una huella COMPRUEBA pero no CONSERVA. Regenerar la secuencia
+   exigiria repetir la descarga con el mismo enmascarado y la misma compilacion
+   de dbSNP (la cabecera declara masked_set y source=dbSNP_b157); el dia que el
+   NCBI publique otra, la misma region puede enmascarar otras posiciones, la
+   huella deja de coincidir y nadie distingue si fallo el alumno o se movio la
+   base. Ademas esta pestana existe PORQUE el HTML guardado pierde la secuencia:
+   guardar solo la huella conservaria la comprobacion y perderia la cosa.
    ============================================================ */
 
-const REP_SECUENCIA_ENTERA = false;
+const REP_SECUENCIA_ENTERA = true;
 
 const REP_estado = { ultimo: null };
 
