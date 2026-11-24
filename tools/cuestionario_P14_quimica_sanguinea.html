@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-X5BT5RP5WF"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag("js", new Date());
+    gtag("config", "G-X5BT5RP5WF");
+  </script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Integración P14 y química sanguínea · Laboratorio de Bioquímica UANL 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg:#0f172a; --surface:#1e293b; --surface2:#263147;
+    --accent:#3b82f6; --accent2:#06b6d4; --accent3:#fbbf24;
+    --text:#f1f5f9; --muted:#94a3b8; --border:#334155;
+    --green:#22c55e; --red:#ef4444;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Inter',system-ui,sans-serif; min-height:100vh; }
+
+  /* ── PANTALLA DE REGISTRO ── */
+  #registerScreen {
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:2rem;
+  }
+  .register-card {
+    background:var(--surface); border:1px solid var(--border); border-radius:20px;
+    padding:2.5rem; max-width:480px; width:100%; text-align:center;
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+  }
+  .register-card .logo { font-family:'Orbitron',sans-serif; font-size:1.5rem; color:var(--accent); margin-bottom:.3rem; }
+  .register-card .inst { font-size:.8rem; color:var(--muted); margin-bottom:2rem; line-height:1.5; }
+  .register-card h2 { font-size:1.1rem; color:var(--accent3); margin-bottom:1.5rem; }
+  .field { text-align:left; margin-bottom:1.2rem; }
+  .field label { display:block; font-size:.82rem; color:var(--muted); margin-bottom:.4rem; font-weight:600; letter-spacing:.03em; }
+  .field input, .field select {
+    width:100%; background:var(--surface2); border:1px solid var(--border);
+    border-radius:10px; padding:.7rem 1rem; color:var(--text); font-size:.95rem;
+    font-family:inherit; transition:border-color .2s;
+  }
+  .field input:focus, .field select:focus { outline:none; border-color:var(--accent); }
+  .btn-start {
+    width:100%; background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#fff; border:none; border-radius:12px; padding:.9rem; font-size:1rem;
+    font-weight:700; cursor:pointer; margin-top:.5rem; transition:opacity .2s;
+    font-family:inherit; letter-spacing:.03em;
+  }
+  .btn-start:hover { opacity:.88; }
+  .btn-start:disabled { opacity:.4; cursor:default; }
+  .meta-pills { display:flex; gap:.5rem; justify-content:center; flex-wrap:wrap; margin-bottom:1.5rem; }
+  .pill { background:var(--surface2); border:1px solid var(--border); border-radius:20px; padding:.3rem .8rem; font-size:.75rem; color:var(--muted); }
+
+  /* ── QUIZ ── */
+  #quizScreen { display:none; }
+  header {
+    background:linear-gradient(135deg,#0f2849,#1e293b);
+    padding:1rem 2rem; border-bottom:2px solid var(--accent);
+    display:flex; align-items:center; gap:1rem; flex-wrap:wrap;
+    position:sticky; top:0; z-index:100;
+  }
+  header h1 { font-family:'Orbitron',sans-serif; font-size:1rem; color:var(--accent2); flex:1; }
+  .hdr-info { font-size:.8rem; color:var(--muted); }
+  .progress-wrap { width:100%; height:5px; background:var(--border); border-radius:3px; margin-top:.5rem; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:3px; transition:width .4s; width:0%; }
+
+  main { max-width:780px; margin:0 auto; padding:2rem 1rem 4rem; }
+
+  .q-card {
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:1.5rem 1.6rem; margin-bottom:1.3rem; transition:border-color .2s;
+  }
+  .q-card.answered { border-color:var(--accent2); }
+  .q-header { display:flex; gap:.7rem; align-items:flex-start; margin-bottom:1.1rem; }
+  .q-badge {
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#fff; font-weight:700; font-size:.75rem; padding:.25rem .6rem;
+    border-radius:6px; white-space:nowrap; flex-shrink:0; margin-top:2px;
+  }
+  .q-text { font-size:.97rem; line-height:1.6; }
+  .options { display:flex; flex-direction:column; gap:.5rem; }
+  .opt {
+    background:var(--surface2); border:1.5px solid var(--border); border-radius:10px;
+    padding:.65rem 1rem; cursor:pointer; font-size:.92rem; transition:all .15s;
+    display:flex; align-items:center; gap:.7rem; user-select:none;
+  }
+  .opt:hover:not(.locked) { border-color:var(--accent); background:#1e3a5f; }
+  .opt.selected { border-color:var(--accent); background:#1e3a5f; }
+  .opt.locked { cursor:default; }
+  .opt-letter { font-weight:700; color:var(--muted); font-size:.85rem; min-width:1.2rem; flex-shrink:0; }
+
+  .submit-wrap { text-align:center; margin-top:2rem; }
+  .btn-submit {
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    color:#fff; border:none; border-radius:12px; padding:.85rem 2.5rem;
+    font-size:1rem; font-weight:700; cursor:pointer; font-family:inherit;
+    transition:opacity .2s; letter-spacing:.03em;
+  }
+  .btn-submit:hover { opacity:.88; }
+  .btn-submit:disabled { opacity:.35; cursor:default; }
+
+  /* ── RESULTADOS ── */
+  #resultsScreen {
+    display:none; min-height:100vh; padding:2rem 1rem;
+    background:radial-gradient(ellipse at top,#0f2849 0%,#0f172a 60%);
+  }
+  .results-inner { max-width:700px; margin:0 auto; }
+  .score-hero { text-align:center; padding:2.5rem 1rem; }
+  .score-hero .title { font-family:'Orbitron',sans-serif; font-size:1rem; color:var(--muted); margin-bottom:1rem; letter-spacing:.1em; text-transform:uppercase; }
+  .score-circle {
+    width:160px; height:160px; border-radius:50%; margin:0 auto 1.2rem;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    border:4px solid var(--accent);
+    background:conic-gradient(var(--accent) 0%, var(--surface2) 0%);
+  }
+  .score-pct { font-family:'Orbitron',sans-serif; font-size:2.4rem; font-weight:900; line-height:1; }
+  .score-sub { font-size:.78rem; color:var(--muted); margin-top:.2rem; }
+  .score-label { font-size:1.1rem; font-weight:700; margin-bottom:.3rem; }
+
+  .breakdown {
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:1.4rem 1.6rem; margin-bottom:1.2rem;
+  }
+  .breakdown h3 { font-size:.85rem; color:var(--muted); margin-bottom:1rem; text-transform:uppercase; letter-spacing:.06em; }
+  .bk-row { display:flex; align-items:center; gap:.8rem; margin-bottom:.6rem; font-size:.88rem; }
+  .bk-tag { background:var(--surface2); border-radius:6px; padding:.2rem .55rem; font-size:.75rem; font-weight:700; color:var(--accent2); min-width:40px; text-align:center; }
+  .bk-bar-wrap { flex:1; height:8px; background:var(--border); border-radius:4px; overflow:hidden; }
+  .bk-bar { height:100%; border-radius:4px; background:linear-gradient(90deg,var(--accent),var(--accent2)); transition:width .6s; }
+  .bk-score { font-size:.8rem; color:var(--muted); min-width:40px; text-align:right; }
+
+  .action-btns { display:flex; gap:.8rem; justify-content:center; flex-wrap:wrap; margin:1.5rem 0; }
+  .btn-cert {
+    background:linear-gradient(135deg,#854d0e,var(--accent3));
+    color:#000; border:none; border-radius:12px; padding:.8rem 1.8rem;
+    font-size:.95rem; font-weight:700; cursor:pointer; font-family:inherit;
+    transition:opacity .2s; letter-spacing:.02em;
+  }
+  .btn-cert:hover { opacity:.88; }
+  .btn-outline {
+    background:transparent; border:1.5px solid var(--border); color:var(--muted);
+    border-radius:12px; padding:.8rem 1.8rem; font-size:.95rem; font-weight:600;
+    cursor:pointer; font-family:inherit; transition:all .2s;
+  }
+  .btn-outline:hover { border-color:var(--accent); color:var(--text); }
+
+  /* ── CANVAS CERTIFICADO ── */
+  #certCanvas { display:none; }
+
+  footer { text-align:center; padding:2rem; color:var(--muted); font-size:.75rem; }
+</style>
+<style>
+  /* ── Añadidos de esta página: retroalimentación y caso clínico ── */
+  .opt.correcta { border-color:var(--green); background:#14321f; }
+  .opt.fallada  { border-color:var(--red);   background:#3a1a1a; }
+  .opt-mark { margin-left:auto; font-weight:700; font-size:.85rem; }
+  .fb {
+    display:none; margin-top:.9rem; padding:.9rem 1rem; border-radius:10px;
+    background:var(--surface2); border-left:4px solid var(--accent2);
+    font-size:.88rem; line-height:1.55; color:var(--text);
+  }
+  .fb.visible { display:block; }
+  .fb .fb-head { font-weight:700; margin-bottom:.35rem; }
+  .fb .fb-head.ok   { color:var(--green); }
+  .fb .fb-head.mal  { color:var(--red); }
+  .fb .fb-ref { display:block; margin-top:.5rem; font-size:.76rem; color:var(--muted); }
+  .fb a { color:var(--accent2); }
+  details.panel {
+    background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    padding:1rem 1.2rem; margin:1rem 0; text-align:left;
+  }
+  details.panel > summary {
+    cursor:pointer; font-weight:700; color:var(--accent2); font-size:.95rem; list-style:none;
+  }
+  details.panel > summary::-webkit-details-marker { display:none; }
+  details.panel > summary::before { content:'▸ '; color:var(--accent3); }
+  details.panel[open] > summary::before { content:'▾ '; }
+  details.panel .cuerpo { margin-top:.9rem; font-size:.88rem; line-height:1.6; color:var(--text); }
+  details.panel .cuerpo p { margin-bottom:.7rem; }
+  details.sub { border:0; border-top:1px dashed var(--border); border-radius:0; padding:.7rem 0 0; margin:.7rem 0 0; }
+  details.sub > summary { color:var(--accent3); font-size:.88rem; }
+  table.labs { width:100%; border-collapse:collapse; margin:.8rem 0; font-size:.82rem; }
+  table.labs th, table.labs td { border:1px solid var(--border); padding:.4rem .55rem; text-align:left; }
+  table.labs th { background:var(--surface2); color:var(--accent2); }
+  table.labs td.alto { color:var(--red); font-weight:700; }
+  table.labs td.bajo { color:var(--accent3); font-weight:700; }
+  .aviso {
+    border-left:4px solid var(--accent3); background:var(--surface2);
+    padding:.75rem .9rem; border-radius:8px; font-size:.82rem; color:var(--muted); margin:.8rem 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ REGISTRO ══════════════ -->
+<div id="registerScreen">
+  <div class="register-card">
+    <div class="logo">🧬 BioLab</div>
+    <p class="inst">UNIVERSIDAD AUTÓNOMA DE NUEVO LEÓN<br>Facultad de Medicina · Laboratorio de Bioquímica · Ciclo 2026</p>
+    <h2>Integración: de la variante a la química sanguínea<br><span style="color:var(--muted);font-size:.85rem;font-weight:400">Práctica 14 con las prácticas 4, 5, 9 y 10</span></h2>
+    <div class="meta-pills">
+      <span class="pill">📋 8 preguntas</span>
+      <span class="pill">💬 Con retroalimentación</span>
+      <span class="pill">↻ Intentos libres</span>
+    </div>
+    <div class="field">
+      <label>Nombre completo</label>
+      <input type="text" id="regNombre" placeholder="Apellido Paterno Materno, Nombre(s)" maxlength="80">
+    </div>
+    <div class="field">
+      <label>Matrícula</label>
+      <input type="text" id="regMatricula" placeholder="ej. 1845632" maxlength="12" pattern="[0-9]*">
+    </div>
+    <div class="field">
+      <label>Grupo</label>
+      <select id="regGrupo">
+        <option value="">— Selecciona tu grupo —</option>
+        <option>101</option><option>102</option><option>103</option>
+        <option>104</option><option>105</option><option>106</option>
+        <option>107</option><option>108</option><option>109</option>
+        <option>110</option><option>201</option><option>202</option>
+        <option>203</option><option>204</option><option>205</option>
+      </select>
+    </div>
+    <button class="btn-start" id="startBtn" onclick="startQuiz()" disabled>Iniciar cuestionario →</button>
+    <p style="font-size:.72rem;color:var(--muted);margin-top:1rem">Esto no lleva nota. Es un ejercicio de retroalimentación: al entregar verás por qué cada opción es correcta o no, y podrás repetirlo.</p>
+  </div>
+</div>
+
+<!-- ══════════════ QUIZ ══════════════ -->
+<div id="quizScreen">
+  <header>
+    <h1>Integración P14 · Química sanguínea</h1>
+    <span class="hdr-info" id="hdrInfo"></span>
+    <div class="progress-wrap" style="width:100%">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </header>
+  <main id="questionsArea"></main>
+  <div class="submit-wrap">
+    <button class="btn-submit" id="submitBtn" onclick="submitQuiz()" disabled>Entregar y ver la retroalimentación</button>
+    <p style="font-size:.78rem;color:var(--muted);margin-top:.6rem" id="submitHint">Responde todas las preguntas para habilitar la entrega.</p>
+  </div>
+  <footer>BioLab Interactive · UANL · 2026<br><span style="opacity:.75"><a href="../privacidad.html">Privacidad</a></span></footer>
+</div>
+
+<!-- ══════════════ RESULTADOS ══════════════ -->
+<div id="resultsScreen">
+  <div class="results-inner">
+    <div class="score-hero">
+      <div class="title">Resultado</div>
+      <div class="score-circle" id="scoreCircle">
+        <span class="score-pct" id="scorePct">—</span>
+        <span class="score-sub" id="scoreSub"></span>
+      </div>
+      <div class="score-label" id="scoreLabel"></div>
+      <p id="scoreMsg" style="color:var(--muted);font-size:.88rem;margin-top:.4rem"></p>
+    </div>
+
+    <div class="breakdown" id="breakdown"></div>
+
+    <div class="action-btns">
+      <button class="btn-cert" onclick="verRetro()">💬 Ver mis respuestas comentadas</button>
+      <button class="btn-outline" onclick="location.reload()">↩ Nuevo intento</button>
+    </div>
+
+    <!-- ── Caso clínico ── -->
+    <details class="panel" id="panelCaso">
+      <summary>Parte B · Caso clínico en formato SOAP</summary>
+      <div class="cuerpo">
+        <div class="aviso">Las cifras de este caso son <b>didácticas</b>, construidas a partir de los valores de referencia de la práctica 10. No proceden de un paciente real ni de un expediente.</div>
+        <p><b>S.</b> Mujer de 19 años, estudiante, con fatiga de varios meses, episodios de dolor abdominal y coloración amarillenta de la esclerótica que sus familiares notan «cuando se enferma». Antecedentes familiares de anemia.</p>
+        <p><b>O.</b> Palidez de tegumentos e ictericia escleral. Sin hepatomegalia dolorosa. Signos vitales sin alteración.</p>
+        <p><b>A.</b> Laboratorio:</p>
+        <table class="labs">
+          <tr><th>Parámetro</th><th>Resultado</th><th>Referencia (P10)</th><th>Unidades</th></tr>
+          <tr><td>Hemoglobina</td><td class="bajo">8.9</td><td>M: 12.00 a 16.00</td><td>g/dL</td></tr>
+          <tr><td>Hematocrito</td><td class="bajo">27</td><td>M: 37 a 47</td><td>%</td></tr>
+          <tr><td>VCM</td><td>92</td><td>83 a 100</td><td>fL</td></tr>
+          <tr><td>Bilirrubina total</td><td class="alto">3.1</td><td>0.1 a 1.4</td><td>mg/dL</td></tr>
+          <tr><td>Bilirrubina directa</td><td>0.5</td><td>0.1 a 0.5</td><td>mg/dL</td></tr>
+          <tr><td>Bilirrubina indirecta</td><td class="alto">2.6</td><td>0.0 a 0.9</td><td>mg/dL</td></tr>
+          <tr><td>LDH</td><td class="alto">820</td><td>105 a 414 (P5)</td><td>U/L</td></tr>
+          <tr><td>AST</td><td class="alto">62</td><td>8 a 48</td><td>UI/L</td></tr>
+          <tr><td>ALT</td><td>28</td><td>7 a 55</td><td>UI/L</td></tr>
+          <tr><td>Creatinina</td><td>0.6</td><td>0.4 a 1.25</td><td>mg/dL</td></tr>
+          <tr><td>Urea</td><td>22</td><td>14.9 a 40</td><td>mg/dL</td></tr>
+          <tr><td>Glucosa</td><td>88</td><td>70 a 100</td><td>mg/dL</td></tr>
+        </table>
+        <p><b>EGO:</b> color amarillo oscuro, sangre positiva, urobilinógeno aumentado, bilirrubina negativa, nitritos negativos, leucocitos negativos.</p>
+
+        <details class="sub"><summary>B1. Agrupa los resultados alterados en un solo mecanismo. ¿Cuál es?</summary>
+          <p>Hemólisis. Hemoglobina y hematocrito bajos con VCM normal indican anemia normocítica; LDH y bilirrubina indirecta elevadas corresponden al contenido del eritrocito que se libera y al pigmento que resulta de degradar la hemoglobina; la sangre positiva en orina sin leucocitos ni nitritos apunta a hemoglobina libre y no a infección. Un solo mecanismo explica siete resultados, que es lo que se busca al integrar.</p></details>
+
+        <details class="sub"><summary>B2. ¿Por qué la AST está alta y la ALT normal, y qué descarta eso?</summary>
+          <p>Porque el eritrocito contiene AST y prácticamente no contiene ALT. La elevación aislada de AST, con ALT dentro de referencia, apunta al eritrocito y no al hepatocito: en daño hepatocelular se esperaría elevación de las dos, con bilirrubina directa alta y albúmina baja, que es el patrón que describe la práctica 10.</p></details>
+
+        <details class="sub"><summary>B3. La creatinina es de 0.6 mg/dL, dentro de referencia. ¿Puedes concluir que el riñón está sano?</summary>
+          <p>No. Está dentro de referencia, que es lo único que mide ese número. En anemia drepanocítica las ecuaciones basadas en creatinina predicen mal la filtración glomerular medida y pueden pasar por alto el deterioro: en 109 niños con filtración medida por aclaramiento de iohexol, la mediana fue de 142 mL/min/1.73 m², es decir hiperfiltración, y la creatinina sérica no aumentó con la edad como se esperaría. Un valor dentro de referencia no es una función normal, es un valor dentro de referencia.</p></details>
+
+        <details class="sub"><summary>B4. ¿Qué estudio confirma el diagnóstico y por qué la química sanguínea no basta?</summary>
+          <p>La química sanguínea describe la consecuencia, la destrucción acelerada de eritrocitos, y no la causa. La confirmación requiere caracterizar la hemoglobina o el gen: electroforesis de hemoglobina o HPLC, y el estudio molecular que recorren las prácticas 11 a 14. Dos variantes distintas del mismo gen pueden dar un cuadro de hemólisis parecido y necesitan el estudio molecular para distinguirse.</p></details>
+
+        <details class="sub"><summary>B5. Escribe el plan (P) en una línea.</summary>
+          <p>Confirmar con estudio de hemoglobina y estudio molecular de HBB, buscar desencadenantes de crisis, y dar seguimiento con biometría hemática, reticulocitos, bilirrubinas y LDH.</p></details>
+      </div>
+    </details>
+
+    <!-- ── Fundamento corregido ── -->
+    <details class="panel" id="panelFundamento">
+      <summary>Qué muestra de verdad la química sanguínea en hemólisis</summary>
+      <div class="cuerpo">
+        <p><b>Lo que sí se sostiene.</b> La hemólisis eleva la <b>bilirrubina indirecta</b>, porque el hígado recibe más pigmento del que conjuga; eleva la <b>LDH</b>, que es intracelular y abunda en el eritrocito como isoenzima LDH-1; <b>consume la haptoglobina</b>, que se une a la hemoglobina libre; y en la biometría da <b>hemoglobina y hematocrito bajos con reticulocitos altos</b> cuando la médula responde.</p>
+        <p><b>AST sí, ALT no, y esa es la clave.</b> Decir «se alteran las transaminasas» borra el dato útil. Lo medido: Lippi y colaboradores (2006) encuentran variaciones clínicamente relevantes de AST y LDH con hemoglobina libre menor de 0.6 g/L, es decir con hemólisis que no se ve a simple vista (<a href="https://doi.org/10.1515/CCLM.2006.054" target="_blank" rel="noopener">DOI</a>); Koseoglu y colaboradores (2011) lo reproducen por debajo de 0.5 g/L y además reportan que la <b>ALT no se interfiere</b> ni en hemólisis severa, de 2.5 a 4.5 g/L (<a href="https://doi.org/10.11613/bm.2011.015" target="_blank" rel="noopener">DOI</a>). AST alta con ALT normal señala al eritrocito.</p>
+        <p><b>La creatinina no es tranquilizadora.</b> En anemia drepanocítica las ecuaciones basadas en creatinina predicen mal la filtración medida y pueden ocultar el daño renal, con hiperfiltración de entrada (<a href="https://doi.org/10.1007/s00467-025-06986-w" target="_blank" rel="noopener">DOI</a>). Esperar a que la creatinina suba es esperar demasiado.</p>
+        <p><b>Y nada de esto diagnostica.</b> Son marcadores de hemólisis, no de la variante. La identidad de la hemoglobina se establece por electroforesis o HPLC, y la del gen por estudio molecular.</p>
+        <p class="fb-ref">Valores de referencia tomados de las prácticas 5 y 10 del propio curso. Artículos recuperados de PubMed.</p>
+      </div>
+    </details>
+  </div>
+  <footer>BioLab Interactive · UANL Facultad de Medicina · Laboratorio de Bioquímica 2026</footer>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  BANCO DE PREGUNTAS, con retroalimentación por opción
+//  tag = práctica de la que viene el concepto
+// ══════════════════════════════════════════
+const GAME_ID = 'cuestionario_P14_quimica_sanguinea';
+
+const QUESTIONS = [
+  {
+    tag:'P5',
+    text:'En un paciente con hemólisis crónica por una variante de HBB, ¿qué isoenzima de LDH esperarías encontrar elevada de manera predominante?',
+    opts:[
+      'LDH-5 (M₄), porque el hígado procesa el exceso de hemoglobina',
+      'LDH-1 (H₄), porque predomina en el eritrocito, que es la célula que se destruye',
+      'LDH-3 (H₂M₂), porque el pulmón compensa el menor transporte de oxígeno',
+      'LDH-4 (HM₃), porque el riñón filtra la hemoglobina liberada'
+    ],
+    fb:[
+      'Confundes el órgano que procesa con el tejido que se destruye. LDH-5 predomina en hígado y músculo esquelético, y sube en hepatitis viral o necrosis hepática.',
+      'La tabla de isoenzimas de la práctica 5 asigna LDH-1 al músculo cardiaco y al eritrocito, y lista la hemólisis entre las causas de elevación. Una enzima intracelular aparece en plasma cuando se rompe la célula que la contiene.',
+      'LDH-3 corresponde a pulmón y cerebro. El pulmón no libera enzima por compensar una anemia.',
+      'LDH-4 corresponde a riñón, placenta y páncreas. Filtrar hemoglobina no equivale a destruir células renales.'
+    ],
+    ans:1,
+    ref:'Práctica 5, Determinación de la actividad de LDH: isoenzimas y patologías asociadas.'
+  },
+  {
+    tag:'P10',
+    text:'Ese paciente tiene bilirrubina total de 3.1 mg/dL. ¿Qué fracción esperas elevada, y con qué referencia lo afirmas?',
+    opts:[
+      'La directa, 0.1 a 0.5 mg/dL, porque el hígado está dañado',
+      'La indirecta, 0.0 a 0.9 mg/dL, porque llega más pigmento del que el hígado alcanza a conjugar',
+      'Las dos por igual, porque la total es la suma de ambas',
+      'Ninguna: en hemólisis cambia la hemoglobina, no la bilirrubina'
+    ],
+    fb:[
+      'La fracción directa es la ya conjugada. Su elevación apunta a obstrucción biliar o daño hepatocelular, que es lo que dice la diapositiva de interpretación clínica de la práctica 10, no a hemólisis.',
+      'En hemólisis el hígado está sano pero recibe más pigmento del que conjuga, así que se acumula lo que todavía no pasó por la conjugación. Referencias de la práctica 10: total 0.1 a 1.4, directa 0.1 a 0.5, indirecta 0.0 a 0.9 mg/dL.',
+      'Que la total sea la suma no implica que ambas suban igual: el patrón de qué fracción predomina es justamente lo que orienta el diagnóstico.',
+      'La bilirrubina es el producto de degradación de la hemoglobina, así que destruir eritrocitos la eleva por definición.'
+    ],
+    ans:1,
+    ref:'Práctica 10, perfil bioquímico y valores de referencia.'
+  },
+  {
+    tag:'Preanalítico',
+    text:'Llega un suero de color rosado. El equipo reporta LDH y AST altas, con ALT dentro de referencia. ¿Cuál es la interpretación más prudente antes de hablar de enfermedad?',
+    opts:[
+      'Daño hepático, porque la AST es una transaminasa hepática',
+      'Infarto al miocardio, porque LDH y AST se elevan juntas',
+      'La muestra puede estar hemolizada en el tubo: AST y LDH se alteran con hemólisis que no se ve, mientras que la ALT apenas se afecta',
+      'El resultado es válido tal cual: el color del suero no cambia la química'
+    ],
+    fb:[
+      'La AST también está en el eritrocito. Por eso sube en hemólisis sin que el hígado tenga nada, y por eso la ALT normal es el dato que te salva de ese error.',
+      'El patrón es compatible, pero antes de un diagnóstico así hay que descartar lo barato: que la enzima venga del tubo y no del corazón.',
+      'Correcto, y está medido: Lippi 2006 encuentra variaciones relevantes de AST y LDH con hemoglobina libre menor de 0.6 g/L, invisible a la vista, y Koseoglu 2011 reporta que la ALT no se interfiere ni en hemólisis severa de 2.5 a 4.5 g/L.',
+      'El color rosado es hemoglobina libre en el suero, y esa hemoglobina viene acompañada de todo el contenido del eritrocito.'
+    ],
+    ans:2,
+    ref:'Lippi 2006, Clin Chem Lab Med, doi:10.1515/CCLM.2006.054 · Koseoglu 2011, Biochem Med, doi:10.11613/bm.2011.015'
+  },
+  {
+    tag:'Preanalítico',
+    text:'Siguiendo con ese suero rosado, ¿qué procede antes de entregar el resultado de LDH?',
+    opts:[
+      'Restarle un porcentaje fijo según el color del suero',
+      'Reportarlo con la nota «muestra hemolizada» y dejar la interpretación al médico',
+      'Cuantificar la hemoglobina libre, avisar y pedir nueva muestra, porque la interferencia no se corrige con un factor confiable',
+      'Repetir la lectura a 340 nm con el mismo suero, porque la segunda lectura corrige la interferencia'
+    ],
+    fb:[
+      'No existe ese porcentaje: la respuesta a la hemólisis es distinta para cada analito, así que una corrección única inventa precisión que no hay.',
+      'La nota ayuda, pero traslada al médico un número que el laboratorio ya sabe que está desplazado. El dato no mejora por avisar.',
+      'Es la conclusión explícita de Lippi y colaboradores: la interferencia es heterogénea e impredecible, así que recomiendan cuantificar hemoglobina libre, alertar y recolectar de nuevo.',
+      'Repetir la lectura mide otra vez lo mismo. El cálculo de la práctica 5, ΔAbs por minuto multiplicado por 8095, no distingue de dónde salió la enzima.'
+    ],
+    ans:2,
+    ref:'Lippi 2006, doi:10.1515/CCLM.2006.054 · Práctica 5, metodología a 340 nm y factor 8095.'
+  },
+  {
+    tag:'P10',
+    text:'La biometría hemática muestra hemoglobina 8.9 g/dL, hematocrito 27 % y VCM 92 fL. ¿Cómo describes ese patrón con los valores de referencia de la práctica 10?',
+    opts:[
+      'Anemia microcítica hipocrómica, como la ferropénica',
+      'Anemia megaloblástica, por deficiencia de B12 o folato',
+      'Anemia con VCM dentro de referencia, es decir normocítica, que obliga a buscar la causa fuera del tamaño del eritrocito',
+      'Sin anemia: el hematocrito está bajo pero la hemoglobina es normal'
+    ],
+    fb:[
+      'La ferropénica cursa con VCM y HCM bajos. Aquí el VCM es de 92 fL, dentro del intervalo de 83 a 100 de la práctica 10.',
+      'La megaloblástica cursa con VCM y HCM altos. Tampoco es el caso.',
+      'Con los valores de la práctica 10, hemoglobina de 14.00 a 18.00 en hombres y 12.00 a 16.00 en mujeres, hematocrito de 42 a 52 y 37 a 47, y VCM de 83 a 100, estos resultados son anemia normocítica. El reticulocito es el parámetro que dice si la médula está respondiendo.',
+      'Una hemoglobina de 8.9 g/dL está por debajo del límite inferior en cualquiera de los dos sexos.'
+    ],
+    ans:2,
+    ref:'Práctica 10, biometría hemática: valores de referencia e interpretación clínica.'
+  },
+  {
+    tag:'P9',
+    text:'En el examen general de orina, la tira da sangre positiva y urobilinógeno aumentado, pero bilirrubina negativa. ¿Es coherente con hemólisis?',
+    opts:[
+      'No: si la bilirrubina en sangre está alta, la tira tiene que dar bilirrubina positiva',
+      'Sí: la fracción que se eleva es la indirecta, que viaja unida a albúmina y no se filtra, mientras que la hemoglobina libre sí llega a la orina',
+      'No: la sangre en orina solo aparece en cálculos renales e infecciones',
+      'Sí, pero solo si además hay una infección urinaria'
+    ],
+    fb:[
+      'La tira detecta la bilirrubina conjugada, que es hidrosoluble. La indirecta circula unida a albúmina y el glomérulo no la filtra.',
+      'Y el fundamento está en la propia práctica 9: la casilla de sangre detecta la pseudoperoxidasa de la hemoglobina con tetrametilbencidina, así que responde a hemoglobina libre y no solo a eritrocitos enteros. El color amarillo oscuro se explica por urobilinógeno.',
+      'La práctica 9 lista la hemólisis entre las causas de sangre en orina, junto con la patología glomerular, los cálculos y las infecciones.',
+      'Nitritos y leucocitos negativos van en contra de infección urinaria, y aun así la casilla de sangre puede ser positiva por hemoglobinuria.'
+    ],
+    ans:1,
+    ref:'Práctica 9, examen general de orina: componentes patológicos y fundamento de la tira reactiva.'
+  },
+  {
+    tag:'P11-P14',
+    text:'El médico quiere confirmar la causa molecular. ¿Cuál es el orden correcto del trabajo de laboratorio que ya realizaste en el curso?',
+    opts:[
+      'PCR, extracción de ADN, electroforesis, análisis bioinformático',
+      'Electroforesis, PCR, extracción de ADN, análisis bioinformático',
+      'Extracción de ADN genómico, PCR de la región de interés, electroforesis en gel de agarosa, análisis bioinformático',
+      'Análisis bioinformático, extracción de ADN, PCR, electroforesis'
+    ],
+    fb:[
+      'Sin ADN extraído no hay molde que amplificar: la PCR no puede ir primero.',
+      'La electroforesis separa el producto de la PCR. Sin ese producto no hay nada que separar.',
+      'Es el orden de las prácticas 11, 12, 13 y 14, y no es administrativo: cada paso produce el insumo del siguiente. La química sanguínea describe la consecuencia de la variante; esta cadena identifica la variante.',
+      'El análisis bioinformático interpreta una secuencia que todavía no existe si va primero.'
+    ],
+    ans:2,
+    ref:'Prácticas 11 a 14 del Laboratorio de Bioquímica.'
+  },
+  {
+    tag:'P14',
+    text:'En el gel de RFLP de la práctica 14, con la enzima que distingue los alelos, ¿qué patrón corresponde al portador?',
+    opts:[
+      'Una sola banda, del tamaño del amplicón sin digerir',
+      'Dos bandas, las dos menores que el amplicón',
+      'Tres bandas: la del amplicón sin cortar más las dos de los fragmentos',
+      'Ninguna banda, porque la enzima corta ambos alelos por completo'
+    ],
+    fb:[
+      'Una sola banda del tamaño completo es el homocigoto cuyo alelo la enzima no corta, y también el carril del amplicón sin digerir.',
+      'Dos bandas menores corresponden al homocigoto cuyo alelo sí se corta: en la práctica, 302 y 195 nt.',
+      'El portador es heterocigoto: lleva un alelo que la enzima corta y otro que no, así que en el mismo tubo conviven el fragmento entero y los dos productos. Comprueba siempre la suma: 302 más 195 son 497.',
+      'Si la enzima cortara ambos alelos por igual no distinguiría genotipos, y por eso no sería la enzima elegida.'
+    ],
+    ans:2,
+    ref:'Práctica 14, simulación de RFLP y electroforesis en gel.'
+  }
+];
+
+// ══════════════════════════════════════════
+//  ESTADO
+// ══════════════════════════════════════════
+let student = {};
+let answers = new Array(QUESTIONS.length).fill(null);
+let entregado = false;
+
+function lsGet(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : v; } catch (e) { return d; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* modo privado */ } }
+
+// ══════════════════════════════════════════
+//  REGISTRO
+// ══════════════════════════════════════════
+['regNombre','regMatricula','regGrupo'].forEach(id => {
+  document.getElementById(id).addEventListener('input', checkRegForm);
+  document.getElementById(id).addEventListener('change', checkRegForm);
+});
+function checkRegForm() {
+  const ok = document.getElementById('regNombre').value.trim().length > 3
+    && document.getElementById('regMatricula').value.trim().length >= 5
+    && document.getElementById('regGrupo').value !== '';
+  document.getElementById('startBtn').disabled = !ok;
+}
+
+function startQuiz() {
+  student = {
+    nombre: document.getElementById('regNombre').value.trim(),
+    matricula: document.getElementById('regMatricula').value.trim(),
+    grupo: document.getElementById('regGrupo').value,
+    fecha: new Date().toLocaleDateString('es-MX',{year:'numeric',month:'long',day:'numeric'})
+  };
+  document.getElementById('registerScreen').style.display = 'none';
+  document.getElementById('quizScreen').style.display = 'block';
+  document.getElementById('hdrInfo').textContent = `${student.nombre} · Mat. ${student.matricula} · Gr. ${student.grupo}`;
+  lsSet(GAME_ID + '_plays', String(parseInt(lsGet(GAME_ID + '_plays', '0'), 10) + 1));
+  if (typeof gtag === 'function') gtag('event', 'game_start', { game: GAME_ID });
+  renderQuestions();
+}
+
+// ══════════════════════════════════════════
+//  RENDERIZAR
+// ══════════════════════════════════════════
+function renderQuestions() {
+  const area = document.getElementById('questionsArea');
+  area.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  QUESTIONS.forEach((q, qi) => {
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.id = `qcard${qi}`;
+    card.innerHTML = `
+      <div class="q-header">
+        <span class="q-badge">${qi+1} · ${q.tag}</span>
+        <span class="q-text">${q.text}</span>
+      </div>
+      <div class="options">
+        ${q.opts.map((o,oi)=>`
+          <div class="opt" id="opt_${qi}_${oi}" onclick="choose(${qi},${oi})">
+            <span class="opt-letter">${letters[oi]}</span>
+            <span>${o}</span>
+            <span class="opt-mark" id="mark_${qi}_${oi}"></span>
+          </div>`).join('')}
+      </div>
+      <div class="fb" id="fb_${qi}"></div>`;
+    area.appendChild(card);
+  });
+}
+
+function choose(qi, oi) {
+  if (entregado) return;
+  if (answers[qi] !== null) {
+    document.getElementById(`opt_${qi}_${answers[qi]}`).classList.remove('selected');
+  }
+  answers[qi] = oi;
+  document.getElementById(`opt_${qi}_${oi}`).classList.add('selected');
+  document.getElementById(`qcard${qi}`).classList.add('answered');
+  updateProgress();
+}
+
+function updateProgress() {
+  const done = answers.filter(a => a !== null).length;
+  document.getElementById('progressFill').style.width = (done / QUESTIONS.length * 100) + '%';
+  const submitBtn = document.getElementById('submitBtn');
+  const hint = document.getElementById('submitHint');
+  if (done === QUESTIONS.length) {
+    submitBtn.disabled = false;
+    hint.textContent = 'Todas contestadas. Al entregar verás la retroalimentación de cada una.';
+    hint.style.color = 'var(--green)';
+  } else {
+    submitBtn.disabled = true;
+    hint.textContent = `Responde todas las preguntas para habilitar la entrega. (${done}/${QUESTIONS.length})`;
+    hint.style.color = 'var(--muted)';
+  }
+}
+
+// ══════════════════════════════════════════
+//  ENTREGAR: calificar y abrir la retroalimentación
+// ══════════════════════════════════════════
+function submitQuiz() {
+  entregado = true;
+  document.querySelectorAll('.opt').forEach(el => el.classList.add('locked'));
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('submitHint').textContent = 'Entregado. Abajo, en cada pregunta, está el porqué.';
+
+  const letters = ['A','B','C','D'];
+  let correct = 0;
+  const byTag = {};
+
+  QUESTIONS.forEach((q, qi) => {
+    if (!byTag[q.tag]) byTag[q.tag] = { c:0, t:0 };
+    byTag[q.tag].t++;
+    const dado = answers[qi];
+    const bien = dado === q.ans;
+    if (bien) { correct++; byTag[q.tag].c++; }
+
+    document.getElementById(`opt_${qi}_${q.ans}`).classList.add('correcta');
+    document.getElementById(`mark_${qi}_${q.ans}`).textContent = '✓';
+    if (!bien) {
+      document.getElementById(`opt_${qi}_${dado}`).classList.add('fallada');
+      document.getElementById(`mark_${qi}_${dado}`).textContent = '✗';
+    }
+
+    const caja = document.getElementById(`fb_${qi}`);
+    const cab = bien
+      ? '<div class="fb-head ok">Correcto</div>'
+      : `<div class="fb-head mal">Tu respuesta: ${letters[dado]}</div>`;
+    const propia = bien ? '' : `<p>${q.fb[dado]}</p>`;
+    const buena = `<p><b>${letters[q.ans]}.</b> ${q.fb[q.ans]}</p>`;
+    caja.innerHTML = cab + propia + buena + `<span class="fb-ref">${q.ref}</span>`;
+    caja.classList.add('visible');
+
+    if (typeof gtag === 'function') {
+      gtag('event', 'decision', { game: GAME_ID, question: q.tag + '_' + (qi+1), correct: bien });
+    }
+  });
+
+  const pct = Math.round(correct / QUESTIONS.length * 100);
+  const mejor = parseInt(lsGet(GAME_ID + '_best', '0'), 10);
+  if (pct > mejor) lsSet(GAME_ID + '_best', String(pct));
+  if (typeof gtag === 'function') {
+    gtag('event', 'game_complete', { game: GAME_ID, score: correct, total: QUESTIONS.length, pct: pct });
+  }
+  showResults(correct, pct, byTag);
+}
+
+// ══════════════════════════════════════════
+//  RESULTADOS
+// ══════════════════════════════════════════
+function showResults(correct, pct, byTag) {
+  document.getElementById('quizScreen').style.display = 'none';
+  document.getElementById('resultsScreen').style.display = 'block';
+  window.scrollTo(0, 0);
+
+  const circle = document.getElementById('scoreCircle');
+  setTimeout(() => {
+    circle.style.background = `conic-gradient(var(--accent) ${pct*3.6}deg, var(--surface2) 0deg)`;
+  }, 100);
+  document.getElementById('scorePct').textContent = pct + '%';
+  document.getElementById('scoreSub').textContent = `${correct} de ${QUESTIONS.length}`;
+
+  let label, msg, color;
+  if (pct >= 90)      { label='Integración sólida'; msg='Estás uniendo la práctica 14 con las de química sanguínea.'; color='var(--green)'; }
+  else if (pct >= 70) { label='Vas bien';           msg='Lee la retroalimentación de las que fallaste: ahí está el puente que falta.'; color='var(--accent2)'; }
+  else if (pct >= 50) { label='A medio camino';     msg='Repasa las prácticas 5, 9 y 10 junto con la 14, no por separado.'; color='var(--accent3)'; }
+  else                { label='Conviene repasar';   msg='Vuelve al manual de las prácticas 5, 9, 10 y 14 y repite el cuestionario.'; color='var(--red)'; }
+  const lab = document.getElementById('scoreLabel');
+  lab.textContent = label; lab.style.color = color;
+  document.getElementById('scoreMsg').textContent = msg;
+
+  const bd = document.getElementById('breakdown');
+  bd.innerHTML = '<h3 style="font-size:.95rem;margin-bottom:.8rem;color:var(--muted)">Por práctica de origen</h3>' +
+    Object.keys(byTag).map(t => {
+      const b = byTag[t];
+      const p = Math.round(b.c / b.t * 100);
+      return `<div class="bk-row">
+        <span class="bk-tag">${t}</span>
+        <div class="bk-bar-wrap"><div class="bk-bar" style="width:${p}%"></div></div>
+        <span class="bk-score">${b.c}/${b.t}</span>
+      </div>`;
+    }).join('');
+}
+
+function verRetro() {
+  document.getElementById('resultsScreen').style.display = 'none';
+  document.getElementById('quizScreen').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>
