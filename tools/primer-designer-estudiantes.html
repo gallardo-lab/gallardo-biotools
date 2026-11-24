@@ -551,6 +551,8 @@
     <button class="tab" onclick="switchMainTab('help')">Help</button>
     <button class="tab" onclick="switchMainTab('rflp')">RFLP</button>
     <button class="tab" onclick="switchMainTab('orf')">Marco de lectura</button>
+    <button class="tab" onclick="switchMainTab('cuest')">Cuestionario</button>
+    <button class="tab" onclick="switchMainTab('rep')">Reporte</button>
   </div>
   <button id="langBtn" class="tab" style="margin-left:auto" onclick="toggleLang()" title="Español / English">ES</button>
 </header>
@@ -583,6 +585,13 @@
             <option value="ALFA_ASN">ALFA Asian, MAF ≥1% (ALFA_ASN)</option>
             <option value="ALFA_SAS">ALFA South Asian, MAF ≥1% (ALFA_SAS)</option>
             <option value="">no filter: every annotated variant</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Strand</label>
+          <select id="ensHebra" style="width:148px">
+            <option value="+" selected>forward (as annotated)</option>
+            <option value="-">reverse complement</option>
           </select>
         </div>
         <div class="form-row">
@@ -1172,6 +1181,106 @@
       <div id="orfStatus" class="rf-nota" style="margin-bottom:10px">Define el marco y pulsa Traducir.</div>
       <div id="orfSalida"></div>
     </div>
+  </div>
+</div>
+
+
+<!-- ══════════════ PESTAÑAS 11 Y 12 · práctica 14 · 2026-11-24 · HLGB·c ══════════════
+     El cuestionario se pinta desde JavaScript (CUEST_pintar), así que aquí solo
+     está el hueco. El reporte sí tiene sus campos en el HTML, porque los escribe
+     el alumno y tienen que sobrevivir a que se guarde la página.
+
+     ⚠ NINGUNA frase lleva <b> por dentro. La capa de idioma recorre nodos de
+     texto, y un <b> en mitad de una frase la parte en tres nodos: traducir eso
+     exige tres pares y deja media frase en español en cuanto uno falte. Donde
+     hace falta énfasis, la frase entera va en su propio elemento. -->
+<style>
+  .cu-col { max-width: 760px; }
+  .cu-col textarea { background:var(--panel2); color:var(--text); border:1px solid var(--border);
+    border-radius:6px; padding:6px 8px; font-size:12px; font-family:inherit; }
+  .cu-col textarea:focus { outline:none; border-color:var(--accent,#60b4ff); }
+  .cu-fuerte { font-weight:600; color:var(--text); }
+</style>
+
+<div class="tab-content" id="tab-cuest" style="padding:16px;overflow:auto">
+  <div class="cu-col">
+
+    <div class="rf-box">
+      <h4>Cuestionario de la actividad extra</h4>
+      <p class="rf-nota">Seis preguntas sobre lo que tú hiciste en esta sesión. El programa comprueba el dato que puede comprobar y te dice contra qué lo comparó; el «por qué» de cada una lo lee tu profesor.</p>
+      <p class="rf-nota cu-fuerte">Esto no lleva nota.</p>
+      <p class="rf-nota">Las cuatro preguntas del cuestionario de retroalimentación del manual se contestan a mano en el libro, pp. 150 y 151. No se repiten aquí.</p>
+    </div>
+
+    <div class="rf-box rf-guia">
+      <h4>Cómo se usa</h4>
+      <p class="rf-nota">Contesta primero y pulsa Comprobar después. Si una pregunta dice que no se puede comprobar todavía, no es que esté mal: es que falta un paso en otra pestaña, y ahí mismo te dice cuál. Tus respuestas se guardan en este navegador y entran en el reporte de la pestaña siguiente.</p>
+    </div>
+
+    <div class="rf-row" style="margin:10px 0">
+      <button class="btn btn-primary" onclick="CUEST_comprobar()">Comprobar</button>
+      <button class="btn btn-secondary btn-sm" onclick="CUEST_borrar()">Borrar mis respuestas</button>
+    </div>
+    <div id="cuestStatus" class="rf-nota" style="margin-bottom:10px"></div>
+
+    <div id="cuestPreguntas"></div>
+
+  </div>
+</div>
+
+<div class="tab-content" id="tab-rep" style="padding:16px;overflow:auto">
+  <div class="cu-col">
+
+    <div class="rf-box">
+      <h4>Reporte</h4>
+      <p class="rf-nota">Reúne en un solo documento lo que entró, lo que salió y lo que contestaste, y lo sella con SHA-256. Se abre en una ventana aparte para imprimirlo a PDF.</p>
+      <p class="rf-nota">Guardar la página con el navegador no sirve de evidencia: conserva los resultados y pierde la secuencia, el rsID, los alelos y la posición. Por eso existe esta pestaña.</p>
+    </div>
+
+    <div class="rf-box">
+      <h4>1 · Quiénes</h4>
+      <div class="rf-row">
+        <label>Alumnos</label>
+      </div>
+      <textarea id="repAlumnos" rows="3" style="width:100%;box-sizing:border-box"
+        placeholder="Un nombre por línea"></textarea>
+      <div class="rf-row" style="margin-top:8px">
+        <label>Equipo</label>
+        <input type="text" id="repEquipo" style="width:70px">
+        <label style="margin-left:10px">Grupo</label>
+        <input type="text" id="repGrupo" style="width:90px">
+      </div>
+      <div class="rf-row">
+        <label>Profesor</label>
+        <input type="text" id="repProfesor" class="rf-ancho">
+      </div>
+    </div>
+
+    <div class="rf-box">
+      <h4>2 · Pasos 5 a 7</h4>
+      <p class="rf-nota">El número de OMIM, no solo el nombre: el número obliga a abrir la entrada de tu variante, y el nombre del trastorno del gen puede ser el de otra variante distinta.</p>
+      <div class="rf-row">
+        <label>OMIM número</label>
+        <input type="text" id="repOmimNum" style="width:110px" placeholder="ej. 141900">
+        <label style="margin-left:10px">Trastorno</label>
+        <input type="text" id="repOmimNom" style="width:220px">
+      </div>
+      <div class="rf-row"><label>Resumen clínico</label></div>
+      <textarea id="repResumen" rows="4" style="width:100%;box-sizing:border-box"
+        placeholder="Características, herencia y diagnóstico"></textarea>
+      <div class="rf-row" style="margin-top:8px"><label>Referencias de PubMed</label></div>
+      <textarea id="repRefs" rows="5" style="width:100%;box-sizing:border-box"
+        placeholder="Una por línea, con su PMID"></textarea>
+    </div>
+
+    <div class="rf-row" style="margin:10px 0">
+      <button class="btn btn-primary" onclick="REP_generar()">Generar el reporte</button>
+      <button class="btn btn-secondary btn-sm" onclick="REP_pintar()">Ver antes de imprimir</button>
+    </div>
+    <div id="repStatus" class="rf-nota" style="margin-bottom:10px"></div>
+
+    <div id="repSalida"></div>
+
   </div>
 </div>
 
@@ -3099,7 +3208,7 @@ function switchMainTab(name) {
   document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  document.querySelectorAll('.tab')[['design','pcr','database','help','rflp','orf'].indexOf(name)].classList.add('active');
+  document.querySelectorAll('.tab')[['design','pcr','database','help','rflp','orf','cuest','rep'].indexOf(name)].classList.add('active');
   if (name === 'database') renderDB();
 }
 
@@ -5947,6 +6056,23 @@ function SVG_gel(opts) {
    seqInput, pcrFwd, pcrRev, pcrSnpPos y ensRsid.
    ============================================================ */
 
+/**
+ * Limpia un cuadro de secuencia QUITANDO ANTES las lineas de cabecera FASTA.
+ *
+ * ⚠ H-8, medido el 2026-11-24. RFLP_limpiaSeq solo quita lo que no es letra
+ * IUPAC, y una cabecera FASTA esta llena de letras que si lo son: la de
+ * «Traer la plantilla» aportaba 54 bases de basura y corria TODAS las
+ * posiciones. El amplicon pasaba de 601 a 655 nt y la base de la 301 dejaba de
+ * ser la de la variante, sin que nada en pantalla lo dijera.
+ *
+ * parseSeq de v1.8b ya hacia esto bien. Esta capa no lo copio, y ese es el
+ * fallo: donde ya hay una convencion en la casa, seguirla.
+ */
+function RF_limpiaFasta(txt) {
+  return RFLP_limpiaSeq(String(txt || '').split('\n')
+    .filter(function (l) { return l.charAt(0) !== '>'; }).join('\n'));
+}
+
 const RF_estado = { res: null, sel: -1, seq: '', cds: null,
   /* Origen de la secuencia cargada, ESTRUCTURADO y no como frase hecha, para
      poder redactarlo en el idioma activo en el momento de pintarlo, y
@@ -6025,7 +6151,18 @@ async function RF_identificar() {
             + ', ' + (v.porQueEseAlelo || '')
             + RF_t('. Cámbialo si el tuyo es otro.', '. Change it if yours is another.')
           : ' ' + RF_t('El alterno lo eliges tú: ', 'You pick the alternative: ')
-            + (v.porQueEseAlelo || '')));
+            + (v.porQueEseAlelo || '')
+            /* ⚠ H-2 de la revision del 2026-11-20. Cuando ningun alternativo
+               tiene frecuencia, el cuadro se queda vacio Y el alumno no sabe
+               que escribir. Decir el porque no basta: hay que decir cuales
+               hay. Con rs35424040 pasa, porque ninguno de sus tres
+               alternativos tiene frecuencia en 1000Genomes_30X. */
+            + (v.alts && v.alts.length
+                ? ' ' + RF_t('Los anotados son: ', 'The annotated ones are: ')
+                  + v.alts.join(', ')
+                  + RF_t('. Escribe uno en el cuadro del alelo alternativo.',
+                         '. Type one into the alternative allele box.')
+                : '')));
     if (RF_estado.res) RF_buscar();
     const so = RF_$('orfSalida');
     if (so && so.innerHTML.trim()) ORFUI_calcular();
@@ -6058,12 +6195,39 @@ function RF_bloqueVariante(refEnUso, altEnUso, posAmp) {
     return (enUso && a.toUpperCase() === enUso) ? '<b>' + RFLP_esc(a) + '</b>' : RFLP_esc(a);
   }).join(', ');
   const m = v.mapeo, avisos = [];
-  if (refEnUso && v.ref && String(refEnUso).toUpperCase() !== v.ref.toUpperCase()) {
-    avisos.push(RF_t('El alelo de referencia que estás usando (', 'The reference allele you are using (')
-      + RFLP_esc(refEnUso) + RF_t(') no es el de la anotación (', ') is not the annotated one (')
-      + RFLP_esc(v.ref)
-      + RF_t('). Suele querer decir que tu secuencia va en la hebra contraria.',
-             '). That usually means your sequence runs on the opposite strand.'));
+  /* ⚠ REHECHO el 2026-11-20. Antes decia «suele querer decir que tu secuencia
+     va en la hebra contraria», que es una conjetura, y no decia que hacer. Al
+     preparar la practica 14 eso costo tiempo de verdad: la secuencia del
+     ejercicio va en la hebra del gen, el mutante lleva C en la posicion 301, y
+     en la hebra de la anotacion esa C es la REFERENCIA, asi que la fila del
+     aminoacido salia sin cambio y parecia que la variante no hacia nada.
+     Ahora se COMPRUEBA el complemento en vez de suponerlo, y se dice cual es
+     el alelo equivalente en la hebra de la anotacion. */
+  const _comp = { A: 'T', T: 'A', G: 'C', C: 'G' };
+  const _refU = String(refEnUso || '').toUpperCase();
+  const _hebraVolteada = (_refU && v.ref && _comp[_refU] === v.ref.toUpperCase());
+  if (refEnUso && v.ref && _refU !== v.ref.toUpperCase()) {
+    if (_hebraVolteada) {
+      const _altAnot = _comp[enUso] || null;
+      avisos.push(RF_t('Tu secuencia va en la HEBRA CONTRARIA a la de la anotación, y está comprobado, no supuesto: tu ',
+                       'Your sequence runs on the OPPOSITE STRAND to the annotation, and this is checked, not guessed: your ')
+        + RFLP_esc(refEnUso)
+        + RF_t(' es el complemento de la referencia anotada ', ' is the complement of the annotated reference ')
+        + RFLP_esc(v.ref) + '. '
+        + (_altAnot
+            ? RF_t('Tu alelo alternativo ', 'Your alternative allele ') + RFLP_esc(enUso)
+              + RF_t(' es ', ' is ') + RFLP_esc(_altAnot)
+              + RF_t(' en la hebra de la anotación: esa es la fila que tienes que mirar en la tabla de consecuencia.',
+                     ' on the annotated strand: that is the row to read in the consequence table.')
+            : RF_t('Escribe el alternativo en TU hebra; en la tabla de consecuencia búscalo por su complemento.',
+                   'Type the alternative on YOUR strand; in the consequence table look for its complement.')));
+    } else {
+      avisos.push(RF_t('El alelo de referencia que estás usando (', 'The reference allele you are using (')
+        + RFLP_esc(refEnUso) + RF_t(') no es el de la anotación (', ') is not the annotated one (')
+        + RFLP_esc(v.ref)
+        + RF_t('), y tampoco es su complemento, así que no es solo cuestión de hebra: comprueba la posición.',
+               '), and it is not its complement either, so it is not just a strand matter: check the position.'));
+    }
   }
   if (enUso && v.alts.length
       && v.alts.map(function (a) { return a.toUpperCase(); }).indexOf(enUso) === -1) {
@@ -6158,6 +6322,21 @@ function RF_repintar() {
     const s = RF_$('orfSalida');
     if (s && s.innerHTML.trim()) ORFUI_calcular();
   } catch (e) {}
+  /* Las pestanas 11 y 12, 2026-11-24. El cuestionario se pinta desde
+     JavaScript, asi que la capa de idioma, que recorre nodos de texto del
+     HTML, no lo alcanza: hay que volver a pintarlo. Se guarda ANTES, porque
+     repintar reconstruye los cuadros y lo no guardado se perderia. */
+  try {
+    if (typeof CUEST_pintar === 'function') {
+      CUEST_guardar();
+      CUEST_pintar();
+      if (CUEST_estado && Object.keys(CUEST_estado.marcas).length) CUEST_comprobar();
+    }
+  } catch (e) {}
+  try {
+    const r = RF_$('repSalida');
+    if (typeof REP_pintar === 'function' && r && r.innerHTML.trim()) REP_pintar();
+  } catch (e) {}
 }
 
 /** Lista de bandas recortada: con un sitio de 4 bases degeneradas salen
@@ -6200,7 +6379,7 @@ function RF_origenTexto(tipo, ini1, fin1) {
     ya no es el que puso el cargador, se dice que esta escrito a mano. */
 function RF_origenActual() {
   const t = RF_$('rfSeq');
-  const s = t ? RFLP_limpiaSeq(t.value) : '';
+  const s = t ? RF_limpiaFasta(t.value) : '';
   if (s) {
     const cargada = !!(RF_estado.origenSeq && s === RF_estado.origenSeq);
     return {
@@ -6212,7 +6391,7 @@ function RF_origenActual() {
     };
   }
   const o = RF_$('seqInput');
-  const d = o ? RFLP_limpiaSeq(o.value) : '';
+  const d = o ? RF_limpiaFasta(o.value) : '';
   if (d) return {
     seq: d, fuente: 'seqInput', cargada: false,
     origen: RF_t('secuencia completa de la pestaña de diseño, que no es el amplicón',
@@ -6234,8 +6413,8 @@ function RF_pintaInfoSeq() {
 
 function RF_traerDelDiseno() {
   const src = RF_$('seqInput');
-  if (!src || !RFLP_limpiaSeq(src.value)) { RF_toast('No hay secuencia en la pestaña de diseño.'); return; }
-  RF_$('rfSeq').value = RFLP_limpiaSeq(src.value);
+  if (!src || !RF_limpiaFasta(src.value)) { RF_toast('No hay secuencia en la pestaña de diseño.'); return; }
+  RF_$('rfSeq').value = RF_limpiaFasta(src.value);
   RF_estado.origenTipo = 'diseno';
   RF_estado.origenIni1 = 0; RF_estado.origenFin1 = 0;
   RF_estado.origenSeq = RF_$('rfSeq').value;
@@ -6904,7 +7083,7 @@ function ORFUI_resaltesProteina() {
   // distinto tamano y NO pilla una del mismo tamano empezada en otro sitio.
   const anchoReg = parseInt(mm[2], 10) - base + 1;
   const largoDis = (RF_$('seqInput') && RF_$('seqInput').value)
-    ? RFLP_limpiaSeq(RF_$('seqInput').value).length : 0;
+    ? RF_limpiaFasta(RF_$('seqInput').value).length : 0;
   if (largoDis && anchoReg && largoDis !== anchoReg) {
     return { error: RF_t(
       'La secuencia de la pestaña de diseño mide ' + largoDis + ' nt y la región anotada ' +
@@ -7562,6 +7741,13 @@ async function NCBI_traerPlantilla() {
     });
 
     // 6. blanco y encabezado
+    // posiciones DISTINTAS tocadas por el enmascarado, que es lo que se ve
+    const _posEnmascaradas = (function () {
+      const vistas = {};
+      masked.forEach(function (m) { vistas[m[1]] = 1; });
+      return Object.keys(vistas).length;
+    })();
+
     const snpIdx = s0 - regStart;
     const refAtSnp = orig[snpIdx];
     if (seq[snpIdx] !== refAtSnp) seq[snpIdx] = refAtSnp;   // red de seguridad
@@ -7576,20 +7762,75 @@ async function NCBI_traerPlantilla() {
                 '. There is a coordinate shift: the template is not delivered.'));
     }
 
+    /* ⚠ VOLTEO A LA HEBRA DEL GEN, 2026-11-20.
+
+       Voltear la secuencia y dejar la cabecera como estaba seria peor que no
+       tener la opcion: diria ref=C sobre una secuencia donde esa base es G.
+       Asi que se voltean CON ella la posicion del SNP, el alelo de referencia
+       y la lista de alelos.
+
+       ⚠ La posicion NO se da por simetrica aunque en una ventana centrada lo
+       parezca: se calcula. Si la region se recorto contra el inicio del
+       cromosoma, o el alelo ocupa mas de una base, deja de estarlo.
+
+       Se usa revComp del motor, cuya tabla COMP cubre las 16 letras IUPAC, que
+       es justo lo que perdio el volteador externo con el que se preparo la
+       practica 14: sus B y V quedaron como N. */
+    const _hebraSel = (document.getElementById('ensHebra') || {}).value || '+';
+    let _seqFinal = seq.join('');
+    let _snp1 = snpIdx + 1;
+    let _ref = refAtSnp;
+    let _alelos = v.alelos || '';
+    if (_hebraSel === '-') {
+      const _c = { A: 'T', T: 'A', G: 'C', C: 'G' };
+      _seqFinal = revComp(_seqFinal);
+      // la base del SNP pasa a contarse desde el otro extremo
+      _snp1 = _seqFinal.length - snpIdx;
+      _ref = _c[refAtSnp] || 'N';
+      _alelos = _alelos.split('/').map(function (a) {
+        return a.split('').map(function (b) { return _c[b] || b; }).reverse().join('');
+      }).join('/');
+      // ⚠ Control que puede fallar: tras voltear, la base que hay en la nueva
+      // posicion tiene que ser el complemento de la original. Si no, el volteo
+      // o la cuenta estan mal y no se entrega nada.
+      if (_seqFinal[_snp1 - 1] !== _ref) {
+        throw new Error(_ensT(
+          'el volteo de hebra no cuadra: en la posición ', 'the strand flip does not add up: at position ')
+          + _snp1 + _ensT(' hay ', ' there is ') + _seqFinal[_snp1 - 1]
+          + _ensT(' y se esperaba ', ' and ') + _ref
+          + _ensT('. No se entrega la plantilla.', ' was expected. The template is not delivered.'));
+      }
+    }
+
     const header = '>' + rsid + '|' + (v.mapeo.ensamblaje || 'GRCh38')
-      + '|' + crom + ':' + regStart + '-' + regEnd + '|SNP_pos=' + (snpIdx + 1)
-      + '|ref=' + refAtSnp + '|alleles=' + (v.alelos || '')
+      + '|' + crom + ':' + regStart + '-' + regEnd
+      + '|strand=' + (_hebraSel === '-' ? 'minus' : 'plus')
+      + '|SNP_pos=' + _snp1
+      + '|ref=' + _ref + '|alleles=' + _alelos
       + '|masked_set=' + (juego || 'none')
-      + '|n_masked=' + masked.length
+      /* ⚠ H-6 de la revision del 2026-11-20: antes salia masked.length, que
+         cuenta OPERACIONES de enmascarado y no posiciones. dbSNP devuelve
+         identificadores FUSIONADOS que tapan la misma base varias veces, asi
+         que la cabecera anunciaba 11 en una secuencia con 2 letras raras y
+         quien las contara tenia razon en desconfiar. Se cuentan posiciones
+         distintas, y el numero de operaciones va aparte para no perderlo. */
+      + '|n_masked=' + _posEnmascaradas
+      + (masked.length !== _posEnmascaradas ? '|n_ops=' + masked.length : '')
       + '|source=dbSNP' + (build ? '_b' + build : '');
-    const body = seq.join('').replace(/(.{60})/g, '$1\n').trim();
+    const body = _seqFinal.replace(/(.{60})/g, '$1\n').trim();
     document.getElementById('seqInput').value = header + '\n' + body;
 
     lastMasked = masked; lastSkipped = skipped; lastHeader = header;
     renderMasked(juego);
-    ensStatus('✓ ' + seq.length + ' ' + _ensT('pb', 'bp') + ' · '
+    ensStatus('✓ ' + _seqFinal.length + ' ' + _ensT('pb', 'bp') + ' · '
+      + (_hebraSel === '-'
+          ? _ensT('hebra del gen (complemento inverso)', 'gene strand (reverse complement)') + ' · '
+          : _ensT('hebra directa', 'forward strand') + ' · ')
       + _ensT('SNP en', 'SNP at') + ' ' + (snpIdx + 1) + ' · '
-      + masked.length + ' ' + _ensT('SNV y', 'SNV and') + ' '
+      + _posEnmascaradas
+      + (masked.length !== _posEnmascaradas
+          ? ' (' + masked.length + ' ' + _ensT('operaciones', 'operations') + ')' : '')
+      + ' ' + _ensT('SNV y', 'SNV and') + ' '
       + skipped.length + ' ' + _ensT('indel/MNV enmascarados', 'indel/MNV masked')
       + ' · ' + _ensT('de ', 'out of ') + det.length
       + _ensT(' halladas', ' found')
@@ -7917,6 +8158,1013 @@ if (typeof module !== 'undefined' && module.exports) {
 </script>
 <script>
 /* ============================================================
+   ui_cuestionario.js  ·  v1.0  ·  2026-11-24  ·  HLGB·c
+
+   Pestana 11: el cuestionario de la ACTIVIDAD EXTRA de la practica 14.
+
+   DE DONDE SALE EL DISENO, y no de mi gusto. Del manual impreso de la
+   practica, leido pagina por pagina el 2026-11-24 (8 paginas, paginas 144 a
+   151 del libro, sha256 2369f16c22cd...), que con la evaluacion de mayo es lo
+   unico de la practica 14 que sobrevivio al retiro del 14-nov.
+
+   Lo que ese manual hace: su cuestionario se llama DE RETROALIMENTACION, tiene
+   CUATRO preguntas abiertas de concepto que se contestan con su propio marco
+   teorico, NO pregunta por el resultado del alumno, y cierra con el sello del
+   profesor.
+
+   Tres consecuencias, decididas con HLGB el 2026-11-24:
+     1. Las cuatro del manual NO se traen aqui. Se contestan a mano en el libro
+        y las cierra su sello. Copiarlas haria escribir dos veces y cambiaria
+        una hoja firmada por un PDF, que es decision suya.
+     2. Esta pestana solo pregunta lo que el libro NO puede preguntar: lo que
+        paso en la sesion del alumno.
+     3. NO hay nota. El instrumento del manual no califica.
+
+   Las seis preguntas son las dos de la diapositiva 2 del ejercicio, mas los
+   CUATRO sitios donde tropezo la revision del 2026-11-20: el alelo (H-2), el
+   marco de lectura (H-1), la hebra (H-3) y la enzima (paso 8 del manual).
+
+   ⚠ REGLA DE LOS CONTROLES, que es lo que distingue esto de un formulario.
+   Una comprobacion que no puede fallar no es una comprobacion. Aqui eso
+   significa CUATRO estados y no dos:
+     'ok'      coincide con lo que esta sesion calculo
+     'no'      no coincide, y se dice con que se comparo
+     'falta'   NO SE PUDO COMPROBAR, y se dice que falta y donde se consigue
+     'vacio'   no hay respuesta que comprobar
+   'falta' no es un aprobado silencioso. Un cuestionario que diera por bueno lo
+   que no pudo mirar seria peor que no tener cuestionario.
+
+   ⚠ Y NO SE COMPARA CONTRA UNA CLAVE FIJA, sino contra lo que esta sesion
+   calculo. Asi cada alumno puede llevar una variante distinta, no hay clave
+   que mantener cuando se cambie de gen, y responder bien exige haber seguido
+   el procedimiento y no haber copiado un numero.
+   ============================================================ */
+
+const CUEST_estado = { marcas: {}, cuando: '' };
+
+/* Complemento, para la pregunta de la hebra: el alumno puede estar trabajando
+   en la hebra del gen, donde su alelo es el complemento del anotado. Eso no es
+   un error suyo y no se marca como tal. */
+const CUEST_COMP = { A: 'T', T: 'A', G: 'C', C: 'G' };
+
+function CUEST_val(id) {
+  const e = document.getElementById(id);
+  return e ? String(e.value || '').trim() : '';
+}
+
+function CUEST_num(id) {
+  const v = CUEST_val(id);
+  return /^\d+$/.test(v) ? parseInt(v, 10) : null;
+}
+
+/* La enzima que el alumno tiene elegida en la pestana RFLP. Sin eleccion no se
+   puede comprobar nada del gel, y eso se dice en vez de suponerlo. */
+function CUEST_enzimaElegida() {
+  const r = (typeof RF_estado !== 'undefined') ? RF_estado.res : null;
+  if (!r || !r.candidatas || !r.candidatas.length) return null;
+  const i = (RF_estado.sel >= 0) ? RF_estado.sel : 0;
+  return r.candidatas[i] || null;
+}
+
+function CUEST_variante() {
+  return (typeof RF_variante !== 'undefined' && RF_variante.dato) ? RF_variante.dato : null;
+}
+
+function CUEST_secuencia() {
+  /* ⚠ RF_origenActual lee cuadros del DOM. Si falta alguno, lo que interesa es
+     caer al estado y no reventar: una excepcion aqui haria que la pregunta
+     dijera 'no se puede comprobar' por el motivo equivocado. */
+  try {
+    if (typeof RF_origenActual === 'function') {
+      const fu = RF_origenActual();
+      if (fu && fu.seq) return fu.seq;
+    }
+  } catch (e) { /* se cae al estado */ }
+  return (typeof RF_estado !== 'undefined') ? (RF_estado.seq || '') : '';
+}
+
+/* --- constructores de veredicto, para que todos tengan la misma forma --- */
+function CUEST_ok(dicho, contra, nota) {
+  return { estado: 'ok', dicho: dicho, contra: contra, nota: nota || '' };
+}
+function CUEST_no(dicho, contra, nota) {
+  return { estado: 'no', dicho: dicho, contra: contra, nota: nota || '' };
+}
+function CUEST_falta(que) {
+  return { estado: 'falta', dicho: '', contra: '', nota: que };
+}
+function CUEST_vacio() {
+  return { estado: 'vacio', dicho: '', contra: '', nota: '' };
+}
+
+/* ============================================================
+   Las seis preguntas
+   ============================================================ */
+
+const CUEST_PREGUNTAS = [
+
+  /* --- 1 y 2: las dos de la diapositiva 2, tal cual --- */
+  {
+    id: 'q1',
+    es: 'En RFLP, ¿cuántos fragmentos se visualizan en el gel para el amplicón sin digerir, '
+      + 'para el homocigoto sano, para el heterocigoto (portador) y para el afectado (homocigoto)?',
+    en: 'In RFLP, how many fragments are seen on the gel for the undigested amplicon, '
+      + 'for the healthy homozygote, for the heterozygote (carrier) and for the affected homozygote?',
+    campos: [
+      { id: 'q1sd', es: 'sin digerir', en: 'undigested', ancho: 58 },
+      { id: 'q1ref', es: 'homocigoto de referencia', en: 'reference homozygote', ancho: 58 },
+      { id: 'q1het', es: 'heterocigoto', en: 'heterozygote', ancho: 58 },
+      { id: 'q1alt', es: 'homocigoto alterno', en: 'alternative homozygote', ancho: 58 }
+    ],
+    porque: { es: 'Es tuya, de la diapositiva 2.', en: 'Yours, from slide 2.' },
+    comprueba: function () {
+      const c = CUEST_enzimaElegida();
+      if (!c) {
+        return CUEST_falta(RF_t(
+          'no hay enzima elegida: ve a la pestaña RFLP, pulsa Buscar y elige una fila',
+          'no enzyme chosen: go to the RFLP tab, press Search and pick a row'));
+      }
+      const dado = ['q1sd', 'q1ref', 'q1het', 'q1alt'].map(CUEST_num);
+      if (dado.every(function (n) { return n === null; })) return CUEST_vacio();
+      /* El amplicón sin digerir es UNA banda: la molécula entera. */
+      const esp = [1, c.fragRef.length, c.fragHet.length, c.fragAlt.length];
+      const malas = [];
+      for (let i = 0; i < 4; i++) {
+        if (dado[i] === null || dado[i] !== esp[i]) malas.push(i);
+      }
+      const etq = this.campos.map(function (k) { return RF_t(k.es, k.en); });
+      const contra = esp.map(function (n, i) { return etq[i] + ': ' + n; }).join(' · ');
+      if (!malas.length) return CUEST_ok(dado.join(' · '), contra);
+      return CUEST_no(dado.map(function (n) { return n === null ? '?' : n; }).join(' · '), contra,
+        RF_t('No coinciden ', 'Does not match in ') + malas.length
+        + RF_t(' de las 4 con ', ' of the 4 with ') + c.nombre + '.');
+    }
+  },
+
+  {
+    id: 'q2',
+    es: '¿Se puede diferenciar entre sano, portador y afectado?',
+    en: 'Can you tell healthy, carrier and affected apart?',
+    campos: [
+      { id: 'q2si', es: 'sí o no', en: 'yes or no', ancho: 70, opciones: [
+        { v: '', es: '(elige)', en: '(pick)' },
+        { v: 'si', es: 'sí', en: 'yes' },
+        { v: 'no', es: 'no', en: 'no' }] }
+    ],
+    porque: { es: 'Es tuya, de la diapositiva 2.', en: 'Yours, from slide 2.' },
+    comprueba: function () {
+      const c = CUEST_enzimaElegida();
+      if (!c) {
+        return CUEST_falta(RF_t(
+          'no hay enzima elegida: ve a la pestaña RFLP, pulsa Buscar y elige una fila',
+          'no enzyme chosen: go to the RFLP tab, press Search and pick a row'));
+      }
+      const d = CUEST_val('q2si');
+      if (!d) return CUEST_vacio();
+      const esp = c.resoluble ? 'si' : 'no';
+      const contra = RF_t('con ', 'with ') + c.nombre + ': '
+        + (c.resoluble
+            ? RF_t('sí, los tres patrones de banda se distinguen entre sí',
+                   'yes, the three band patterns are mutually distinguishable')
+            : RF_t('no, esta enzima no resuelve el genotipo',
+                   'no, this enzyme does not resolve the genotype'));
+      return (d === esp) ? CUEST_ok(d, contra) : CUEST_no(d, contra);
+    }
+  },
+
+  /* --- 3: el alelo. Es H-2 de la revision del 2026-11-20 --- */
+  {
+    id: 'q3',
+    es: 'La herramienta no te preseleccionó el alelo alternativo en esta variante. '
+      + '¿Cuál escribiste y por qué ese?',
+    en: 'The tool did not preselect the alternative allele for this variant. '
+      + 'Which one did you type, and why that one?',
+    campos: [
+      { id: 'q3a', es: 'alelo alternativo', en: 'alternative allele', ancho: 58 }
+    ],
+    porque: { es: 'Es H-2 de la revisión: hay variantes cuyos alelos alternativos no tienen '
+                + 'frecuencia publicada, y entonces la herramienta no elige por ti.',
+              en: 'Review finding H-2: some variants have alternative alleles with no published '
+                + 'frequency, and then the tool does not choose for you.' },
+    comprueba: function () {
+      const v = CUEST_variante();
+      if (!v) {
+        return CUEST_falta(RF_t(
+          'la variante no está identificada: escribe el rsID en la pestaña RFLP y pulsa Identificar',
+          'the variant is not identified: type the rsID in the RFLP tab and press Identify'));
+      }
+      const d = CUEST_val('q3a').toUpperCase();
+      if (!d) return CUEST_vacio();
+      const alts = v.alts || [];
+      const contra = RF_t('los anotados son ', 'the annotated ones are ') + alts.join(', ');
+      /* ⚠ Lo primero es lo que de verdad uso en ESTA sesion. Cotejar solo
+         contra la lista de anotados daba por buena cualquier letra de la
+         lista, y la pregunta es cual escribiste tu, no cual existe. Medido en
+         el navegador el 2026-11-24: con C en el cuadro, contestar T salia bien. */
+      const usado = CUEST_val('rfAlt').toUpperCase();
+      if (usado && d !== usado && CUEST_COMP[d] !== usado) {
+        return CUEST_no(d,
+          RF_t('en esta sesión usaste ', 'in this session you used ') + usado
+            + '. ' + contra,
+          (alts.indexOf(d) !== -1)
+            ? RF_t('Ese alelo existe en la variante, pero no es el que pusiste en el cuadro.',
+                   'That allele exists in the variant, but it is not the one you put in the box.')
+            : '');
+      }
+      if (alts.indexOf(d) !== -1) return CUEST_ok(d, contra);
+      /* ⚠ La hebra del gen: su alelo puede ser el complemento del anotado, y
+         eso NO es un error del alumno. Se acepta y se le dice cual es su
+         equivalente en la hebra de la anotacion, que es la leccion de H-3. */
+      const comp = CUEST_COMP[d];
+      if (comp && alts.indexOf(comp) !== -1) {
+        return CUEST_ok(d, contra, RF_t(
+          'Vas en la hebra del gen: tu ' + d + ' es ' + comp + ' en la hebra de la anotación.',
+          'You are on the gene strand: your ' + d + ' is ' + comp + ' on the annotated strand.'));
+      }
+      return CUEST_no(d, contra, RF_t(
+        'Ni ese alelo ni su complemento están entre los anotados.',
+        'Neither that allele nor its complement is among the annotated ones.'));
+    }
+  },
+
+  /* --- 4: el marco de lectura. Es H-1, y es lo que HLGB pidio ensenar --- */
+  {
+    id: 'q4',
+    es: 'ORF Finder te devolvió más de un marco de lectura que contiene tu posición. '
+      + '¿Cuál es el del gen, y cómo supiste que era ese?',
+    en: 'ORF Finder gave you more than one reading frame containing your position. '
+      + 'Which one is the gene’s, and how did you know?',
+    campos: [
+      { id: 'q4ini', es: 'codón de inicio en la posición', en: 'start codon at position', ancho: 70 }
+    ],
+    porque: { es: 'Es H-1 de la revisión: el marco más largo NO es el del gen, y ninguna de las '
+                + 'herramientas del paso 4 avisa de eso.',
+              en: 'Review finding H-1: the longest frame is NOT the gene’s, and none of the '
+                + 'step 4 tools warns about it.' },
+    comprueba: function () {
+      const s = CUEST_secuencia();
+      if (!s) {
+        return CUEST_falta(RF_t('no hay secuencia cargada', 'no sequence loaded'));
+      }
+      const ini = CUEST_num('q4ini');
+      if (ini === null) return CUEST_vacio();
+      if (!(ini >= 1 && ini <= s.length)) {
+        return CUEST_no(String(ini),
+          RF_t('la secuencia tiene ', 'the sequence is ') + s.length + ' nt',
+          RF_t('La posición cae fuera de la secuencia.', 'The position falls outside the sequence.'));
+      }
+      const hebra = CUEST_val('orfHebra') || '+';
+      const code = CUEST_val('orfCodigo') || '1';
+      const m = ORF_marco(s, ini, hebra, code);
+      const prot = m.proteina || '';
+      const t = (typeof RF_estado !== 'undefined') ? RF_estado.trProt : null;
+      if (!t || !t.prot || !t.prot.seq) {
+        return CUEST_falta(RF_t(
+          'no tengo la proteína anotada con la que comparar: en la pestaña Marco de lectura, '
+          + 'trae la anotación y pulsa Traer proteína',
+          'I have no annotated protein to compare against: in the Reading frame tab, '
+          + 'fetch the annotation and press Fetch protein'));
+      }
+      /* ⚠ LA X ES COMODIN, Y ESTO NO ES UN DETALLE. La plantilla enmascara las
+         variantes comunes con letras IUPAC degeneradas, y un codon con una de
+         esas letras no traduce a un aminoacido: sale X. Con rs35424040 el ORF
+         correcto da MVXLTPXEKSAVTALWGK frente a MVHLTPEEKSAVTALWGK de la
+         anotacion, asi que una comparacion exacta marcaba como MALA la
+         respuesta BUENA. Medido en el navegador el 2026-11-24. */
+      const firma = prot.slice(0, Math.min(16, prot.length));
+      const informativas = firma.split('').filter(function (a) { return a !== 'X'; }).length;
+      /* ⚠ Y el comodin NO es gratis: si quedan pocas posiciones informativas,
+         encajar no significa nada y se dice, en vez de dar por bueno el azar. */
+      if (firma.length < 8 || informativas < 6) {
+        return CUEST_falta(RF_t(
+          'ese marco da ' + firma.length + ' aminoácidos y solo ' + informativas
+          + ' sin enmascarar: son pocos para comprobar nada',
+          'that frame gives ' + firma.length + ' amino acids and only ' + informativas
+          + ' unmasked: too few to check anything'));
+      }
+      const diana = t.prot.seq;
+      const casa = [];
+      for (let k = 0; k + firma.length <= diana.length; k++) {
+        let bien = true;
+        for (let j = 0; j < firma.length; j++) {
+          if (firma[j] !== 'X' && firma[j] !== diana[k + j]) { bien = false; break; }
+        }
+        if (bien) casa.push(k + 1);
+      }
+      const dicho = RF_t('inicio ', 'start ') + ini + ', ' + RF_t('da ', 'gives ') + firma;
+      const contra = t.prot.id + ', ' + diana.length + ' aa, '
+        + RF_t('empieza ', 'starts ') + diana.slice(0, firma.length);
+      const notaX = (informativas < firma.length)
+        ? ' ' + RF_t('Las ' + (firma.length - informativas) + ' X son posiciones enmascaradas '
+                     + 'de la plantilla y no se han tenido en cuenta.',
+                     'The ' + (firma.length - informativas) + ' X are masked template positions '
+                     + 'and were not taken into account.')
+        : '';
+      if (!casa.length) {
+        return CUEST_no(dicho, contra,
+          RF_t('Ese marco no aparece en la proteína anotada: no es el del gen.',
+               'That frame does not appear in the annotated protein: it is not the gene’s.') + notaX);
+      }
+      if (casa.length > 1) {
+        return CUEST_falta(RF_t(
+          'ese marco encaja en ' + casa.length + ' sitios de la proteína anotada, '
+          + 'así que no distingo cuál es',
+          'that frame fits at ' + casa.length + ' places in the annotated protein, '
+          + 'so I cannot tell which one it is'));
+      }
+      return CUEST_ok(dicho, contra,
+        RF_t('Coincide con la proteína anotada a partir del residuo ',
+             'Matches the annotated protein from residue ') + casa[0] + '.' + notaX);
+    }
+  },
+
+  /* --- 5: la hebra. Es H-3, y es lo que mas tiempo costo al preparar esto --- */
+  {
+    id: 'q5',
+    es: 'En la posición del SNP, tu secuencia tiene una base y la anotación del NCBI dice otra. '
+      + '¿Por qué pasa eso, y cuál de las dos usaste para buscar la enzima?',
+    en: 'At the SNP position your sequence has one base and the NCBI annotation says another. '
+      + 'Why is that, and which of the two did you use to look for the enzyme?',
+    campos: [
+      { id: 'q5seq', es: 'base en TU secuencia', en: 'base in YOUR sequence', ancho: 58 },
+      { id: 'q5anot', es: 'base en la anotación', en: 'base in the annotation', ancho: 58 }
+    ],
+    porque: { es: 'Es H-3 de la revisión, y es donde más se tropieza: la secuencia del ejercicio '
+                + 'va en la hebra del gen a propósito.',
+              en: 'Review finding H-3, and the most common trip-up: the exercise sequence runs on '
+                + 'the gene strand on purpose.' },
+    comprueba: function () {
+      const s = CUEST_secuencia();
+      const pos = parseInt(CUEST_val('rfPos'), 10);
+      if (!s || !(pos >= 1 && pos <= s.length)) {
+        return CUEST_falta(RF_t(
+          'falta la secuencia o la posición de la variante en la pestaña RFLP',
+          'the sequence or the variant position is missing in the RFLP tab'));
+      }
+      const v = CUEST_variante();
+      if (!v || !v.ref) {
+        return CUEST_falta(RF_t(
+          'la variante no está identificada: escribe el rsID en la pestaña RFLP y pulsa Identificar',
+          'the variant is not identified: type the rsID in the RFLP tab and press Identify'));
+      }
+      const dS = CUEST_val('q5seq').toUpperCase(), dA = CUEST_val('q5anot').toUpperCase();
+      if (!dS && !dA) return CUEST_vacio();
+      const eS = String(s[pos - 1] || '').toUpperCase(), eA = String(v.ref).toUpperCase();
+      const contra = RF_t('en tu secuencia ', 'in your sequence ') + eS
+        + RF_t(', en la anotación ', ', in the annotation ') + eA;
+      if (dS === eS && dA === eA) {
+        return CUEST_ok(dS + ' / ' + dA, contra,
+          (CUEST_COMP[eS] === eA)
+            ? RF_t('Y son complementarias, que es justo la razón: hebras distintas.',
+                   'And they are complementary, which is exactly the reason: different strands.')
+            : '');
+      }
+      return CUEST_no((dS || '?') + ' / ' + (dA || '?'), contra);
+    }
+  },
+
+  /* --- 6: la enzima, que es el paso 8 del manual --- */
+  {
+    id: 'q6',
+    es: '¿Qué enzima elegiste, y por qué distingue los dos genotipos?',
+    en: 'Which enzyme did you choose, and why does it tell the two genotypes apart?',
+    campos: [
+      { id: 'q6e', es: 'enzima', en: 'enzyme', ancho: 110 }
+    ],
+    porque: { es: 'Es el paso 8 del manual: «mencione qué enzima elegiría para diferenciar entre '
+                + 'ambos productos amplificados».',
+              en: 'Step 8 of the manual: «name the enzyme you would choose to tell the two '
+                + 'amplified products apart».' },
+    comprueba: function () {
+      const r = (typeof RF_estado !== 'undefined') ? RF_estado.res : null;
+      if (!r || !r.candidatas) {
+        return CUEST_falta(RF_t(
+          'todavía no se ha buscado enzima: ve a la pestaña RFLP y pulsa Buscar',
+          'no enzyme search yet: go to the RFLP tab and press Search'));
+      }
+      const d = CUEST_val('q6e');
+      if (!d) return CUEST_vacio();
+      const res = r.candidatas.filter(function (c) { return c.resoluble; })
+                              .map(function (c) { return c.nombre; });
+      const contra = res.length
+        ? RF_t('resuelven el genotipo ', 'resolve the genotype ') + res.length + ': ' + res.join(', ')
+        : RF_t('ninguna de las candidatas resuelve el genotipo',
+               'none of the candidates resolves the genotype');
+      const hay = res.filter(function (n) { return n.toLowerCase() === d.toLowerCase(); });
+      if (hay.length) return CUEST_ok(hay[0], contra);
+      /* Que este entre las candidatas pero no resuelva NO es lo mismo que no
+         existir, y decirlo igual seria perder la informacion que importa. */
+      const cand = r.candidatas.filter(function (c) {
+        return c.nombre.toLowerCase() === d.toLowerCase();
+      });
+      if (cand.length) {
+        return CUEST_no(cand[0].nombre, contra, RF_t(
+          'Esa enzima tiene sitio diferencial pero NO resuelve el genotipo con los filtros puestos.',
+          'That enzyme has a differential site but does NOT resolve the genotype with the current filters.'));
+      }
+      return CUEST_no(d, contra, RF_t(
+        'Esa enzima no está entre las candidatas de esta sesión.',
+        'That enzyme is not among this session’s candidates.'));
+    }
+  }
+];
+
+/* ============================================================
+   Pintado
+   ============================================================ */
+
+function CUEST_pintar() {
+  const caja = document.getElementById('cuestPreguntas');
+  if (!caja) return;
+  let h = '';
+  CUEST_PREGUNTAS.forEach(function (p, i) {
+    const campos = p.campos.map(function (c) {
+      const et = '<label style="min-width:unset">' + RFLP_esc(RF_t(c.es, c.en)) + '</label>';
+      if (c.opciones) {
+        const ops = c.opciones.map(function (o) {
+          return '<option value="' + o.v + '">' + RFLP_esc(RF_t(o.es, o.en)) + '</option>';
+        }).join('');
+        return '<div class="rf-row">' + et + '<select id="' + c.id + '" style="width:'
+          + c.ancho + 'px">' + ops + '</select></div>';
+      }
+      return '<div class="rf-row">' + et + '<input type="text" id="' + c.id
+        + '" style="width:' + c.ancho + 'px"></div>';
+    }).join('');
+    h += '<div class="rf-box" id="cuestCaja' + p.id + '">'
+      + '<h4>' + (i + 1) + ' · ' + RFLP_esc(RF_t(p.es, p.en)) + '</h4>'
+      + campos
+      + '<div class="rf-row"><label style="min-width:unset">'
+      + RFLP_esc(RF_t('Por qué', 'Why')) + '</label></div>'
+      + '<textarea id="' + p.id + 'txt" rows="3" style="width:100%;box-sizing:border-box" '
+      + 'placeholder="' + RFLP_esc(RF_t('Esto lo lee tu profesor, no lo corrige el programa.',
+                                        'Your teacher reads this; the program does not mark it.')) + '"></textarea>'
+      + '<div id="' + p.id + 'marca" class="rf-nota" style="margin-top:6px"></div>'
+      + '<p class="rf-nota" style="margin-top:4px;opacity:0.75">'
+      + RFLP_esc(RF_t(p.porque.es, p.porque.en)) + '</p>'
+      + '</div>';
+  });
+  caja.innerHTML = h;
+  CUEST_cargar();
+  CUEST_PREGUNTAS.forEach(function (p) {
+    p.campos.forEach(function (c) {
+      const e = document.getElementById(c.id);
+      if (e) e.addEventListener('change', CUEST_guardar);
+    });
+    const t = document.getElementById(p.id + 'txt');
+    if (t) t.addEventListener('change', CUEST_guardar);
+  });
+}
+
+const CUEST_SIMBOLO = { ok: '✓', no: '✗', falta: '⚠', vacio: '·' };
+const CUEST_COLOR = { ok: 'var(--good)', no: 'var(--danger)', falta: 'var(--warn)', vacio: 'var(--text3)' };
+
+function CUEST_comprobar() {
+  const marcas = {};
+  let nOk = 0, nNo = 0, nFalta = 0, nVacio = 0;
+  CUEST_PREGUNTAS.forEach(function (p) {
+    let v;
+    try {
+      v = p.comprueba();
+    } catch (e) {
+      /* Un fallo del comprobador NO puede parecer un acierto. */
+      v = CUEST_falta(RF_t('el comprobador falló: ', 'the checker failed: ') + (e && e.message ? e.message : e));
+    }
+    marcas[p.id] = v;
+    if (v.estado === 'ok') nOk++;
+    else if (v.estado === 'no') nNo++;
+    else if (v.estado === 'falta') nFalta++;
+    else nVacio++;
+    const caja = document.getElementById(p.id + 'marca');
+    if (caja) {
+      const texto = (v.estado === 'vacio')
+        ? RF_t('sin responder', 'not answered')
+        : (v.estado === 'falta')
+          ? RF_t('no se puede comprobar todavía: ', 'cannot be checked yet: ') + v.nota
+          : RF_t('respondiste ', 'you answered ') + '<b>' + RFLP_esc(v.dicho) + '</b>. '
+            + RF_t('Esta sesión calculó: ', 'This session computed: ') + RFLP_esc(v.contra) + '.'
+            + (v.nota ? ' ' + RFLP_esc(v.nota) : '');
+      caja.innerHTML = '<span style="color:' + CUEST_COLOR[v.estado] + ';font-weight:700">'
+        + CUEST_SIMBOLO[v.estado] + '</span> ' + texto;
+    }
+  });
+  CUEST_estado.marcas = marcas;
+  CUEST_estado.cuando = new Date().toISOString().slice(0, 19).replace('T', ' ');
+  const est = document.getElementById('cuestStatus');
+  if (est) {
+    /* ⚠ El universo se imprime SIEMPRE, y el recuento de lo que no se pudo
+       comprobar va delante, no escondido al final. */
+    est.innerHTML = RF_t('Comprobadas ', 'Checked ') + '<b>' + (nOk + nNo) + '</b>'
+      + RF_t(' de ', ' of ') + CUEST_PREGUNTAS.length + ': ' + nOk
+      + RF_t(' coinciden y ', ' match and ') + nNo + RF_t(' no.', ' do not.')
+      + (nFalta ? ' <b style="color:var(--warn)">' + nFalta
+          + RF_t(' no se pudieron comprobar</b>, y arriba dice por qué.',
+                 ' could not be checked</b>, and the reason is shown above.') : '')
+      + (nVacio ? ' ' + nVacio + RF_t(' sin responder.', ' not answered.') : '')
+      + ' <span style="opacity:0.8">'
+      + RF_t('Esto no es una nota: el «por qué» de cada una lo lee tu profesor.',
+             'This is not a grade: your teacher reads the «why» of each one.') + '</span>';
+  }
+  CUEST_guardar();
+}
+
+/* ============================================================
+   Persistencia y entrega al reporte
+   ============================================================ */
+
+function CUEST_respuestas() {
+  return CUEST_PREGUNTAS.map(function (p) {
+    const m = CUEST_estado.marcas[p.id] || null;
+    return {
+      id: p.id,
+      pregunta: RF_t(p.es, p.en),
+      campos: p.campos.map(function (c) {
+        return { etiqueta: RF_t(c.es, c.en), valor: CUEST_val(c.id) };
+      }),
+      porque: CUEST_val(p.id + 'txt'),
+      comprobacion: m ? { estado: m.estado, contra: m.contra, nota: m.nota } : null
+    };
+  });
+}
+
+function CUEST_guardar() {
+  try {
+    const d = {};
+    CUEST_PREGUNTAS.forEach(function (p) {
+      p.campos.forEach(function (c) { d[c.id] = CUEST_val(c.id); });
+      d[p.id + 'txt'] = CUEST_val(p.id + 'txt');
+    });
+    localStorage.setItem('pd_cuestionario_p14', JSON.stringify(d));
+  } catch (e) { /* almacenamiento no disponible: se sigue sin persistir */ }
+}
+
+function CUEST_cargar() {
+  try {
+    const d = JSON.parse(localStorage.getItem('pd_cuestionario_p14') || '{}');
+    Object.keys(d).forEach(function (k) {
+      const e = document.getElementById(k);
+      if (e) e.value = d[k];
+    });
+  } catch (e) { /* idem */ }
+}
+
+function CUEST_borrar() {
+  if (!window.confirm(RF_t('¿Borrar todas tus respuestas de este cuestionario?',
+                           'Erase all your answers to this questionnaire?'))) return;
+  CUEST_PREGUNTAS.forEach(function (p) {
+    p.campos.forEach(function (c) { const e = document.getElementById(c.id); if (e) e.value = ''; });
+    const t = document.getElementById(p.id + 'txt'); if (t) t.value = '';
+    const m = document.getElementById(p.id + 'marca'); if (m) m.innerHTML = '';
+  });
+  CUEST_estado.marcas = {}; CUEST_estado.cuando = '';
+  const est = document.getElementById('cuestStatus'); if (est) est.textContent = '';
+  CUEST_guardar();
+}
+
+
+/* ------------------------------------------------------------
+   Arranque
+   ------------------------------------------------------------
+   El modulo se inyecta al final del body, asi que el DOM ya esta. Se protege
+   igualmente: si el cuestionario no pudiera pintarse, el resto de la pagina
+   tiene que seguir funcionando. */
+try { CUEST_pintar(); } catch (e) {
+  console.error('No se pudo pintar el cuestionario de la practica 14:', e);
+}
+
+</script>
+<script>
+/* ============================================================
+   ui_reporte.js  ·  v1.0  ·  2026-11-24  ·  HLGB·c
+
+   Pestana 12: el reporte de la ACTIVIDAD EXTRA de la practica 14.
+
+   POR QUE EXISTE, medido y no supuesto. El 2026-11-20 se comprobo que el HTML
+   que el navegador guarda CONSERVA los resultados y PIERDE la secuencia, el
+   rsID, los alelos y la posicion. Es decir: se queda con la respuesta y tira
+   la pregunta. Un reporte que repitiera ese error no serviria de evidencia, y
+   por eso el bloque de ENTRADA va primero y es el que mas cuidado lleva.
+
+   QUE LLEVA, y de donde sale cada cosa:
+     identificacion  lo escribe el alumno
+     entrada         de la CABECERA FASTA que el alumno pego, no de lo que yo
+                     suponga: rsID, region, ensamblaje, hebra, posicion y
+                     alelos. Si no hay cabecera, se dice que no la hay.
+     resultado       de esta sesion: enzima, fragmentos por genotipo, residuo
+                     y cambio de aminoacido
+     pasos 5 a 7     lo escribe el alumno: OMIM con NUMERO, resumen y PMID
+     procedencia     el `fuente` y el `cuando` que ya traen los registros de
+                     variante y de anotacion. ⚠ No hay un registro global de
+                     peticiones: lo que se declara es lo que esos dos guardan.
+     respuestas      las seis de la pestana 11, con su comprobacion
+     cierre          nombre del profesor y espacio de firma, como la
+                     VERIFICACION DE TRABAJO del manual impreso
+     sello           SHA-256 sobre el JSON canonico, con el mismo aparato que
+                     ya usa la constancia de primers
+
+   ⚠ LA SECUENCIA VA POR HUELLA, no entera: 601 nt en un PDF ocupan y nadie los
+   lee, pero sin nada no se puede verificar despues. La huella ocupa una linea
+   y permite comprobarlo. HLGB puede pedir la secuencia entera y entonces se
+   cambia `REP_SECUENCIA_ENTERA` a true; esta aqui y no escondido para que sea
+   una linea y no una reescritura.
+   ============================================================ */
+
+const REP_SECUENCIA_ENTERA = false;
+
+const REP_estado = { ultimo: null };
+
+function REP_val(id) {
+  const e = document.getElementById(id);
+  return e ? String(e.value || '').trim() : '';
+}
+
+/* ------------------------------------------------------------
+   La cabecera FASTA: lo que el alumno pego, leido tal cual
+   ------------------------------------------------------------
+   ⚠ No se reconstruye ni se adivina. Si la secuencia no trae cabecera, el
+   reporte lo dice, porque «sin declarar» y «GRCh38 porque casi siempre lo es»
+   son cosas distintas y la segunda es una invencion.
+*/
+function REP_cabecera() {
+  /* ⚠ Se miran LOS DOS cuadros. Desde el arreglo de H-8, «Traer del diseno»
+     deja la secuencia ya limpia en el cuadro de la pestana RFLP, asi que la
+     cabecera solo sobrevive en el de diseno, que es donde la pone «Traer la
+     plantilla». Mirar uno solo hacia que el reporte perdiera el ensamblaje, la
+     hebra y los alelos, que es lo que esta pestana existe para conservar.
+     Medido en el navegador el 2026-11-24. */
+  let de = '', l0 = '';
+  const cajas = [['rfSeq', 'pestaña RFLP'], ['seqInput', 'pestaña de diseño']];
+  for (let i = 0; i < cajas.length; i++) {
+    const c = document.getElementById(cajas[i][0]);
+    const p = c ? (String(c.value || '').split('\n')[0] || '') : '';
+    if (p.charAt(0) === '>') { l0 = p; de = cajas[i][1]; break; }
+  }
+  if (!l0) return { hay: false };
+  const campos = l0.slice(1).split('|').map(function (s) { return s.trim(); });
+  const dato = { hay: true, cruda: l0.slice(1), de: de };
+  campos.forEach(function (c, i) {
+    const m = c.match(/^(\w+)=(.*)$/);
+    if (m) { dato[m[1]] = m[2]; return; }
+    if (i === 0 && /^rs\d+$/i.test(c)) { dato.rsid = c; return; }
+    if (/^GRCh\d+/i.test(c)) { dato.ensamblaje = c; return; }
+    if (/^[\w.]+:\d+-\d+$/.test(c)) { dato.region = c; return; }
+  });
+  return dato;
+}
+
+/* ------------------------------------------------------------
+   Reunir el registro
+   ------------------------------------------------------------ */
+async function REP_reunir() {
+  const ahora = new Date();
+  const cab = REP_cabecera();
+  const v = (typeof RF_variante !== 'undefined' && RF_variante.dato) ? RF_variante.dato : null;
+  const r = (typeof RF_estado !== 'undefined') ? RF_estado.res : null;
+  const c = (r && r.candidatas && r.candidatas.length)
+    ? r.candidatas[(RF_estado.sel >= 0) ? RF_estado.sel : 0] : null;
+  const seq = (typeof RF_estado !== 'undefined') ? (RF_estado.seq || '') : '';
+  const huella = (seq && typeof sha256Hex === 'function') ? await sha256Hex(seq) : null;
+
+  /* El cambio de aminoacido se recalcula aqui con lo que hay en pantalla, en
+     vez de guardarlo al vuelo desde la pestana del marco de lectura: asi el
+     reporte no puede quedarse con un residuo de hace tres cambios de alelo. */
+  let orf = null;
+  const ini = parseInt(REP_val('orfInicio'), 10);
+  const pos = parseInt(REP_val('rfPos'), 10);
+  const ref = REP_val('rfRef').toUpperCase(), alt = REP_val('rfAlt').toUpperCase();
+  if (seq && ini >= 1 && pos >= 1 && ref && alt && typeof ORF_cambio === 'function') {
+    try {
+      const k = ORF_cambio(seq, ini, REP_val('orfHebra') || '+', pos - 1, ref, alt,
+                           REP_val('orfCodigo') || '1');
+      if (!k.fuera) {
+        orf = { inicio: ini, codon: k.codonRef + ' a ' + k.codonAlt,
+                aminoacido: (ORF_AA3[k.aaRef] || k.aaRef) + ' a ' + (ORF_AA3[k.aaAlt] || k.aaAlt),
+                residuo: k.posAA, tipo: k.tipo, notacion: k.p || '' };
+      } else {
+        orf = { inicio: ini, fuera: true, nota: k.nota };
+      }
+    } catch (e) { orf = { inicio: ini, error: String(e && e.message ? e.message : e) }; }
+  }
+
+  const t = (typeof RF_estado !== 'undefined') ? RF_estado.trProt : null;
+
+  const reg = {
+    identificacion: {
+      alumnos: REP_val('repAlumnos') || '(no declarado)',
+      equipo: REP_val('repEquipo') || '(sin equipo)',
+      grupo: REP_val('repGrupo') || '(sin grupo)',
+      generado: (typeof isoLocal === 'function') ? isoLocal(ahora) : ahora.toISOString()
+    },
+    entrada: {
+      rsid: cab.rsid || (v ? v.rsid : '') || '(no declarado)',
+      region: cab.region || (typeof RF_estado !== 'undefined' ? (RF_estado.anotRegion || '') : '') || '(no declarada)',
+      ensamblaje: cab.ensamblaje || '(no declarado)',
+      hebra: cab.strand || '(no declarada en la cabecera)',
+      posicion_snp: pos >= 1 ? pos : '(no declarada)',
+      alelo_referencia_usado: ref || '(no declarado)',
+      alelo_alterno_usado: alt || '(no declarado)',
+      alelos_de_la_cabecera: cab.alleles || '(no declarados)',
+      secuencia_nt: seq.length,
+      secuencia_sha256: huella || '(no disponible: crypto.subtle necesita https o file://)',
+      cabecera_fasta: cab.hay ? cab.cruda : '(no hay cabecera FASTA en ninguno de los dos cuadros)',
+      cabecera_leida_de: cab.hay ? cab.de : '(ninguno)'
+    },
+    resultado: {
+      enzima: c ? c.nombre : '(ninguna elegida)',
+      resuelve_el_genotipo: c ? !!c.resoluble : null,
+      fragmentos_sin_digerir: seq ? [seq.length] : [],
+      fragmentos_homocigoto_referencia: c ? c.fragRef : [],
+      fragmentos_heterocigoto: c ? c.fragHet : [],
+      fragmentos_homocigoto_alterno: c ? c.fragAlt : [],
+      enzimas_que_resuelven: r ? r.candidatas.filter(function (x) { return x.resoluble; })
+                                             .map(function (x) { return x.nombre; }) : [],
+      universo_de_enzimas: r ? (r.universo + ' del juego ' + r.universoEtiqueta) : '(sin búsqueda)',
+      marco_de_lectura: orf || '(sin calcular)',
+      transcrito: (t && t.transcrito) ? (t.transcrito + (t.mane ? ' (MANE)' : '')) : '(sin anotación)',
+      proteina: (t && t.prot && t.prot.seq) ? (t.prot.id + ', ' + t.prot.seq.length + ' aa') : '(sin pedir)'
+    },
+    pasos_5_a_7: {
+      omim_numero: REP_val('repOmimNum') || '(no declarado)',
+      omim_trastorno: REP_val('repOmimNom') || '(no declarado)',
+      resumen_clinico: REP_val('repResumen') || '(no declarado)',
+      referencias_pubmed: REP_val('repRefs')
+        ? REP_val('repRefs').split('\n').map(function (s) { return s.trim(); })
+                            .filter(function (s) { return s; })
+        : []
+    },
+    procedencia: {
+      variante: v ? ((v.fuente || '(sin declarar)') + ', ' + (v.cuando || '(sin fecha)')) : '(sin consulta)',
+      anotacion: (typeof RF_estado !== 'undefined' && RF_estado.anot)
+        ? ((RF_estado.anot.fuente || '(sin declarar)') + ', '
+           + (RF_estado.anot.cuando || '(sin fecha)')) : '(sin consulta)',
+      nota: 'Se declara el origen que guardan los registros de variante y de anotación. '
+          + 'La herramienta no lleva un registro global de peticiones.'
+    },
+    respuestas: (typeof CUEST_respuestas === 'function') ? CUEST_respuestas() : [],
+    cierre: {
+      profesor: REP_val('repProfesor') || '(no declarado)',
+      firma: '(se firma sobre el documento impreso)'
+    },
+    cuestionario_del_manual: 'Las cuatro preguntas del cuestionario de retroalimentación '
+      + 'se entregan a mano en el manual, pp. 150 y 151.',
+    herramienta: (typeof APP_NAME !== 'undefined' ? APP_NAME : 'PrimerDesigner')
+      + ' ' + (typeof APP_VER !== 'undefined' ? APP_VER : '')
+  };
+
+  if (REP_SECUENCIA_ENTERA && seq) reg.entrada.secuencia = seq;
+
+  /* ⚠ El sello se calcula sobre el registro COMPLETO y al final: si se
+     calculara antes de meter las respuestas, el sello certificaria un
+     documento distinto del que se imprime. */
+  const canon = (typeof canonicalJSON === 'function') ? canonicalJSON(reg) : JSON.stringify(reg, null, 1);
+  const sello = (typeof sha256Hex === 'function') ? await sha256Hex(canon) : null;
+  return { reg: reg, canon: canon, sello: sello };
+}
+
+/* ------------------------------------------------------------
+   Vista previa dentro de la pestana
+   ------------------------------------------------------------ */
+async function REP_pintar() {
+  const caja = document.getElementById('repSalida');
+  if (!caja) return;
+  caja.innerHTML = '<p class="rf-nota">' + RF_t('Reuniendo...', 'Gathering...') + '</p>';
+  let d;
+  try {
+    d = await REP_reunir();
+  } catch (e) {
+    caja.innerHTML = '<div class="rf-aviso">' + RFLP_esc(RF_t('No se pudo reunir el reporte: ',
+      'Could not gather the report: ') + (e && e.message ? e.message : e)) + '</div>';
+    return;
+  }
+  REP_estado.ultimo = d;
+  caja.innerHTML = REP_tablaHTML(d, false);
+}
+
+function REP_fila(k, v) {
+  return '<span>' + RFLP_esc(k) + '</span><span class="rf-mono">' + RFLP_esc(v) + '</span>';
+}
+
+function REP_bloque(titulo, obj) {
+  const filas = Object.keys(obj).map(function (k) {
+    let v = obj[k];
+    if (Array.isArray(v)) v = v.length ? v.join(', ') : '(ninguno)';
+    else if (v && typeof v === 'object') v = Object.keys(v).map(function (j) {
+      return j + ': ' + v[j];
+    }).join(' · ');
+    else if (v === true) v = 'sí';
+    else if (v === false) v = 'no';
+    else if (v === null) v = '(sin dato)';
+    return REP_fila(k.replace(/_/g, ' '), String(v));
+  }).join('');
+  return '<div class="rf-box"><h4>' + RFLP_esc(titulo) + '</h4><div class="rf-kv">' + filas + '</div></div>';
+}
+
+function REP_tablaHTML(d, paraImprimir) {
+  const r = d.reg;
+  const marca = { ok: '✓', no: '✗', falta: '⚠', vacio: '·' };
+  const resp = r.respuestas.map(function (q, i) {
+    const campos = q.campos.map(function (c) { return c.etiqueta + ': ' + (c.valor || '(vacio)'); }).join(' · ');
+    const m = q.comprobacion;
+    const est = m ? (marca[m.estado] + ' ' + m.estado) : RF_t('sin comprobar', 'not checked');
+    return '<div style="margin-bottom:8px">'
+      + '<div style="font-weight:600">' + (i + 1) + ' · ' + RFLP_esc(q.pregunta) + '</div>'
+      + '<div class="rf-mono">' + RFLP_esc(campos) + '</div>'
+      + '<div>' + RFLP_esc(q.porque || RF_t('(sin justificar)', '(no reason given)')) + '</div>'
+      + '<div class="rf-nota">' + RFLP_esc(est)
+      + (m && m.contra ? ' · ' + RFLP_esc(RF_t('esta sesión calculó: ', 'this session computed: ') + m.contra) : '')
+      + (m && m.nota ? ' · ' + RFLP_esc(m.nota) : '') + '</div></div>';
+  }).join('');
+
+  const selloTxt = d.sello
+    ? d.sello.replace(/(.{8})/g, '$1 ').trim()
+    : RF_t('no disponible (crypto.subtle necesita https o file://)',
+           'not available (crypto.subtle needs https or file://)');
+
+  return REP_bloque(RF_t('Identificación', 'Identification'), r.identificacion)
+    + REP_bloque(RF_t('Entrada, que es lo que el HTML guardado pierde',
+                      'Input, which the saved HTML loses'), r.entrada)
+    + REP_bloque(RF_t('Resultado', 'Result'), r.resultado)
+    + REP_bloque(RF_t('Pasos 5 a 7', 'Steps 5 to 7'), r.pasos_5_a_7)
+    + REP_bloque(RF_t('Procedencia', 'Provenance'), r.procedencia)
+    + '<div class="rf-box"><h4>' + RF_t('Respuestas del cuestionario', 'Questionnaire answers')
+    + '</h4>' + (resp || '<p class="rf-nota">' + RF_t('Sin responder.', 'Not answered.') + '</p>')
+    + '<p class="rf-nota">' + RFLP_esc(r.cuestionario_del_manual) + '</p></div>'
+    + REP_bloque(RF_t('Cierre', 'Closing'), r.cierre)
+    + '<div class="rf-box"><h4>' + RF_t('Sello', 'Seal') + '</h4>'
+    + '<p class="rf-mono" style="word-break:break-all">SHA-256 ' + RFLP_esc(selloTxt) + '</p>'
+    + '<p class="rf-nota">' + RF_t(
+        'El sello se calcula sobre el registro completo en JSON con claves ordenadas. '
+        + 'Para comprobarlo, guarda el bloque en un archivo y ejecuta shasum -a 256 archivo.json.',
+        'The seal is computed over the whole record as JSON with sorted keys. '
+        + 'To check it, save the block to a file and run shasum -a 256 file.json.') + '</p>'
+    + (paraImprimir
+        ? '<pre style="font-size:7pt;white-space:pre-wrap;word-break:break-all;border:1px solid #b9c4d4;padding:4px">'
+          + RFLP_esc(d.canon) + '</pre>'
+        : '') + '</div>';
+}
+
+/* ------------------------------------------------------------
+   El documento imprimible
+   ------------------------------------------------------------
+   Se abre en ventana propia con sus propios estilos, en vez de pelearse con
+   las reglas de impresion de v1.8b, que estan escritas para la constancia de
+   primers y esconden las pestanas nuevas.
+   ⚠ Si el navegador bloquea la ventana, NO se calla: se dice y se ofrece la
+   descarga, porque un boton que no hace nada visible es peor que un error.
+*/
+async function REP_generar() {
+  const est = document.getElementById('repStatus');
+  const di = function (m) { if (est) est.innerHTML = m; };
+  di(RF_t('Reuniendo el reporte...', 'Gathering the report...'));
+  let d;
+  try {
+    d = await REP_reunir();
+  } catch (e) {
+    di('<span style="color:var(--danger)">' + RFLP_esc(RF_t('No se pudo reunir: ', 'Could not gather: ')
+      + (e && e.message ? e.message : e)) + '</span>');
+    return;
+  }
+  REP_estado.ultimo = d;
+  const caja = document.getElementById('repSalida');
+  if (caja) caja.innerHTML = REP_tablaHTML(d, false);
+
+  const titulo = 'Reporte_practica14_'
+    + (d.reg.identificacion.equipo || 'sin-equipo').replace(/[^\w.-]+/g, '-')
+    + '_' + String(d.reg.identificacion.generado).slice(0, 10);
+  const doc = REP_documento(d, titulo);
+
+  const w = window.open('', '_blank');
+  if (!w) {
+    di('<span style="color:var(--warn)">⚠ ' + RF_t(
+      'El navegador bloqueó la ventana del reporte. Permite las ventanas emergentes de esta página, o descárgalo.',
+      'The browser blocked the report window. Allow pop-ups for this page, or download it.')
+      + '</span> ' + REP_botonDescarga(doc, titulo));
+    return;
+  }
+  w.document.open();
+  w.document.write(doc);
+  w.document.close();
+  di(RF_t('Reporte abierto en una ventana nueva. Imprímelo a PDF desde ahí.',
+          'Report opened in a new window. Print it to PDF from there.')
+     + ' ' + REP_botonDescarga(doc, titulo));
+}
+
+function REP_botonDescarga(doc, titulo) {
+  REP_estado.doc = doc; REP_estado.titulo = titulo;
+  return '<button class="btn btn-secondary btn-sm" onclick="REP_descargar()">'
+    + RF_t('Descargar el reporte', 'Download the report') + '</button>';
+}
+
+function REP_descargar() {
+  if (!REP_estado.doc) return;
+  const b = new Blob([REP_estado.doc], { type: 'text/html;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b);
+  a.download = (REP_estado.titulo || 'reporte') + '.html';
+  a.click();
+}
+
+function REP_documento(d, titulo) {
+  return '<!doctype html><html lang="es"><head><meta charset="utf-8">'
+    + '<title>' + RFLP_esc(titulo) + '</title><style>'
+    + 'body{font:10pt/1.4 Georgia,serif;color:#10151f;max-width:760px;margin:24px auto;padding:0 18px}'
+    + 'h1{font-size:13pt;border-bottom:1.2pt solid #10151f;padding-bottom:4px}'
+    + 'h2{font-size:11pt;margin:16px 0 6px}'
+    + '.kv{display:grid;grid-template-columns:200px 1fr;gap:2px 10px;font-size:9pt}'
+    + '.kv span:nth-child(odd){color:#33405a}'
+    + '.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:8.5pt;word-break:break-all}'
+    + '.q{margin-bottom:10px;padding-bottom:6px;border-bottom:0.4pt solid #ccd4e0}'
+    + '.firma{margin-top:28px;border-top:0.8pt solid #10151f;width:260px;padding-top:4px;font-size:9pt}'
+    + 'pre{font-size:6.5pt;white-space:pre-wrap;word-break:break-all;border:0.6pt solid #b9c4d4;padding:5px}'
+    + '@media print{body{margin:0;max-width:none}}'
+    + '</style></head><body>'
+    + '<h1>' + RFLP_esc(RF_t('Reporte de la actividad extra · Práctica 14, bioinformática médica',
+                             'Extra activity report · Practice 14, medical bioinformatics')) + '</h1>'
+    + REP_seccionesImpresas(d)
+    + '<div class="firma">' + RFLP_esc(RF_t('Firma del profesor', 'Teacher’s signature')) + '</div>'
+    + '</body></html>';
+}
+
+function REP_seccionesImpresas(d) {
+  const r = d.reg;
+  const bloque = function (tit, obj) {
+    const filas = Object.keys(obj).map(function (k) {
+      let v = obj[k];
+      if (Array.isArray(v)) v = v.length ? v.join(', ') : '(ninguno)';
+      else if (v && typeof v === 'object') v = Object.keys(v).map(function (j) {
+        return j + ': ' + v[j];
+      }).join(' · ');
+      else if (v === true) v = 'sí'; else if (v === false) v = 'no';
+      else if (v === null) v = '(sin dato)';
+      return '<span>' + RFLP_esc(k.replace(/_/g, ' ')) + '</span><span class="mono">'
+        + RFLP_esc(String(v)) + '</span>';
+    }).join('');
+    return '<h2>' + RFLP_esc(tit) + '</h2><div class="kv">' + filas + '</div>';
+  };
+  const marca = { ok: '✓', no: '✗', falta: '⚠', vacio: '·' };
+  const resp = r.respuestas.map(function (q, i) {
+    const campos = q.campos.map(function (c) { return c.etiqueta + ': ' + (c.valor || '(vacio)'); }).join(' · ');
+    const m = q.comprobacion;
+    return '<div class="q"><b>' + (i + 1) + '. ' + RFLP_esc(q.pregunta) + '</b>'
+      + '<div class="mono">' + RFLP_esc(campos) + '</div>'
+      + '<div>' + RFLP_esc(q.porque || '(sin justificar)') + '</div>'
+      + '<div class="mono">' + (m ? marca[m.estado] + ' ' + RFLP_esc(m.estado)
+          + (m.contra ? ' · ' + RFLP_esc(m.contra) : '') + (m.nota ? ' · ' + RFLP_esc(m.nota) : '')
+          : '(sin comprobar)') + '</div></div>';
+  }).join('');
+  const selloTxt = d.sello ? d.sello.replace(/(.{8})/g, '$1 ').trim() : '(no disponible)';
+  return bloque(RF_t('Identificación', 'Identification'), r.identificacion)
+    + bloque(RF_t('Entrada', 'Input'), r.entrada)
+    + bloque(RF_t('Resultado', 'Result'), r.resultado)
+    + bloque(RF_t('Pasos 5 a 7', 'Steps 5 to 7'), r.pasos_5_a_7)
+    + bloque(RF_t('Procedencia', 'Provenance'), r.procedencia)
+    + '<h2>' + RFLP_esc(RF_t('Respuestas del cuestionario', 'Questionnaire answers')) + '</h2>'
+    + (resp || '<p>(sin responder)</p>')
+    + '<p class="mono">' + RFLP_esc(r.cuestionario_del_manual) + '</p>'
+    + '<h2>' + RFLP_esc(RF_t('Sello', 'Seal')) + '</h2>'
+    + '<p class="mono">SHA-256 ' + RFLP_esc(selloTxt) + '</p>'
+    + '<pre>' + RFLP_esc(d.canon) + '</pre>';
+}
+
+
+/* ------------------------------------------------------------
+   Persistencia de los campos que escribe el alumno
+   ------------------------------------------------------------
+   ⚠ Son los unicos datos del reporte que NO se pueden recalcular: si se
+   pierden al recargar, el alumno los escribe dos veces. */
+const REP_CAMPOS = ['repAlumnos', 'repEquipo', 'repGrupo', 'repProfesor',
+                    'repOmimNum', 'repOmimNom', 'repResumen', 'repRefs'];
+
+function REP_guardar() {
+  try {
+    const d = {};
+    REP_CAMPOS.forEach(function (k) { d[k] = REP_val(k); });
+    localStorage.setItem('pd_reporte_p14', JSON.stringify(d));
+  } catch (e) { /* almacenamiento no disponible: se sigue sin persistir */ }
+}
+
+function REP_cargar() {
+  try {
+    const d = JSON.parse(localStorage.getItem('pd_reporte_p14') || '{}');
+    REP_CAMPOS.forEach(function (k) {
+      const e = document.getElementById(k);
+      if (e && d[k]) e.value = d[k];
+    });
+  } catch (e) { /* idem */ }
+}
+
+try {
+  REP_cargar();
+  REP_CAMPOS.forEach(function (k) {
+    const e = document.getElementById(k);
+    if (e) e.addEventListener('change', REP_guardar);
+  });
+} catch (e) {
+  console.error('No se pudo arrancar el reporte de la practica 14:', e);
+}
+
+</script>
+<script>
+/* ============================================================
    i18n_rflp.js  ·  v1.0  ·  2026-11-10  ·  HLGB·c
 
    Capa de idioma completa para PrimerDesigner RFLP v2.0.
@@ -8008,6 +9256,9 @@ const RF_I18N_PARES = [
    "Verifica siempre la especificidad en Primer-BLAST; hay enlaces por primer y por par."],
 
   /* --- aviso de privacidad de la Ayuda, C-3, 2026-11-17 --- */
+  ["Strand", "Hebra"],
+  ["forward (as annotated)", "directa (como la anotación)"],
+  ["reverse complement", "complemento inverso (sentido del gen)"],
   ["Privacy.",
    "Privacidad."],
   ["Annotation servers.", "Servidores de anotación."],
@@ -8143,8 +9394,8 @@ const RF_I18N_PARES = [
   ["Define the frame and press Translate.", "Define el marco y pulsa Traducir."],
 
   /* --- pie de pagina --- */
-  ["· Gallardo BioTools · all computation happens in your browser: your sequences and results never leave it. This page loads no analytics and no external fonts. Outbound requests are started by you, never on load, and are described under Help. <a href="https://gallardo-lab.github.io/gallardo-biotools/privacidad.html" target="_blank" rel="noopener noreferrer">Privacy</a>.",
-   "· Gallardo BioTools · todo el cómputo ocurre en tu navegador: tus secuencias y tus resultados no salen de él. Esta página no carga analítica ni fuentes externas. Las peticiones salientes las inicias tú, nunca al cargar, y están descritas en Ayuda. <a href="https://gallardo-lab.github.io/gallardo-biotools/privacidad.html" target="_blank" rel="noopener noreferrer">Privacidad</a>."],
+  ["· Gallardo BioTools · all computation happens in your browser: your sequences and results never leave it. This page loads no analytics and no external fonts. Outbound requests are started by you, never on load, and are described under Help. <a href=\"https://gallardo-lab.github.io/gallardo-biotools/privacidad.html\" target=\"_blank\" rel=\"noopener noreferrer\">Privacy</a>.",
+   "· Gallardo BioTools · todo el cómputo ocurre en tu navegador: tus secuencias y tus resultados no salen de él. Esta página no carga analítica ni fuentes externas. Las peticiones salientes las inicias tú, nunca al cargar, y están descritas en Ayuda. <a href=\"https://gallardo-lab.github.io/gallardo-biotools/privacidad.html\" target=\"_blank\" rel=\"noopener noreferrer\">Privacidad</a>."],
   ["How to cite:", "Cómo citar:"],
   [", in Gallardo BioTools. UANL, 2026.", ", en Gallardo BioTools. UANL, 2026."],
   ["Gallardo BioTools collection · concept DOI (always the latest version):",
@@ -8166,7 +9417,43 @@ const RF_I18N_PARES = [
 
   /* --- marcadores de posicion --- */
   [">Gene_name ATGCGTACGATCGATCGATCGAT...", ">Nombre_del_gen ATGCGTACGATCGATCGATCGAT..."],
-  ["e.g. 264", "p. ej. 264"]
+  ["e.g. 264", "p. ej. 264"],
+
+  /* --- pestanas 11 y 12, practica 14, 2026-11-24 --- */
+  ["Questionnaire", "Cuestionario"],
+  ["Report", "Reporte"],
+  ["Extra activity questionnaire", "Cuestionario de la actividad extra"],
+  ["Six questions about what you did in this session. The program checks the datum it can check and tells you what it compared it against; your teacher reads the \u00abwhy\u00bb of each one.",
+   "Seis preguntas sobre lo que t\u00fa hiciste en esta sesi\u00f3n. El programa comprueba el dato que puede comprobar y te dice contra qu\u00e9 lo compar\u00f3; el \u00abpor qu\u00e9\u00bb de cada una lo lee tu profesor."],
+  ["This carries no grade.", "Esto no lleva nota."],
+  ["The four questions of the feedback questionnaire in the manual are answered by hand in the book, pp. 150 and 151. They are not repeated here.",
+   "Las cuatro preguntas del cuestionario de retroalimentaci\u00f3n del manual se contestan a mano en el libro, pp. 150 y 151. No se repiten aqu\u00ed."],
+  ["How to use it", "C\u00f3mo se usa"],
+  ["Answer first and press Check afterwards. If a question says it cannot be checked yet, it does not mean it is wrong: a step is missing in another tab, and it tells you which one right there. Your answers are kept in this browser and go into the report of the next tab.",
+   "Contesta primero y pulsa Comprobar despu\u00e9s. Si una pregunta dice que no se puede comprobar todav\u00eda, no es que est\u00e9 mal: es que falta un paso en otra pesta\u00f1a, y ah\u00ed mismo te dice cu\u00e1l. Tus respuestas se guardan en este navegador y entran en el reporte de la pesta\u00f1a siguiente."],
+  ["Check", "Comprobar"],
+  ["Erase my answers", "Borrar mis respuestas"],
+  ["Gathers into one document what went in, what came out and what you answered, and seals it with SHA-256. It opens in a separate window so you can print it to PDF.",
+   "Re\u00fane en un solo documento lo que entr\u00f3, lo que sali\u00f3 y lo que contestaste, y lo sella con SHA-256. Se abre en una ventana aparte para imprimirlo a PDF."],
+  ["Saving the page with the browser is not evidence: it keeps the results and loses the sequence, the rsID, the alleles and the position. That is why this tab exists.",
+   "Guardar la p\u00e1gina con el navegador no sirve de evidencia: conserva los resultados y pierde la secuencia, el rsID, los alelos y la posici\u00f3n. Por eso existe esta pesta\u00f1a."],
+  ["1 \u00b7 Who", "1 \u00b7 Qui\u00e9nes"],
+  ["Students", "Alumnos"],
+  ["Team", "Equipo"],
+  ["Group", "Grupo"],
+  ["Teacher", "Profesor"],
+  ["One name per line", "Un nombre por l\u00ednea"],
+  ["2 \u00b7 Steps 5 to 7", "2 \u00b7 Pasos 5 a 7"],
+  ["The OMIM number, not just the name: the number forces you to open the entry for your variant, and the name of the gene\u2019s disorder may be that of a different variant.",
+   "El n\u00famero de OMIM, no solo el nombre: el n\u00famero obliga a abrir la entrada de tu variante, y el nombre del trastorno del gen puede ser el de otra variante distinta."],
+  ["OMIM number", "OMIM n\u00famero"],
+  ["Disorder", "Trastorno"],
+  ["Clinical summary", "Resumen cl\u00ednico"],
+  ["PubMed references", "Referencias de PubMed"],
+  ["Features, inheritance and diagnosis", "Caracter\u00edsticas, herencia y diagn\u00f3stico"],
+  ["One per line, with its PMID", "Una por l\u00ednea, con su PMID"],
+  ["Generate the report", "Generar el reporte"],
+  ["Preview before printing", "Ver antes de imprimir"]
 ];
 
 /* ------------------------------------------------------------
